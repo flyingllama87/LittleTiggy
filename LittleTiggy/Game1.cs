@@ -17,10 +17,13 @@ namespace LittleTiggy
         SpriteBatch spriteBatch;
         // Texture2D characterSheetTexture;
         mainCharacter character;
+        Enemy enemy;
         SpriteFont mainFont;
         public EnvironmentBlock[] walls = new EnvironmentBlock[300];
         // public EnvironmentBlock[] walls = new EnvironmentBlock[10];
 
+
+#if _DEBUG //DEBUG VARS
         public static bool collidingLeft { get; set; } = false;
         public static bool collidingRight { get; set; } = false;
         public static bool collidingTop { get; set; } = false;
@@ -29,11 +32,13 @@ namespace LittleTiggy
         public static string collisionString { get; set; }  = "";
         public static DateTime TimerDateTime { get; set; }
 
+        int numberOfRandomWalls = 0;
+        int numberOfPlacedWalls = 0;
+#endif
+
         public static int score { get; set; } = 0;
         public static int respawn { get; set; } = 30;
 
-        int numberOfRandomWalls = 0;
-        int numberOfPlacedWalls = 0;
 
         public Game1()
         {
@@ -43,7 +48,6 @@ namespace LittleTiggy
             this.IsMouseVisible = true;
 
             // mainFont = new SpriteFont();
-
 
             graphics.PreferredBackBufferWidth = 512;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 512;   // set this value to the desired height of your window
@@ -61,9 +65,6 @@ namespace LittleTiggy
         {
             // TODO: Add your initialization logic here
 
-            
-
-
             base.Initialize();
         }
 
@@ -73,11 +74,13 @@ namespace LittleTiggy
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
+            // Create main game objects
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new mainCharacter(this.GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
-            // EnvironmentBlock[] walls = new EnvironmentBlock[5];
+           
+
+            // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
             Random randomNumber = new Random();
 
@@ -92,6 +95,8 @@ namespace LittleTiggy
                 walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
                 numberOfRandomWalls++;
             }
+
+            // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish type level. 
 
             int f = 0;
 
@@ -140,21 +145,12 @@ namespace LittleTiggy
                     numberOfRandomWalls++;
                 }
 
-
-                //gridAlignedX = gridAlignedX - (gridAlignedX % 16);
-                //gridAlignedY = gridAlignedY - (gridAlignedY % 16);
-
-
             }
 
-            /*
-            using (var stream = TitleContainer.OpenStream("Content/charactersheet.png"))
-            {
-                characterSheetTexture = Texture2D.FromStream(this.GraphicsDevice, stream);
-            }*/
+            // spawn enemy around the map now that walls have been created
+            enemy = new Enemy(this.GraphicsDevice, walls);
 
 
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -171,6 +167,7 @@ namespace LittleTiggy
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+ 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -179,19 +176,18 @@ namespace LittleTiggy
             // TODO: Add your update logic here
             character.Update(gameTime, GraphicsDevice, walls);
             base.Update(gameTime);
+            enemy.Update(gameTime, GraphicsDevice, walls);
 
         }
 
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(82,82,82));
+            GraphicsDevice.Clear(new Color(82,82,82)); // set BG color
 
-
-            // TODO: Add your drawing code here
 
             spriteBatch.Begin();
 
@@ -203,6 +199,7 @@ namespace LittleTiggy
 
 
             character.Draw(spriteBatch);
+            enemy.Draw(spriteBatch);
 
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);

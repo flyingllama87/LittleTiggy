@@ -31,8 +31,6 @@ namespace LittleTiggy
 
 
 
-
-
         public float X
         {
             get;
@@ -274,7 +272,7 @@ namespace LittleTiggy
                 Rectangle wallRight = new Rectangle((int)walls[i].X + 16, (int)walls[i].Y + 1, 0, 14);
                 Rectangle wallUp = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y, 14, 0);
                 Rectangle wallDown = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 16, 14, 0);
-                Rectangle character = new Rectangle((int)this.X + 2, (int)this.Y + 2, 12, 13);
+                Rectangle character = new Rectangle((int)this.X + 3, (int)this.Y + 2, 10, 13);
 
                 if (character.Intersects(wallLeft))
                 {
