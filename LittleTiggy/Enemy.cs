@@ -24,7 +24,6 @@ namespace LittleTiggy
         Animation currentAnimation;
 
         const float charSpeed = 0.00001F;
-        //long lastCountOfTicks = 0;
         long ticksSinceLastUpdate = 0;
 
 
@@ -108,14 +107,53 @@ namespace LittleTiggy
         {
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            float lastXPosition = this.X;
-            float lastYPosition = this.Y;
+            //TODO: check collisions with environment walls
 
-            //check collisions with environment walls
+
+            //TODO: Check player collision
+
+            
+            // Get direction of player character and set enemy to move in that direction at half player speed.
+            var velocity = GetPlayerVelocity();
+
+            this.X += (velocity.X * (charSpeed * ticksSinceLastUpdate)) / 2;
+            this.Y += (velocity.Y * (charSpeed * ticksSinceLastUpdate)) / 2;
+
+
+            // select appropriate animation based on movement direction
+
+            bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
+
+            if (movingHorizontally)
+            {
+                if (velocity.X > 0) currentAnimation = walkRight;
+                else  currentAnimation = walkLeft;
+            }
+            else
+            {
+                if (velocity.Y > 0) currentAnimation = walkDown;
+                else currentAnimation = walkUp;
+            }
 
             currentAnimation.Update(gameTime);
+   
+            // Logic to stop enemy object from going outside game play area.  Probably not needed.
+
+            if (this.X < graphicsDevice.Viewport.Width - 16)
+                this.X += charSpeed * ticksSinceLastUpdate;
+
+            if (this.X > 0 )
+                this.X -= charSpeed * ticksSinceLastUpdate;
+
+            if (this.Y < graphicsDevice.Viewport.Height - 16)
+                this.Y += charSpeed * ticksSinceLastUpdate;
+
+            if (this.Y > 0)
+                this.Y -= charSpeed * ticksSinceLastUpdate;
 
         }
+
+
 
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -145,7 +183,14 @@ namespace LittleTiggy
 
         }
 
+        Vector2 GetPlayerVelocity()
+        {
+            Vector2 desiredVelocity = new Vector2(mainCharacter.X - this.X, mainCharacter.Y - this.Y);
 
+            desiredVelocity.Normalize();
+
+            return desiredVelocity;
+        }
 
 
     }

@@ -32,6 +32,8 @@ namespace LittleTiggy
         public static string collisionString { get; set; }  = "";
         public static DateTime TimerDateTime { get; set; }
 
+        public static bool collidingEnemy { get; set; } = false;
+
         int numberOfRandomWalls = 0;
         int numberOfPlacedWalls = 0;
 #endif
@@ -175,8 +177,9 @@ namespace LittleTiggy
 
             // TODO: Add your update logic here
             character.Update(gameTime, GraphicsDevice, walls);
-            base.Update(gameTime);
             enemy.Update(gameTime, GraphicsDevice, walls);
+            base.Update(gameTime);
+
 
         }
 

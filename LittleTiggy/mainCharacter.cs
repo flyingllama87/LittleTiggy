@@ -26,18 +26,17 @@ namespace LittleTiggy
         KeyboardState OldKeyboardState;
 
         const float charSpeed = 0.00001F;
-        //long lastCountOfTicks = 0;
         long ticksSinceLastUpdate = 0;
 
 
 
-        public float X
+        public static float X
         {
             get;
             set;
         }
 
-        public float Y
+        public static float Y
         {
             get;
             set;
@@ -94,21 +93,15 @@ namespace LittleTiggy
 
             currentAnimation = Idle;
 
-            this.X = 0; this.Y = 0;
+            X = 0; Y = 0;
 
         }
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
-            //currentAnimation = Idle;
-
-            // Keyboard controls
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
-
-            float lastXPosition = this.X;
-            float lastYPosition = this.Y;
-
+            
             //Touch / mouse controls
 
             var velocity = GetDesiredVelocityFromInput();
@@ -117,19 +110,19 @@ namespace LittleTiggy
             {
 
                 // check collisions with walls via mouse / touch control.
-                if (this.X < graphicsDevice.Viewport.Width - 16 && this.X > 0)
-                    this.X += velocity.X * charSpeed * ticksSinceLastUpdate;
-                else if (this.X > graphicsDevice.Viewport.Width - 16)
-                    this.X -= 1;
-                else if (this.X < 0)
-                    this.X += 1;
+                if (X < graphicsDevice.Viewport.Width - 16 && X > 0)
+                    X += velocity.X * charSpeed * ticksSinceLastUpdate;
+                else if (X > graphicsDevice.Viewport.Width - 16)
+                    X -= 1;
+                else if (X < 0)
+                    X += 1;
 
-                if (this.Y < graphicsDevice.Viewport.Height - 16 && this.Y > 0)
-                    this.Y += velocity.Y * charSpeed * ticksSinceLastUpdate; // * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                else if (this.Y > graphicsDevice.Viewport.Height - 16)
-                    this.Y -= 1;
-                else if (this.Y < 0)
-                    this.Y += 1;
+                if (Y < graphicsDevice.Viewport.Height - 16 && Y > 0)
+                    Y += velocity.Y * charSpeed * ticksSinceLastUpdate; 
+                else if (Y > graphicsDevice.Viewport.Height - 16)
+                    Y -= 1;
+                else if (Y < 0)
+                    Y += 1;
 
 
                 // select animation based on direction mouse/touch input is pointing
@@ -160,8 +153,8 @@ namespace LittleTiggy
                     currentAnimation = walkDown;
                     currentAnimation.Update(gameTime);
 
-                    if (this.Y < graphicsDevice.Viewport.Height - 16)
-                        this.Y += charSpeed * ticksSinceLastUpdate;
+                    if (Y < graphicsDevice.Viewport.Height - 16)
+                        Y += charSpeed * ticksSinceLastUpdate;
 
                     //check collisions with environment walls
                     CheckEnvironmentCollision(walls);
@@ -171,8 +164,8 @@ namespace LittleTiggy
                 {
                     currentAnimation = walkLeft;
                     currentAnimation.Update(gameTime);
-                    if (this.X > 0)
-                        this.X += -(charSpeed * ticksSinceLastUpdate);
+                    if (X > 0)
+                        X += -(charSpeed * ticksSinceLastUpdate);
 
                     //check collisions with environment walls
                     CheckEnvironmentCollision(walls);
@@ -182,8 +175,8 @@ namespace LittleTiggy
                 {
                     currentAnimation = walkRight;
                     currentAnimation.Update(gameTime);
-                    if (this.X < graphicsDevice.Viewport.Width - 16)
-                        this.X += charSpeed * ticksSinceLastUpdate;
+                    if (X < graphicsDevice.Viewport.Width - 16)
+                        X += charSpeed * ticksSinceLastUpdate;
 
                     //check collisions with environment walls
                     CheckEnvironmentCollision(walls);
@@ -194,8 +187,8 @@ namespace LittleTiggy
                 {
                     currentAnimation = walkUp;
                     currentAnimation.Update(gameTime);
-                    if (this.Y > 0)
-                        this.Y -= charSpeed * ticksSinceLastUpdate;
+                    if (Y > 0)
+                        Y -= charSpeed * ticksSinceLastUpdate;
 
                     //check collisions with environment walls
                     CheckEnvironmentCollision(walls);
@@ -219,8 +212,8 @@ namespace LittleTiggy
                         gridAlignedX = gridAlignedX - (gridAlignedX % 16);
                         gridAlignedY = gridAlignedY - (gridAlignedY % 16);
 
-                        this.X = gridAlignedX;
-                        this.Y = gridAlignedY;
+                        X = gridAlignedX;
+                        Y = gridAlignedY;
                     } while (IsEnvironmentCollision(walls));
 
                 }
@@ -238,7 +231,7 @@ namespace LittleTiggy
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            Vector2 topLeftOfSprite = new Vector2(this.X, this.Y);
+            Vector2 topLeftOfSprite = new Vector2(X, Y);
             Color tintColor = Color.White;
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
@@ -251,7 +244,7 @@ namespace LittleTiggy
             for (int i = 0; i < walls.Length; i++)
             {
                 Rectangle wall = new Rectangle((int)walls[i].X, (int)walls[i].Y, 16, 16);
-                Rectangle character = new Rectangle((int)this.X, (int)this.Y, 16, 16);
+                Rectangle character = new Rectangle((int)X, (int)Y, 16, 16);
 
                 if (character.Intersects(wall))
                 {
@@ -272,11 +265,11 @@ namespace LittleTiggy
                 Rectangle wallRight = new Rectangle((int)walls[i].X + 16, (int)walls[i].Y + 1, 0, 14);
                 Rectangle wallUp = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y, 14, 0);
                 Rectangle wallDown = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 16, 14, 0);
-                Rectangle character = new Rectangle((int)this.X + 3, (int)this.Y + 2, 10, 13);
+                Rectangle character = new Rectangle((int)X + 3, (int)Y + 2, 10, 13);
 
                 if (character.Intersects(wallLeft))
                 {
-                    this.X -= (charSpeed * ticksSinceLastUpdate);
+                    X -= (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingLeft = true;
                     //if (Game1.collisionTimerOn == false)
                         SetCollisionTimer();
@@ -284,14 +277,14 @@ namespace LittleTiggy
                     
                 if (character.Intersects(wallRight))
                 {
-                    this.X += (charSpeed * ticksSinceLastUpdate);
+                    X += (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingRight = true;
                     //if (Game1.collisionTimerOn == false)
                         SetCollisionTimer();
                 }
                 if (character.Intersects(wallUp))
                 {
-                    this.Y -= (charSpeed * ticksSinceLastUpdate);
+                    Y -= (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingTop = true;
                     //if (Game1.collisionTimerOn == false) 
                     SetCollisionTimer();
@@ -299,7 +292,7 @@ namespace LittleTiggy
 
                 if (character.Intersects(wallDown))
                 {
-                    this.Y += (charSpeed * ticksSinceLastUpdate);
+                    Y += (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingBottom = true;
                     //if (Game1.collisionTimerOn == false)
                         SetCollisionTimer();
@@ -342,24 +335,22 @@ namespace LittleTiggy
 
             if (touchCollection.Count > 0 )
             {
-                desiredVelocity.X = touchCollection[0].Position.X - this.X;
-                desiredVelocity.Y = touchCollection[0].Position.Y - this.Y;
+                desiredVelocity.X = touchCollection[0].Position.X - X;
+                desiredVelocity.Y = touchCollection[0].Position.Y - Y;
 
                 if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
                 {
                     desiredVelocity.Normalize();
-                    //desiredVelocity;
                 }
             }
             else if (mouseState.LeftButton == ButtonState.Pressed)
             {
-                desiredVelocity.X = mouseState.X - this.X;
-                desiredVelocity.Y = mouseState.Y - this.Y;
+                desiredVelocity.X = mouseState.X - X;
+                desiredVelocity.Y = mouseState.Y - Y;
 
                 if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
                 {
                     desiredVelocity.Normalize();
-                    //desiredVelocity;
                 }
             }
             
