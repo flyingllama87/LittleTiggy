@@ -116,8 +116,38 @@ namespace LittleTiggy
             // Get direction of player character and set enemy to move in that direction at half player speed.
             var velocity = GetPlayerVelocity();
 
-            this.X += (velocity.X * (charSpeed * ticksSinceLastUpdate)) / 2;
-            this.Y += (velocity.Y * (charSpeed * ticksSinceLastUpdate)) / 2;
+
+            float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate) / 2);
+            float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate) / 2);
+
+            Vector2 vectorPosToMoveTo = new Vector2(XPosToMoveTo, YPosToMoveTo);
+
+            if (!IsEnvironmentCollision(walls, vectorPosToMoveTo))
+            {
+                this.X = XPosToMoveTo;
+                this.Y = YPosToMoveTo;
+            }
+            else
+            {
+                Random direction = new Random();
+
+                switch(direction.Next(1,4))
+                {
+                    case 1:
+                        this.X += 1;
+                        break;
+                    case 2:
+                        this.X -= 1;
+                        break;
+                    case 3:
+                        this.Y += 1;
+                        break;
+                    case 4:
+                        this.Y -= 1;
+                        break;
+                }
+
+            }
 
 
             // select appropriate animation based on movement direction
@@ -165,12 +195,31 @@ namespace LittleTiggy
 
         }
 
+
         bool IsEnvironmentCollision(EnvironmentBlock[] walls)
         {
             for (int i = 0; i < walls.Length; i++)
             {
-                Rectangle wall = new Rectangle((int)walls[i].X, (int)walls[i].Y, 16, 16);
+                Rectangle wall = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 1, 14, 14);
                 Rectangle character = new Rectangle((int)this.X, (int)this.Y, 16, 16);
+
+                if (character.Intersects(wall))
+                {
+                    return true;
+                }
+
+            }
+
+            return false;
+
+        }
+
+        bool IsEnvironmentCollision(EnvironmentBlock[] walls, Vector2 characterVector)
+        {
+            for (int i = 0; i < walls.Length; i++)
+            {
+                Rectangle wall = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 1, 14, 14);
+                Rectangle character = new Rectangle((int)characterVector.X, (int)characterVector.Y, 16, 16);
 
                 if (character.Intersects(wall))
                 {
@@ -185,6 +234,8 @@ namespace LittleTiggy
 
         Vector2 GetPlayerVelocity()
         {
+            //get velocity of player character relative to enemy's position & normalize so we end up with a direction to move in.
+
             Vector2 desiredVelocity = new Vector2(mainCharacter.X - this.X, mainCharacter.Y - this.Y);
 
             desiredVelocity.Normalize();
