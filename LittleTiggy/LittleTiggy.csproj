@@ -43,6 +43,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AnimationFrame.cs" />
+    <Compile Include="PowerUp.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnvironmentBlock.cs" />
     <Compile Include="Game1.cs" />
@@ -116,6 +117,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\environmentSheet.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\itemsheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

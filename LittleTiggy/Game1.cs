@@ -1,4 +1,4 @@
-﻿#define _DEBUG
+﻿// #define _DEBUG
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,12 +18,13 @@ namespace LittleTiggy
         // Texture2D characterSheetTexture;
         mainCharacter character;
         Enemy enemy;
+        PowerUp powerUp;
         SpriteFont mainFont;
         public EnvironmentBlock[] walls = new EnvironmentBlock[300];
         // public EnvironmentBlock[] walls = new EnvironmentBlock[10];
 
 
-#if _DEBUG //DEBUG VARS
+
         public static bool collidingLeft { get; set; } = false;
         public static bool collidingRight { get; set; } = false;
         public static bool collidingTop { get; set; } = false;
@@ -31,12 +32,13 @@ namespace LittleTiggy
         public static bool collisionTimerOn { get; set; } = false;
         public static string collisionString { get; set; }  = "";
         public static DateTime TimerDateTime { get; set; }
+        public static DateTime powerUpCooldown { get; set; }
 
         public static bool collidingEnemy { get; set; } = false;
 
         int numberOfRandomWalls = 0;
         int numberOfPlacedWalls = 0;
-#endif
+
 
         public static int score { get; set; } = 0;
         public static int respawn { get; set; } = 30;
@@ -80,7 +82,8 @@ namespace LittleTiggy
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new mainCharacter(this.GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
-           
+
+
 
             // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
@@ -151,7 +154,7 @@ namespace LittleTiggy
 
             // spawn enemy around the map now that walls have been created
             enemy = new Enemy(this.GraphicsDevice, walls);
-
+            powerUp = new PowerUp(this.GraphicsDevice, walls);
 
         }
 
@@ -179,7 +182,7 @@ namespace LittleTiggy
             character.Update(gameTime, GraphicsDevice, walls);
             enemy.Update(gameTime, GraphicsDevice, walls);
             base.Update(gameTime);
-
+            powerUp.Update(gameTime, GraphicsDevice);
 
         }
 
@@ -203,6 +206,7 @@ namespace LittleTiggy
 
             character.Draw(spriteBatch);
             enemy.Draw(spriteBatch);
+            powerUp.Draw(spriteBatch);
 
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
