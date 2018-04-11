@@ -91,3 +91,4 @@ C:\Users\User\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.csproj.CopyC
 C:\Users\User\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.exe
 C:\Users\User\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.pdb
 C:\Users\User\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\itemsheet.png
+C:\Users\MJ12\git\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\itemsheet.png

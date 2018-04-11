@@ -26,6 +26,8 @@ namespace LittleTiggy
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
 
+        Vector2 vectorFinalDestinationPosition;
+        bool isRandomWalking = false;
 
         public float X
         {
@@ -105,64 +107,108 @@ namespace LittleTiggy
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
+
+
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
-
-            //TODO: check collisions with environment walls
-
 
             //TODO: Check player collision
 
-            
-            // Get direction of player character and set enemy to move in that direction at half player speed.
-            var velocity = GetPlayerVelocity();
 
-
-            float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate) / 2);
-            float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate) / 2);
-
-            Vector2 vectorPosToMoveTo = new Vector2(XPosToMoveTo, YPosToMoveTo);
-
-            if (!IsEnvironmentCollision(walls, vectorPosToMoveTo))
+            if (isRandomWalking)
             {
-                this.X = XPosToMoveTo;
-                this.Y = YPosToMoveTo;
-            }
-            else
-            {
-                Random direction = new Random();
 
-                switch(direction.Next(1,4))
+                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == 0 && Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == 0)
+                    isRandomWalking = false;
+
+                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 0)
                 {
-                    case 1:
-                        this.X += 1;
-                        break;
-                    case 2:
-                        this.X -= 1;
-                        break;
-                    case 3:
-                        this.Y += 1;
-                        break;
-                    case 4:
-                        this.Y -= 1;
-                        break;
+                    this.X += 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < 0)
+                {
+                    this.X -= 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 0)
+                {
+                    this.Y += 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < 0)
+                {
+                    this.Y -= 1;
                 }
 
-            }
 
-
-            // select appropriate animation based on movement direction
-
-            bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
-
-            if (movingHorizontally)
-            {
-                if (velocity.X > 0) currentAnimation = walkRight;
-                else  currentAnimation = walkLeft;
             }
             else
             {
-                if (velocity.Y > 0) currentAnimation = walkDown;
-                else currentAnimation = walkUp;
+
+                // Get direction of player character and set enemy to move in that direction at half player speed.
+                var velocity = GetPlayerVelocity();
+
+                float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate) / 2);
+                float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate) / 2);
+
+                Vector2 vectorImmediatePosToMoveTo = new Vector2(XPosToMoveTo, YPosToMoveTo);
+
+                if (!IsEnvironmentCollision(walls, vectorImmediatePosToMoveTo))
+                {
+                    this.X = XPosToMoveTo;
+                    this.Y = YPosToMoveTo;
+                }
+                else
+                {
+                    Random direction = new Random();
+
+                    do
+                    {
+
+                        vectorFinalDestinationPosition.X = this.X;
+                        vectorFinalDestinationPosition.Y = this.Y;
+
+                        switch (direction.Next(1, 4))
+                        {
+                            case 1:
+                                vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) + 16;
+                                break;
+                            case 2:
+                                vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) - 16;
+                                break;
+                            case 3:
+                                vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) + 16;
+                                break;
+                            case 4:
+                                vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) - 16;
+                                break;
+                        }
+
+                        
+
+                    } while (IsEnvironmentCollision(walls, new Vector2(vectorFinalDestinationPosition.X, vectorFinalDestinationPosition.Y)));
+
+                    isRandomWalking = true;
+
+                    //this.X = XPosToMoveTo;
+                    //this.Y = YPosToMoveTo;
+
+                }
+
+
+
+                // select appropriate animation based on movement direction
+
+                bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
+
+                if (movingHorizontally)
+                {
+                    if (velocity.X > 0) currentAnimation = walkRight;
+                    else currentAnimation = walkLeft;
+                }
+                else
+                {
+                    if (velocity.Y > 0) currentAnimation = walkDown;
+                    else currentAnimation = walkUp;
+                }
+
             }
 
             currentAnimation.Update(gameTime);
@@ -201,7 +247,7 @@ namespace LittleTiggy
             for (int i = 0; i < walls.Length; i++)
             {
                 Rectangle wall = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 1, 14, 14);
-                Rectangle character = new Rectangle((int)this.X, (int)this.Y, 16, 16);
+                Rectangle character = new Rectangle((int)this.X + 3, (int)this.Y + 2, 10, 13);
 
                 if (character.Intersects(wall))
                 {
