@@ -158,6 +158,7 @@ namespace LittleTiggy
                 else
                 {
                     Random direction = new Random();
+                    int loopCount = 0;
 
                     do
                     {
@@ -169,19 +170,37 @@ namespace LittleTiggy
                         {
                             case 1:
                                 vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) + 16;
+                                vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16));
                                 break;
                             case 2:
                                 vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) - 16;
+                                vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16));
                                 break;
                             case 3:
                                 vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) + 16;
+                                vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16));
                                 break;
                             case 4:
                                 vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) - 16;
+                                vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16));
                                 break;
                         }
 
-                        
+                        loopCount++;
+                        if (loopCount > 100)
+                        {
+                            Random randomNumber = new Random();
+
+                            do
+                            {
+                                this.X = (float)randomNumber.Next(0, 512);
+                                this.Y = randomNumber.Next(0, 512);
+
+                                this.X -= this.X % 16;
+                                this.Y -= this.Y % 16;
+
+                            } while (IsEnvironmentCollision(walls));
+                        }
 
                     } while (IsEnvironmentCollision(walls, new Vector2(vectorFinalDestinationPosition.X, vectorFinalDestinationPosition.Y)));
 
@@ -215,6 +234,7 @@ namespace LittleTiggy
    
             // Logic to stop enemy object from going outside game play area.  Probably not needed.
 
+            /*
             if (this.X < graphicsDevice.Viewport.Width - 16)
                 this.X += charSpeed * ticksSinceLastUpdate;
 
@@ -226,6 +246,8 @@ namespace LittleTiggy
 
             if (this.Y > 0)
                 this.Y -= charSpeed * ticksSinceLastUpdate;
+
+            */
 
         }
 

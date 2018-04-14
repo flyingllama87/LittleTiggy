@@ -1,9 +1,11 @@
-﻿using System;
+﻿#define _PATHDEBUG
+
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Input;
-
+using System.Collections.Generic;
 
 
 namespace LittleTiggy
@@ -28,6 +30,13 @@ namespace LittleTiggy
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
 
+#if _PATHDEBUG
+        Stack<Vector2> Path;
+        static Texture2D environmentSheetTexture;
+        Animation PathIdle;
+        Animation PathCurrentAnimation;
+
+#endif
 
 
         public static float X
@@ -94,6 +103,22 @@ namespace LittleTiggy
             currentAnimation = Idle;
 
             X = 1; Y = 1;
+
+#if _PATHDEBUG
+            if (environmentSheetTexture == null)
+            {
+                using (var stream = TitleContainer.OpenStream("Content/environmentSheet.png"))
+                {
+                    environmentSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
+                }
+            }
+
+            PathIdle = new Animation();
+            PathIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
+
+            PathCurrentAnimation = PathIdle;
+#endif
+
 
         }
 
@@ -217,6 +242,21 @@ namespace LittleTiggy
                     } while (IsEnvironmentCollision(walls));
 
                 }
+#if _PATHDEBUG
+
+
+                if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
+                {
+                    Vector2 source = new Vector2(0, 0);
+
+                    Vector2 destination = new Vector2(X - (X % 16), Y - (Y % 16));
+                    Path = new Stack<Vector2>();
+
+                    Pathfinder test_pathfinder = new Pathfinder();
+                    Path = test_pathfinder.Pathfind(source, destination, walls);
+
+                }
+#endif
 
                 OldKeyboardState = Keyboard.GetState();
 
@@ -236,6 +276,20 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
+
+#if _PATHDEBUG
+            sourceRectangle = PathCurrentAnimation.CurrentRectangle;
+
+            if (Path != null)
+            {
+                for (int i = 0; i < Path.Count; i++)
+                {
+                    Vector2 topLeftOfPathSquare = Path.Pop();
+                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
+                }
+            }
+
+#endif
 
         }
 
