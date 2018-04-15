@@ -49,6 +49,9 @@ namespace LittleTiggy
     {
 
         List<Vector2> Path = new List<Vector2>();
+        List<Vector2> DeletedNodes = new List<Vector2>();
+        Animation DeletedNodesIdle;
+        Animation DeletedNodesCurrentAnimation;
 
         static Texture2D environmentSheetTexture;
         Animation PathIdle;
@@ -70,6 +73,11 @@ namespace LittleTiggy
 
             PathCurrentAnimation = PathIdle;
 
+            DeletedNodesIdle = new Animation();
+            DeletedNodesIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
+
+            DeletedNodesCurrentAnimation = DeletedNodesIdle;
+
         }
 
 
@@ -84,6 +92,8 @@ namespace LittleTiggy
 
                 // Path = new Stack<Vector2>();
 
+                DeletedNodes = new List<Vector2>();
+
                 Path = Pathfind(source, destination, walls);
                 //Pathfind(source, destination, walls);
 
@@ -96,6 +106,17 @@ namespace LittleTiggy
         public void Draw(SpriteBatch spriteBatch)
         {
             Color tintColor = Color.White;
+
+
+            var DeletedNodesSourceRectangle = DeletedNodesCurrentAnimation.CurrentRectangle;
+
+            if (DeletedNodes != null)
+            {
+                foreach (Vector2 topLeftOfPathSquare in DeletedNodes)
+                {
+                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, DeletedNodesSourceRectangle, tintColor);
+                }
+            }
 
             var sourceRectangle = PathCurrentAnimation.CurrentRectangle;
 
@@ -140,9 +161,16 @@ namespace LittleTiggy
 
                 closed.Add(node);
 
-                List<Node> neighbors = GetNeighbours(node, walls); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
+                List<Node> neighbours = GetNeighbours(node, walls); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
-                foreach (Node n in neighbors)
+                // DEBUG
+                
+                foreach (Node neighbour in neighbours)
+                {
+                    DeletedNodes.Add(neighbour.position);
+                }
+
+                foreach (Node n in neighbours)
                 {
                     ushort g_score = (ushort)(node.g_score + 16);
                     ushort h_score = ManhattanDistance(n.position, goalNode.position);
