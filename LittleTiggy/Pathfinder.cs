@@ -48,7 +48,8 @@ namespace LittleTiggy
     public class Pathfinder
     {
 
-        Stack<Vector2> Path;
+        List<Vector2> Path = new List<Vector2>();
+
         static Texture2D environmentSheetTexture;
         Animation PathIdle;
         Animation PathCurrentAnimation;
@@ -65,7 +66,7 @@ namespace LittleTiggy
             }
 
             PathIdle = new Animation();
-            PathIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
+            PathIdle.AddFrame(new Rectangle(32, 0, 16, 16), TimeSpan.FromSeconds(.25));
 
             PathCurrentAnimation = PathIdle;
 
@@ -75,15 +76,16 @@ namespace LittleTiggy
         public void Update(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
 
-
             if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
             {
                 Vector2 source = new Vector2(0, 0);
 
                 Vector2 destination = new Vector2(mainCharacter.X - (mainCharacter.X % 16), mainCharacter.Y - (mainCharacter.Y % 16));
-                Path = new Stack<Vector2>();
+
+                // Path = new Stack<Vector2>();
 
                 Path = Pathfind(source, destination, walls);
+                //Pathfind(source, destination, walls);
 
             }
 
@@ -99,9 +101,15 @@ namespace LittleTiggy
 
             if (Path != null)
             {
+                /*
                 for (int i = 0; i < Path.Count; i++)
                 {
                     Vector2 topLeftOfPathSquare = Path.Pop();
+                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
+                } */
+
+                foreach (Vector2 topLeftOfPathSquare in Path)
+                {
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
             }
@@ -109,7 +117,7 @@ namespace LittleTiggy
 
         // A* pathfinding algo guts
 
-        public Stack<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
+        public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
         {
 
             Node goalNode = new Node(destination, 0, 0);
@@ -155,8 +163,8 @@ namespace LittleTiggy
                     }
                 }
             }
-            Stack<Vector2> emptyVectorStack = new Stack<Vector2>();
-            return emptyVectorStack;
+            List<Vector2> emptyVectorList = new List<Vector2>();
+            return emptyVectorList;
         }
 
         public ushort ManhattanDistance(Vector2 source, Vector2 destination)
@@ -230,23 +238,26 @@ namespace LittleTiggy
         }
 
 
-        public Stack<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition) // Used to iterate over nodes starting with final node to generate a list of positions (path) a* found to navigate from src to destination
+        public List<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition) // Used to iterate over nodes starting with final node to generate a list of positions (path) a* found to navigate from src to destination
         {
 
-            Stack<Vector2> vectorStack = new Stack<Vector2>();
+            List<Vector2> vectorList = new List<Vector2>();
             Node tempNode = new Node(new Vector2(0,0), 999, 999);
             bool foundStartPosition = false;
+            DateTime timer = DateTime.Now;
+            timer = timer.AddSeconds(1.0);
 
             foreach (Node node in nodes) // start with destination node and find it's parent
             {
                 if (node.position == lastNode.parent)
                 {
-                    vectorStack.Push(node.position);
+                    vectorList.Add(node.position);
                     tempNode = node;
                     nodes.Remove(node);
                     break;
                 }
             }
+
 
             do
             {
@@ -256,7 +267,7 @@ namespace LittleTiggy
                 {
                     if (node.position == tempNode.parent)  // if we've found the previously found node's parent.
                     {
-                        vectorStack.Push(node.position);
+                        vectorList.Add(node.position);
                         tempNode = node;
                         cleanNodeList.Remove(node);
 
@@ -270,9 +281,9 @@ namespace LittleTiggy
 
                 nodes = cleanNodeList;
 
-            } while (!foundStartPosition);
+            } while (!foundStartPosition && timer.CompareTo(DateTime.Now) > 0);
 
-            return vectorStack;
+            return vectorList;
 
         }
     }
