@@ -234,7 +234,7 @@ namespace LittleTiggy
    
             // Logic to stop enemy object from going outside game play area.  Probably not needed.
 
-            /*
+            
             if (this.X < graphicsDevice.Viewport.Width - 16)
                 this.X += charSpeed * ticksSinceLastUpdate;
 
@@ -247,7 +247,7 @@ namespace LittleTiggy
             if (this.Y > 0)
                 this.Y -= charSpeed * ticksSinceLastUpdate;
 
-            */
+            
 
         }
 

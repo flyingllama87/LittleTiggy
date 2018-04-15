@@ -1,11 +1,15 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+
+// This source file is for the implementation of the A* pathfinding / graph search algorithm.  Two classes are defined.  The first is a data type for nodes on the graph and the second is the actual implementation of the search built using the former data type.  Drawing functions for debugging exist too.
 
 
 namespace LittleTiggy
 {
-    public class Node : IEquatable<Node>
+    public class Node : IEquatable<Node>  //device graph node data type used in graph searchs
     {
         public ushort h_score { get; set; }
         public ushort g_score { get; set; }
@@ -19,7 +23,7 @@ namespace LittleTiggy
 
 
         public Vector2 position { get; set; }
-        public Vector2 parent { get; set; }
+        public Vector2 parent { get; set; } //parent node
 
         public Node(Vector2 Position, ushort H_Score, ushort G_Score)
         {
@@ -29,7 +33,7 @@ namespace LittleTiggy
 
         }
 
-        public bool Equals(Node otherNode)
+        public bool Equals(Node otherNode) //use X,Y coord of node for equality
         {
             if (this.position == otherNode.position)
                 return true;
@@ -39,36 +43,96 @@ namespace LittleTiggy
 
     }
 
+
+
     public class Pathfinder
     {
 
-        public Stack<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)
+        Stack<Vector2> Path;
+        static Texture2D environmentSheetTexture;
+        Animation PathIdle;
+        Animation PathCurrentAnimation;
+        KeyboardState OldKeyboardState;
+
+        public Pathfinder(GraphicsDevice graphicsDevice)
+        {
+            if (environmentSheetTexture == null)
+            {
+                using (var stream = TitleContainer.OpenStream("Content/environmentSheet.png"))
+                {
+                    environmentSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
+                }
+            }
+
+            PathIdle = new Animation();
+            PathIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
+
+            PathCurrentAnimation = PathIdle;
+
+        }
+
+
+        public void Update(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
+        {
+
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
+            {
+                Vector2 source = new Vector2(0, 0);
+
+                Vector2 destination = new Vector2(mainCharacter.X - (mainCharacter.X % 16), mainCharacter.Y - (mainCharacter.Y % 16));
+                Path = new Stack<Vector2>();
+
+                Path = Pathfind(source, destination, walls);
+
+            }
+
+            OldKeyboardState = Keyboard.GetState();
+
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            Color tintColor = Color.White;
+
+            var sourceRectangle = PathCurrentAnimation.CurrentRectangle;
+
+            if (Path != null)
+            {
+                for (int i = 0; i < Path.Count; i++)
+                {
+                    Vector2 topLeftOfPathSquare = Path.Pop();
+                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
+                }
+            }
+        }
+
+        // A* pathfinding algo guts
+
+        public Stack<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
         {
 
             Node goalNode = new Node(destination, 0, 0);
             Node startNode = new Node(from, ManhattanDistance(from, destination), 0);
 
-            List<Node> open = new List<Node>();            //list of nodes
+            List<Node> open = new List<Node>();                 //list of nodes
             List<Node> closed = new List<Node>();
-            open.Add(startNode);                //Add starting point
+            open.Add(startNode);                                //Add starting point
 
             while (open.Count > 0)
             {
 
-                Node node = GetBestNode(open);                   //Get node with lowest F value
+                Node node = GetBestNode(open);                   // Get node with lowest F value
 
-                if (node.position == goalNode.position)
+                if (node.position == goalNode.position)         // Goal reached
                 {
-                    //Debug.Log("Goal reached");
                     return GetPath(node, closed, from);
                 }
                 open.Remove(node);
-                //Node nodeToRemove = open.Find(n => n.position == node.position);
-                //open.Remove(nodeToRemove);
 
                 closed.Add(node);
 
-                List<Node> neighbors = GetNeighbours(node, walls);
+                List<Node> neighbors = GetNeighbours(node, walls); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
                 foreach (Node n in neighbors)
                 {
@@ -86,7 +150,6 @@ namespace LittleTiggy
                         n.h_score = h_score;
                         if (!open.Contains(n))
                         {
-                            // map_data[n.position.x, n.position.y] = 4; // ?? Not sure what the dev is trying to do here
                             open.Add(n);
                         }
                     }
@@ -102,11 +165,12 @@ namespace LittleTiggy
         }
 
 
-        public List<Node> GetNeighbours(Node node, EnvironmentBlock[] walls)
+        public List<Node> GetNeighbours(Node node, EnvironmentBlock[] walls) //find all valid neighbours
         {
             List<Node> neighbourList = new List<Node>();
 
 
+            // nodes to the left and right, above and below the current node are valid
             Node neighbourNode = new Node(new Vector2(node.position.X + 16, node.position.Y), 999, 999);
             neighbourList.Add(neighbourNode);
 
@@ -121,6 +185,7 @@ namespace LittleTiggy
 
             List<Node> neighbourListNoWalls = new List<Node>(neighbourList);
 
+            // don't include any neighbour nodes if walls are already placed there.
 
             for (int i = 0; i < walls.Length; i++)
             {
@@ -130,6 +195,8 @@ namespace LittleTiggy
                         neighbourListNoWalls.Remove(n);
                 }
             }
+
+            // don't include any neighbour nodes if they go outside the play area.
 
             for (int i = 0; i < neighbourListNoWalls.Count; i++)
             {
@@ -144,7 +211,7 @@ namespace LittleTiggy
         }
 
 
-        public Node GetBestNode(List<Node> nodes)
+        public Node GetBestNode(List<Node> nodes) //return node with lowest F score
         {
             Node nodeWithLowestFScore = new Node(new Vector2(0, 0), 999, 999);
 
@@ -163,14 +230,14 @@ namespace LittleTiggy
         }
 
 
-        public Stack<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition)
+        public Stack<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition) // Used to iterate over nodes starting with final node to generate a list of positions (path) a* found to navigate from src to destination
         {
 
             Stack<Vector2> vectorStack = new Stack<Vector2>();
             Node tempNode = new Node(new Vector2(0,0), 999, 999);
             bool foundStartPosition = false;
 
-            foreach (Node node in nodes)
+            foreach (Node node in nodes) // start with destination node and find it's parent
             {
                 if (node.position == lastNode.parent)
                 {
@@ -187,11 +254,11 @@ namespace LittleTiggy
 
                 foreach (Node node in nodes)
                 {
-                    if (node.position == tempNode.parent)
+                    if (node.position == tempNode.parent)  // if we've found the previously found node's parent.
                     {
                         vectorStack.Push(node.position);
                         tempNode = node;
-                        //cleanNodeList.Remove(node);
+                        cleanNodeList.Remove(node);
 
                         if (node.position == fromPosition)
                         {
@@ -211,77 +278,3 @@ namespace LittleTiggy
     }
 
 }
-
-
-
-/*
- * ----
-MY A* ALGO:
----
-
-	void PathFinder(Vector2 from, Vector2 destination)
-	{
-
-    goalNode = new Node(destination, 0, 0);
-    startNode = new Node(from, 0, ManhattanDistance(from, destination));
-
-    open = new List<Node>();            //list of nodes
-    closed = new List<Node>();
-    open.Add(startNode);                //Add starting point
-
-    while(open.Count > 0) {
-
-        node = getBestNode();                   //Get node with lowest F value
-        if(node.position == goalNode.position) {
-            Debug.Log("Goal reached");
-            getPath(node);
-            break;
-        }
-        open.Remove(node);
-        closed.Add(node);
-
-        List<Node> neighbors = getNeighbors(node);
-        foreach(Node n in neighbors) {
-            float g_score = node.G + 1;
-            float h_score = ManhattanDistance(n.position, goalNode.position);
-            float f_score = g_score + h_score;
-
-            if(isValueInList(n, closed) && f_score >= n.F) 
-                continue;
-
-            if(!isValueInList(n, open) || f_score < n.F) {
-                n.parent = node;
-                n.G = g_score;
-                n.H = h_score;
-                if(!isValueInList(n, open)) {
-                    // map_data[n.position.x, n.position.y] = 4; // ?? Not sure what the dev is trying to do here
-                    open.Add(n);
-                }
-            }
-        }
-    }
-	}
-
-
-----
-
-Functions to implement:
-
-ushort ManhattanDistance(source, destination)
-list<node> GetNeighbours(node)
-node GetBestNode(); //node with lowest fscore
-getPath (Node) 
-
-
-Node class:
-
-Node (Position, h_score, g_score)
-Node (Vector2, ushort, ushort)
-
-Node properties:
-
-.Position (vector2) 
-.Parent (vector2)
-.G_Score
-.H_Score
-*/

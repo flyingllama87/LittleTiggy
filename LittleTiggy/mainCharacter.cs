@@ -1,6 +1,4 @@
-﻿#define _PATHDEBUG
-
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
@@ -30,13 +28,7 @@ namespace LittleTiggy
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
 
-#if _PATHDEBUG
-        Stack<Vector2> Path;
-        static Texture2D environmentSheetTexture;
-        Animation PathIdle;
-        Animation PathCurrentAnimation;
 
-#endif
 
 
         public static float X
@@ -104,22 +96,6 @@ namespace LittleTiggy
 
             X = 1; Y = 1;
 
-#if _PATHDEBUG
-            if (environmentSheetTexture == null)
-            {
-                using (var stream = TitleContainer.OpenStream("Content/environmentSheet.png"))
-                {
-                    environmentSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
-                }
-            }
-
-            PathIdle = new Animation();
-            PathIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
-
-            PathCurrentAnimation = PathIdle;
-#endif
-
-
         }
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
@@ -127,7 +103,7 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
             
-            //Touch / mouse controls
+            // Touch / mouse controls
 
             var velocity = GetDesiredVelocityFromInput();
 
@@ -220,8 +196,6 @@ namespace LittleTiggy
                 }
 
 
-
-
                 if (Keyboard.GetState().IsKeyDown(Keys.Space) && Game1.respawn > 0 && !OldKeyboardState.IsKeyDown(Keys.Space))
                 {
 
@@ -242,21 +216,6 @@ namespace LittleTiggy
                     } while (IsEnvironmentCollision(walls));
 
                 }
-#if _PATHDEBUG
-
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
-                {
-                    Vector2 source = new Vector2(0, 0);
-
-                    Vector2 destination = new Vector2(X - (X % 16), Y - (Y % 16));
-                    Path = new Stack<Vector2>();
-
-                    Pathfinder test_pathfinder = new Pathfinder();
-                    Path = test_pathfinder.Pathfind(source, destination, walls);
-
-                }
-#endif
 
                 OldKeyboardState = Keyboard.GetState();
 
@@ -276,20 +235,6 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
-
-#if _PATHDEBUG
-            sourceRectangle = PathCurrentAnimation.CurrentRectangle;
-
-            if (Path != null)
-            {
-                for (int i = 0; i < Path.Count; i++)
-                {
-                    Vector2 topLeftOfPathSquare = Path.Pop();
-                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
-                }
-            }
-
-#endif
 
         }
 
@@ -318,8 +263,8 @@ namespace LittleTiggy
                 Rectangle wallLeft = new Rectangle((int)walls[i].X, (int)walls[i].Y + 1, 0, 14);
                 Rectangle wallRight = new Rectangle((int)walls[i].X + 16, (int)walls[i].Y + 1, 0, 14);
                 Rectangle wallUp = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y, 14, 0);
-                Rectangle wallDown = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 16, 14, 0);
-                Rectangle character = new Rectangle((int)X + 3, (int)Y + 2, 10, 13);
+                Rectangle wallDown = new Rectangle((int)walls[i].X, (int)walls[i].Y + 16, 16, 0);
+                Rectangle character = new Rectangle((int)X + 3, (int)Y, 10, 13);
 
                 if (character.Intersects(wallLeft))
                 {
@@ -364,7 +309,6 @@ namespace LittleTiggy
             Game1.collisionTimerOn = true;
             Game1.TimerDateTime = DateTime.Now;
             Game1.TimerDateTime = Game1.TimerDateTime.AddSeconds(0.1);
-            //var tempDateTime = DateTime.Now;
 
         }
 

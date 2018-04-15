@@ -24,7 +24,7 @@ namespace LittleTiggy
         public EnvironmentBlock[] walls = new EnvironmentBlock[300];
         // public EnvironmentBlock[] walls = new EnvironmentBlock[10];
 
-
+        Pathfinder pathfinder;
 
         public static bool collidingLeft { get; set; } = false;
         public static bool collidingRight { get; set; } = false;
@@ -88,7 +88,7 @@ namespace LittleTiggy
 
             // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
-            Random randomNumber = new Random();
+            Random randomNumber = new Random(1);
 
             for (int i = 0; i < 10; i++)
             {
@@ -156,7 +156,7 @@ namespace LittleTiggy
             // spawn enemy around the map now that walls have been created
             enemy = new Enemy(this.GraphicsDevice, walls);
             powerUp = new PowerUp(this.GraphicsDevice, walls);
-
+            pathfinder = new Pathfinder(this.GraphicsDevice);
         }
 
         /// <summary>
@@ -184,6 +184,7 @@ namespace LittleTiggy
             enemy.Update(gameTime, GraphicsDevice, walls);
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
+            pathfinder.Update(GraphicsDevice, walls);
 
         }
 
@@ -208,6 +209,7 @@ namespace LittleTiggy
             character.Draw(spriteBatch);
             enemy.Draw(spriteBatch);
             powerUp.Draw(spriteBatch);
+            pathfinder.Draw(spriteBatch);
 
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
@@ -220,7 +222,6 @@ namespace LittleTiggy
             //spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, tintColor);
 
             spriteBatch.End();
-
 
             base.Draw(gameTime);
         }
