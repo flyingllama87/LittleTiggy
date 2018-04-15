@@ -85,7 +85,6 @@ namespace LittleTiggy
             mainFont = Content.Load<SpriteFont>("MainFont");
 
 
-
             // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
             Random randomNumber = new Random(1);
@@ -205,11 +204,11 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
-
+            pathfinder.Draw(spriteBatch);
             character.Draw(spriteBatch);
             enemy.Draw(spriteBatch);
             powerUp.Draw(spriteBatch);
-            pathfinder.Draw(spriteBatch);
+
 
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);

@@ -136,7 +136,7 @@ namespace LittleTiggy
             }
         }
 
-        // A* pathfinding algo guts
+        // Main A* pathfinding algorithm implementation
 
         public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
         {
@@ -151,7 +151,7 @@ namespace LittleTiggy
             while (open.Count > 0)
             {
 
-                Node node = GetBestNode(open);                   // Get node with lowest F value
+                Node node = GetBestNode(open);                  // Get node with lowest F value
 
                 if (node.position == goalNode.position)         // Goal reached
                 {
@@ -163,30 +163,29 @@ namespace LittleTiggy
 
                 List<Node> neighbours = GetNeighbours(node, walls); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
-                // DEBUG
-                
+                // DEBUG: following foreach is purely for visualisation of a*
                 foreach (Node neighbour in neighbours)
                 {
                     DeletedNodes.Add(neighbour.position);
                 }
 
-                foreach (Node n in neighbours)
+                foreach (Node neighbour in neighbours)
                 {
                     ushort g_score = (ushort)(node.g_score + 16);
-                    ushort h_score = ManhattanDistance(n.position, goalNode.position);
+                    ushort h_score = ManhattanDistance(neighbour.position, goalNode.position);
                     ushort f_score = (ushort)(g_score + h_score);
 
-                    if (closed.Contains(n) && f_score >= (n.g_score + n.h_score))
+                    if (closed.Contains(neighbour) && f_score >= (neighbour.g_score + neighbour.h_score))
                         continue;
 
-                    if (!open.Contains(n) || f_score < (n.g_score + n.h_score))
+                    if (!open.Contains(neighbour) || f_score < (neighbour.g_score + neighbour.h_score))
                     {
-                        n.parent = node.position;
-                        n.g_score = g_score;
-                        n.h_score = h_score;
-                        if (!open.Contains(n))
+                        neighbour.parent = node.position;
+                        neighbour.g_score = g_score;
+                        neighbour.h_score = h_score;
+                        if (!open.Contains(neighbour))
                         {
-                            open.Add(n);
+                            open.Add(neighbour);
                         }
                     }
                 }
@@ -207,6 +206,7 @@ namespace LittleTiggy
 
 
             // nodes to the left and right, above and below the current node are valid
+
             Node neighbourNode = new Node(new Vector2(node.position.X + 16, node.position.Y), 999, 999);
             neighbourList.Add(neighbourNode);
 
@@ -246,8 +246,8 @@ namespace LittleTiggy
 
         }
 
-
-        public Node GetBestNode(List<Node> nodes) //return node with lowest F score
+        //return node with lowest F score
+        public Node GetBestNode(List<Node> nodes) 
         {
             Node nodeWithLowestFScore = new Node(new Vector2(0, 0), 999, 999);
 
@@ -265,15 +265,15 @@ namespace LittleTiggy
             return nodeWithLowestFScore;
         }
 
-
-        public List<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition) // Used to iterate over nodes starting with final node to generate a list of positions (path) a* found to navigate from src to destination
+        // Used to iterate over nodes starting with final node to generate a list of positions (path) a* found to navigate from src to destination
+        public List<Vector2> GetPath(Node lastNode, List<Node> nodes, Vector2 fromPosition) 
         {
 
             List<Vector2> vectorList = new List<Vector2>();
             Node tempNode = new Node(new Vector2(0,0), 999, 999);
             bool foundStartPosition = false;
             DateTime timer = DateTime.Now;
-            timer = timer.AddSeconds(1.0);
+            timer = timer.AddSeconds(0.5);
 
             foreach (Node node in nodes) // start with destination node and find it's parent
             {
