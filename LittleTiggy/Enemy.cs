@@ -150,12 +150,15 @@ namespace LittleTiggy
                     pathfindingTimer = DateTime.Now;
                     pathfindingTimer = pathfindingTimer.AddSeconds(5.0);
 
-                    pathToFollow = pathfinder.Pathfind(new Vector2(this.X, this.Y), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
+                    pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
                     Pathfinder.PathToDraw = pathToFollow;
                 }
 
-                vectorFinalDestinationPosition = pathToFollow[pathToFollow.Count - 1];
-                pathToFollow.RemoveAt(pathToFollow.Count - 1);
+                if (!(pathToFollow.Count == 0))
+                {
+                    vectorFinalDestinationPosition = pathToFollow[pathToFollow.Count - 1];
+                    pathToFollow.RemoveAt(pathToFollow.Count - 1);
+                }
 
                 // Get direction of player character and set enemy to move in that direction at half player speed.
 
