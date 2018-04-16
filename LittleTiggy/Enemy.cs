@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 
 
@@ -27,7 +28,10 @@ namespace LittleTiggy
         long ticksSinceLastUpdate = 0;
 
         Vector2 vectorFinalDestinationPosition;
-        bool isRandomWalking = false;
+        bool isFollowingPath = false;
+
+        List<Vector2> pathToFollow;
+        DateTime pathfindingTimer = DateTime.Now;
 
         public float X
         {
@@ -105,48 +109,61 @@ namespace LittleTiggy
 
         }
 
-        public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
+        public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Pathfinder pathfinder)
         {
-
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
             //TODO: Check player collision
 
 
-            if (isRandomWalking)
+            if (isFollowingPath)
             {
 
-                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == 0 && Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == 0)
-                    isRandomWalking = false;
+                if (Math.Floor(vectorFinalDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorFinalDestinationPosition.Y) == Math.Floor(this.Y))
+                    isFollowingPath = false;
 
                 if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 0)
                 {
-                    this.X += 1;
+                    this.X += (charSpeed * ticksSinceLastUpdate) / 2;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < 0)
                 {
-                    this.X -= 1;
+                    this.X -= (charSpeed * ticksSinceLastUpdate) / 2;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 0)
                 {
-                    this.Y += 1;
+                    this.Y += (charSpeed * ticksSinceLastUpdate) / 2;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < 0)
                 {
-                    this.Y -= 1;
+                    this.Y -= (charSpeed * ticksSinceLastUpdate) / 2;
                 }
-
 
             }
             else
             {
 
-                // Get direction of player character and set enemy to move in that direction at half player speed.
-                var velocity = GetPlayerVelocity();
+                if (pathfindingTimer.CompareTo(DateTime.Now) < 0)
+                {
 
+                    pathfindingTimer = DateTime.Now;
+                    pathfindingTimer = pathfindingTimer.AddSeconds(5.0);
+
+                    pathToFollow = pathfinder.Pathfind(new Vector2(this.X, this.Y), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
+                    Pathfinder.PathToDraw = pathToFollow;
+                }
+
+                vectorFinalDestinationPosition = pathToFollow[pathToFollow.Count - 1];
+                pathToFollow.RemoveAt(pathToFollow.Count - 1);
+
+                // Get direction of player character and set enemy to move in that direction at half player speed.
+
+
+                /*
                 float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate) / 2);
                 float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate) / 2);
+               
 
                 Vector2 vectorImmediatePosToMoveTo = new Vector2(XPosToMoveTo, YPosToMoveTo);
 
@@ -203,17 +220,15 @@ namespace LittleTiggy
                         }
 
                     } while (IsEnvironmentCollision(walls, new Vector2(vectorFinalDestinationPosition.X, vectorFinalDestinationPosition.Y)));
+                     */
 
-                    isRandomWalking = true;
-
-                    //this.X = XPosToMoveTo;
-                    //this.Y = YPosToMoveTo;
-
+                isFollowingPath = true;
                 }
 
 
-
                 // select appropriate animation based on movement direction
+
+                var velocity = GetPlayerVelocity();
 
                 bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
 
@@ -228,26 +243,23 @@ namespace LittleTiggy
                     else currentAnimation = walkUp;
                 }
 
-            }
 
             currentAnimation.Update(gameTime);
    
             // Logic to stop enemy object from going outside game play area.  Probably not needed.
 
             
-            if (this.X < graphicsDevice.Viewport.Width - 16)
-                this.X += charSpeed * ticksSinceLastUpdate;
-
-            if (this.X > 0 )
+            if (this.X > graphicsDevice.Viewport.Width - 16)
                 this.X -= charSpeed * ticksSinceLastUpdate;
 
-            if (this.Y < graphicsDevice.Viewport.Height - 16)
-                this.Y += charSpeed * ticksSinceLastUpdate;
+            if (this.X < 0 )
+                this.X += charSpeed * ticksSinceLastUpdate;
 
-            if (this.Y > 0)
+            if (this.Y > graphicsDevice.Viewport.Height - 16)
                 this.Y -= charSpeed * ticksSinceLastUpdate;
 
-            
+            if (this.Y < 0)
+                this.Y += charSpeed * ticksSinceLastUpdate;
 
         }
 
@@ -302,7 +314,7 @@ namespace LittleTiggy
 
         Vector2 GetPlayerVelocity()
         {
-            //get velocity of player character relative to enemy's position & normalize so we end up with a direction to move in.
+            //get velocity of player character relative to enemy's position & normalize so we end up with a direction to face.
 
             Vector2 desiredVelocity = new Vector2(mainCharacter.X - this.X, mainCharacter.Y - this.Y);
 

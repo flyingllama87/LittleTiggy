@@ -48,6 +48,7 @@ namespace LittleTiggy
     public class Pathfinder
     {
 
+        public static List<Vector2> PathToDraw = new List<Vector2>();
         List<Vector2> Path = new List<Vector2>();
         List<Vector2> DeletedNodes = new List<Vector2>();
         Animation DeletedNodesIdle;
@@ -130,6 +131,14 @@ namespace LittleTiggy
                 } */
 
                 foreach (Vector2 topLeftOfPathSquare in Path)
+                {
+                    spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
+                }
+            }
+
+            if (PathToDraw != null)
+            {
+                foreach (Vector2 topLeftOfPathSquare in PathToDraw)
                 {
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
@@ -330,7 +339,7 @@ namespace LittleTiggy
 
                 nodes = cleanNodeList;
 
-            } while (!foundStartPosition); // && timer.CompareTo(DateTime.Now) > 0);
+            } while (!foundStartPosition && timer.CompareTo(DateTime.Now) > 0);
 
             return vectorList;
 

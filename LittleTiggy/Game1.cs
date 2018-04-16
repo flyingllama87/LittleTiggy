@@ -163,7 +163,7 @@ namespace LittleTiggy
                 powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
-            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false); // || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false && pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace LittleTiggy
 
             // TODO: Add your update logic here
             character.Update(gameTime, GraphicsDevice, walls);
-            enemy.Update(gameTime, GraphicsDevice, walls);
+            enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
             pathfinder.Update(GraphicsDevice, walls, enemy);
