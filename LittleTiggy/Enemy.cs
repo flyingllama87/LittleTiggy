@@ -268,8 +268,8 @@ namespace LittleTiggy
         {
             for (int i = 0; i < walls.Length; i++)
             {
-                Rectangle wall = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 1, 14, 14);
-                Rectangle character = new Rectangle((int)this.X + 3, (int)this.Y + 2, 10, 13);
+                Rectangle wall = new Rectangle((int)walls[i].X, (int)walls[i].Y, 16, 16);
+                Rectangle character = new Rectangle((int)this.X, (int)this.Y, 15, 15);
 
                 if (character.Intersects(wall))
                 {

@@ -1,17 +1,20 @@
 ﻿// #define _DEBUG
 
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 
-
 namespace LittleTiggy
 {
-    /// <summary>
-    /// This is the main type for your game.
-    /// </summary>
+
+    public static class GameConstants
+    {
+        const int windowWidth = 512;
+        const int windowHeight = 512;
+        const int tileSize = 16;
+    }
+
     public class Game1 : Game
     {
         GraphicsDeviceManager graphics;
@@ -87,61 +90,15 @@ namespace LittleTiggy
 
             // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
-            Random randomNumber = new Random(5);
-
-            for (int i = 0; i < 10; i++)
+            do
             {
-                int gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
-                int gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
 
-                gridAlignedX = gridAlignedX - (gridAlignedX % 16);
-                gridAlignedY = gridAlignedY - (gridAlignedY % 16);
+                Random randomNumber = new Random();
 
-                walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                numberOfRandomWalls++;
-            }
-
-            // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish type level. 
-
-            int f = 0;
-
-            for (int i = 10; i < walls.Length; i++)
-            {
-                int gridAlignedX = 0;
-                int gridAlignedY = 0;
-
-                for (int c = 0; c < this.GraphicsDevice.Viewport.Width; c = c + 16)
+                for (int i = 0; i < 10; i++)
                 {
-                    for (int d = 0; d < this.GraphicsDevice.Viewport.Height; d = d + 16)
-                    {
-                        
-                        for (int e = f; e < i; e++)
-                        {
-                            if ((walls[e].X == (c - 16)) || (walls[e].Y == (d - 16)))
-                            {
-                                if (randomNumber.Next(1, 100) == 15)
-                                {
-                                    gridAlignedX = c;
-                                    gridAlignedY = d;
-                                    f = e;
-                                    f++;
-                                    walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                                    numberOfPlacedWalls++;
-                                    break;
-                                }
-                            }
-                        }
-                        if (gridAlignedX > 0 || gridAlignedY > 0)
-                            break;
-                    }
-                    if (gridAlignedX > 0 || gridAlignedY > 0)
-                        break;
-                }
-
-                if (!(gridAlignedX > 0 || gridAlignedY > 0))
-                {
-                    gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
-                    gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
+                    int gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
+                    int gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
 
                     gridAlignedX = gridAlignedX - (gridAlignedX % 16);
                     gridAlignedY = gridAlignedY - (gridAlignedY % 16);
@@ -150,12 +107,63 @@ namespace LittleTiggy
                     numberOfRandomWalls++;
                 }
 
-            }
+                // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish type level. 
 
-            // spawn enemy around the map now that walls have been created
-            enemy = new Enemy(this.GraphicsDevice, walls);
-            powerUp = new PowerUp(this.GraphicsDevice, walls);
-            pathfinder = new Pathfinder(this.GraphicsDevice);
+                int f = 0;
+
+                for (int i = 10; i < walls.Length; i++)
+                {
+                    int gridAlignedX = 0;
+                    int gridAlignedY = 0;
+
+                    for (int c = 0; c < this.GraphicsDevice.Viewport.Width; c = c + 16)
+                    {
+                        for (int d = 0; d < this.GraphicsDevice.Viewport.Height; d = d + 16)
+                        {
+
+                            for (int e = f; e < i; e++)
+                            {
+                                if ((walls[e].X == (c - 16)) || (walls[e].Y == (d - 16)))
+                                {
+                                    if (randomNumber.Next(1, 100) == 15)
+                                    {
+                                        gridAlignedX = c;
+                                        gridAlignedY = d;
+                                        f = e;
+                                        f++;
+                                        walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
+                                        numberOfPlacedWalls++;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (gridAlignedX > 0 || gridAlignedY > 0)
+                                break;
+                        }
+                        if (gridAlignedX > 0 || gridAlignedY > 0)
+                            break;
+                    }
+
+                    if (!(gridAlignedX > 0 || gridAlignedY > 0))
+                    {
+                        gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
+                        gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
+
+                        gridAlignedX = gridAlignedX - (gridAlignedX % 16);
+                        gridAlignedY = gridAlignedY - (gridAlignedY % 16);
+
+                        walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
+                        numberOfRandomWalls++;
+                    }
+
+                }
+
+                // spawn enemy around the map now that walls have been created
+                enemy = new Enemy(this.GraphicsDevice, walls);
+                powerUp = new PowerUp(this.GraphicsDevice, walls);
+                pathfinder = new Pathfinder(this.GraphicsDevice);
+
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false); // || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 
         /// <summary>
@@ -183,7 +191,7 @@ namespace LittleTiggy
             enemy.Update(gameTime, GraphicsDevice, walls);
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
-            pathfinder.Update(GraphicsDevice, walls);
+            pathfinder.Update(GraphicsDevice, walls, enemy);
 
         }
 

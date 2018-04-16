@@ -81,12 +81,12 @@ namespace LittleTiggy
         }
 
 
-        public void Update(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
+        public void Update(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Enemy enemy)
         {
 
             if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
             {
-                Vector2 source = new Vector2(0, 0);
+                Vector2 source = new Vector2(enemy.X - (enemy.X % 16), enemy.Y - (enemy.Y % 16));
 
                 Vector2 destination = new Vector2(mainCharacter.X - (mainCharacter.X % 16), mainCharacter.Y - (mainCharacter.Y % 16));
 
@@ -153,20 +153,20 @@ namespace LittleTiggy
 
                 Node node = GetBestNode(open);                  // Get node with lowest F value
 
+                open.Remove(node);
+                closed.Add(node);
+
                 if (node.position == goalNode.position)         // Goal reached
                 {
                     return GetPath(node, closed, from);
                 }
-                open.Remove(node);
-
-                closed.Add(node);
 
                 List<Node> neighbours = GetNeighbours(node, walls, closed); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
                 // DEBUG: following foreach is purely for visualisation of a*
                 foreach (Node neighbour in neighbours)
                 {
-                    DeletedNodes.Add(neighbour.position);
+                    //DeletedNodes.Add(neighbour.position);
                 }
 
                 foreach (Node neighbour in neighbours)
@@ -189,6 +189,16 @@ namespace LittleTiggy
             }
             List<Vector2> emptyVectorList = new List<Vector2>();
             return emptyVectorList;
+        }
+
+        public bool IsRoutable(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)
+        {
+            List<Vector2> vectorList;
+            vectorList = Pathfind(from, destination, walls);
+            if (vectorList.Contains(from) && vectorList.Contains(destination))
+                return true;
+            else
+                return false;
         }
 
         public ushort ManhattanDistance(Vector2 source, Vector2 destination)
@@ -284,6 +294,8 @@ namespace LittleTiggy
             DateTime timer = DateTime.Now;
             timer = timer.AddSeconds(0.5);
 
+            vectorList.Add(lastNode.position);
+
             foreach (Node node in nodes) // start with destination node and find it's parent
             {
                 if (node.position == lastNode.parent)
@@ -318,7 +330,7 @@ namespace LittleTiggy
 
                 nodes = cleanNodeList;
 
-            } while (!foundStartPosition && timer.CompareTo(DateTime.Now) > 0);
+            } while (!foundStartPosition); // && timer.CompareTo(DateTime.Now) > 0);
 
             return vectorList;
 
