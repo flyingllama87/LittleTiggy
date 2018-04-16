@@ -87,7 +87,7 @@ namespace LittleTiggy
 
             // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
-            Random randomNumber = new Random(1);
+            Random randomNumber = new Random(5);
 
             for (int i = 0; i < 10; i++)
             {

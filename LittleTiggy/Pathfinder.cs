@@ -161,7 +161,7 @@ namespace LittleTiggy
 
                 closed.Add(node);
 
-                List<Node> neighbours = GetNeighbours(node, walls); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
+                List<Node> neighbours = GetNeighbours(node, walls, closed); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
                 // DEBUG: following foreach is purely for visualisation of a*
                 foreach (Node neighbour in neighbours)
@@ -174,9 +174,6 @@ namespace LittleTiggy
                     ushort g_score = (ushort)(node.g_score + 16);
                     ushort h_score = ManhattanDistance(neighbour.position, goalNode.position);
                     ushort f_score = (ushort)(g_score + h_score);
-
-                    if (closed.Contains(neighbour) && f_score >= (neighbour.g_score + neighbour.h_score))
-                        continue;
 
                     if (!open.Contains(neighbour) || f_score < (neighbour.g_score + neighbour.h_score))
                     {
@@ -200,7 +197,7 @@ namespace LittleTiggy
         }
 
 
-        public List<Node> GetNeighbours(Node node, EnvironmentBlock[] walls) //find all valid neighbours
+        public List<Node> GetNeighbours(Node node, EnvironmentBlock[] walls, List<Node> existingNodes) //find all valid neighbours
         {
             List<Node> neighbourList = new List<Node>();
 
@@ -230,6 +227,18 @@ namespace LittleTiggy
                     if (walls[i].X == n.position.X && walls[i].Y == n.position.Y)
                         neighbourListNoWalls.Remove(n);
                 }
+            }
+
+            // don't include any neighbour nodes if those nodes have already been evaluated.
+
+            foreach (Node existingNode in existingNodes)
+            {
+                foreach (Node n in neighbourList)
+                {
+                    if (existingNode.position == n.position)
+                        neighbourListNoWalls.Remove(existingNode);
+                }
+                
             }
 
             // don't include any neighbour nodes if they go outside the play area.
