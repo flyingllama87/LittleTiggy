@@ -173,10 +173,11 @@ namespace LittleTiggy
                 List<Node> neighbours = GetNeighbours(node, walls, closed); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
 
                 // DEBUG: following foreach is purely for visualisation of a*
+                /*
                 foreach (Node neighbour in neighbours)
                 {
-                    //DeletedNodes.Add(neighbour.position);
-                }
+                    DeletedNodes.Add(neighbour.position);
+                }*/
 
                 foreach (Node neighbour in neighbours)
                 {
@@ -268,11 +269,11 @@ namespace LittleTiggy
 
             // don't include any neighbour nodes if they go outside the play area.
 
-            for (int i = 0; i < neighbourListNoWalls.Count; i++)
+            foreach (Node n in neighbourList)
             {
-                if (neighbourListNoWalls[i].position.X < 0 || neighbourListNoWalls[i].position.Y < 0 || neighbourListNoWalls[i].position.X > 512 || neighbourListNoWalls[i].position.Y > 512)
+                if (n.position.X < 0 || n.position.Y < 0 || n.position.X > 512 || n.position.Y > 512)
                 {
-                    neighbourListNoWalls.Remove(neighbourListNoWalls[i]);
+                    neighbourListNoWalls.Remove(n);
                 }
             }
 

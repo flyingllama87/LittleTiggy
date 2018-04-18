@@ -123,21 +123,42 @@ namespace LittleTiggy
                 if (Math.Floor(vectorFinalDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorFinalDestinationPosition.Y) == Math.Floor(this.Y))
                     isFollowingPath = false;
 
-                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 0)
+                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 1)
                 {
-                    this.X += (charSpeed * ticksSinceLastUpdate) / 2;
+                    this.X += (charSpeed * ticksSinceLastUpdate);
+                    currentAnimation = walkRight;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < 0)
+                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < -1)
                 {
-                    this.X -= (charSpeed * ticksSinceLastUpdate) / 2;
+                    this.X -= (charSpeed * ticksSinceLastUpdate);
+                    currentAnimation = walkLeft;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 0)
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 1)
                 {
-                    this.Y += (charSpeed * ticksSinceLastUpdate) / 2;
+                    this.Y += (charSpeed * ticksSinceLastUpdate);
+                    currentAnimation = walkDown;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < 0)
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < -1)
                 {
-                    this.Y -= (charSpeed * ticksSinceLastUpdate) / 2;
+                    this.Y -= (charSpeed * ticksSinceLastUpdate);
+                    currentAnimation = walkUp;
+                }
+                // Check 
+                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == 1)
+                {
+                    this.X += 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == -1)
+                {
+                    this.X -= 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == 1)
+                {
+                    this.Y += 1;
+                }
+                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == -1)
+                {
+                    this.Y -= 1;
                 }
 
             }
@@ -230,7 +251,7 @@ namespace LittleTiggy
 
 
                 // select appropriate animation based on movement direction
-
+                /*
                 var velocity = GetPlayerVelocity();
 
                 bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
@@ -245,20 +266,20 @@ namespace LittleTiggy
                     if (velocity.Y > 0) currentAnimation = walkDown;
                     else currentAnimation = walkUp;
                 }
-
+                */
 
             currentAnimation.Update(gameTime);
    
             // Logic to stop enemy object from going outside game play area.  Probably not needed.
 
             
-            if (this.X > graphicsDevice.Viewport.Width - 16)
+            if (this.X > graphicsDevice.Viewport.Width - 10)
                 this.X -= charSpeed * ticksSinceLastUpdate;
 
             if (this.X < 0 )
                 this.X += charSpeed * ticksSinceLastUpdate;
 
-            if (this.Y > graphicsDevice.Viewport.Height - 16)
+            if (this.Y > graphicsDevice.Viewport.Height - 10)
                 this.Y -= charSpeed * ticksSinceLastUpdate;
 
             if (this.Y < 0)

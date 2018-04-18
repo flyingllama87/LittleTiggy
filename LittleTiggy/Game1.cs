@@ -5,17 +5,13 @@
  * TO DO:
  * - GENERAL: Code clean up / rename
  * - GENERAL: Remove use of animation system for static items such as power up & walls
- * - BUGFIX: Sometimes allows a map to be generated where it's not possible for player to reach bottom
- * - BUGFIX / FEATURE: Allow enemy to move in increments of 1 unit when enemy is near pathfinding node destination.  This is so enemy can move faster.
  * - FEATURE: Add logic for win condition once player reaches bottom of game map
+ * - FEATURE: Add logic for text display system
  * - FEATURE: Add logic for player to lose when it collides with enemy player
  * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels
- * - 
-
-
 */
 
 using Microsoft.Xna.Framework;
@@ -171,7 +167,7 @@ namespace LittleTiggy
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
-            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false && pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 
         /// <summary>
