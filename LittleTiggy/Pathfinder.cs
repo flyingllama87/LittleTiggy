@@ -202,6 +202,13 @@ namespace LittleTiggy
 
         public bool IsRoutable(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)
         {
+            from.X = from.X - from.X % 16;
+            from.Y = from.Y - from.Y % 16;
+
+            destination.X = destination.X - destination.X % 16;
+            destination.Y = destination.Y - destination.Y % 16;
+
+
             List<Vector2> vectorList;
             vectorList = Pathfind(from, destination, walls);
             if (vectorList.Contains(from) && vectorList.Contains(destination))
@@ -219,7 +226,6 @@ namespace LittleTiggy
         public List<Node> GetNeighbours(Node node, EnvironmentBlock[] walls, List<Node> existingNodes) //find all valid neighbours
         {
             List<Node> neighbourList = new List<Node>();
-
 
             // nodes to the left and right, above and below the current node are valid
 

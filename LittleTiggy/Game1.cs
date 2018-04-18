@@ -1,5 +1,23 @@
 ﻿// #define _DEBUG
 
+
+/*
+ * TO DO:
+ * - GENERAL: Code clean up / rename
+ * - GENERAL: Remove use of animation system for static items such as power up & walls
+ * - BUGFIX: Sometimes allows a map to be generated where it's not possible for player to reach bottom
+ * - BUGFIX / FEATURE: Allow enemy to move in increments of 1 unit when enemy is near pathfinding node destination.  This is so enemy can move faster.
+ * - FEATURE: Add logic for win condition once player reaches bottom of game map
+ * - FEATURE: Add logic for player to lose when it collides with enemy player
+ * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
+ * - FEATURE: Add logic for enemy to run away from player if player is powered up
+ * - FEATURE: Add Art for when player is 'powered up'
+ * - FEATURE: Add logic for levels
+ * - 
+
+
+*/
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -19,13 +37,11 @@ namespace LittleTiggy
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        // Texture2D characterSheetTexture;
         mainCharacter character;
         Enemy enemy;
         PowerUp powerUp;
         SpriteFont mainFont;
         public EnvironmentBlock[] walls = new EnvironmentBlock[300];
-        // public EnvironmentBlock[] walls = new EnvironmentBlock[10];
 
         Pathfinder pathfinder;
 
@@ -42,7 +58,6 @@ namespace LittleTiggy
 
         int numberOfRandomWalls = 0;
         int numberOfPlacedWalls = 0;
-
 
         public static int score { get; set; } = 0;
         public static int respawn { get; set; } = 30;
@@ -63,23 +78,11 @@ namespace LittleTiggy
 
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create main game objects
@@ -88,10 +91,13 @@ namespace LittleTiggy
             mainFont = Content.Load<SpriteFont>("MainFont");
 
 
-            // Place 10 walls randomly (aligned to a 16x16 grid) around level.
+            
+            // Loop until valid start conditions from random generation are met.
 
             do
             {
+
+                // Place 10 walls randomly (aligned to a 16x16 grid) around level.
 
                 Random randomNumber = new Random();
 
@@ -158,10 +164,12 @@ namespace LittleTiggy
 
                 }
 
-                // spawn enemy around the map now that walls have been created
+                // spawn other elements on map now that walls have been created
                 enemy = new Enemy(this.GraphicsDevice, walls);
                 powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
+
+                // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
             } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false && pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }

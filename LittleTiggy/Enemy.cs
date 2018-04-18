@@ -148,7 +148,7 @@ namespace LittleTiggy
                 {
 
                     pathfindingTimer = DateTime.Now;
-                    pathfindingTimer = pathfindingTimer.AddSeconds(5.0);
+                    pathfindingTimer = pathfindingTimer.AddSeconds(1.0);
 
                     pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
                     Pathfinder.PathToDraw = pathToFollow;

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/MJ12/git/LittleTiggy/LittleTiggy/Content/charactersheet.png</SourceFile>
-  <SourceTime>2018-04-07T02:54:20.3384474+10:00</SourceTime>
-  <DestFile>C:/Users/MJ12/git/LittleTiggy/LittleTiggy/Content/bin/DesktopGL/charactersheet.xnb</DestFile>
-  <DestTime>2018-04-16T21:54:34.1593835+10:00</DestTime>
+  <SourceFile>C:/Users/morgan.robertson/Desktop/LittleTiggy/LittleTiggy/Content/charactersheet.png</SourceFile>
+  <SourceTime>2018-04-09T13:24:41.1192755+10:00</SourceTime>
+  <DestFile>C:/Users/morgan.robertson/Desktop/LittleTiggy/LittleTiggy/Content/bin/DesktopGL/charactersheet.xnb</DestFile>
+  <DestTime>2018-04-17T09:29:13.9053151+10:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2017-03-02T01:05:36+10:00</ImporterTime>
   <Processor>TextureProcessor</Processor>
