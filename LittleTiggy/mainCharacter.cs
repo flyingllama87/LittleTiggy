@@ -29,8 +29,6 @@ namespace LittleTiggy
         long ticksSinceLastUpdate = 0;
 
 
-
-
         public static float X
         {
             get;
@@ -41,6 +39,22 @@ namespace LittleTiggy
         {
             get;
             set;
+        }
+
+        public static float GridAlignedX
+        {
+            get
+            {
+                return X - (X % 16);
+            }
+        }
+
+        public static float GridAlignedY
+        {
+            get
+            {
+                return Y - (Y % 16);
+            }
         }
 
         public mainCharacter(GraphicsDevice graphicsDevice)
@@ -107,125 +121,167 @@ namespace LittleTiggy
 
             var velocity = GetDesiredVelocityFromInput();
 
-            if (velocity != Vector2.Zero) //we have input from either touch or mouse
+            if (velocity != Vector2.Zero) // if we have input from either touch or mouse
             {
-
-                // check collisions with walls via mouse / touch control.
-                if (X < graphicsDevice.Viewport.Width - 16 && X > 0)
-                    X += velocity.X * charSpeed * ticksSinceLastUpdate;
-                else if (X > graphicsDevice.Viewport.Width - 16)
-                    X -= 1;
-                else if (X < 0)
-                    X += 1;
-
-                if (Y < graphicsDevice.Viewport.Height - 16 && Y > 0)
-                    Y += velocity.Y * charSpeed * ticksSinceLastUpdate; 
-                else if (Y > graphicsDevice.Viewport.Height - 16)
-                    Y -= 1;
-                else if (Y < 0)
-                    Y += 1;
-
-
-                // select animation based on direction mouse/touch input is pointing
-                bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y); 
-                if (movingHorizontally)
-                {
-                    if (velocity.X > 0) currentAnimation = walkRight;
-                    else currentAnimation = walkLeft;        
-                }
-                else
-                {
-                    if (velocity.Y > 0) currentAnimation = walkDown;
-                    else currentAnimation = walkUp;
-                }
-
+                ProcessTouchInput(velocity);
             }
-            else //if keyboard controls
+            else // keyboard controls
             {
-                // select standing animation based off last walk animation
-                if (currentAnimation == walkLeft) currentAnimation = standLeft;
-                else if (currentAnimation == walkRight) currentAnimation = standRight;
-                else if (currentAnimation == walkUp) currentAnimation = standUp;
-                else if (currentAnimation == walkDown) currentAnimation = standDown;
-
-                // change character position and animation based on key press
-                if (Keyboard.GetState().IsKeyDown(Keys.Down))
-                {
-                    currentAnimation = walkDown;
-                    currentAnimation.Update(gameTime);
-
-                    if (Y < graphicsDevice.Viewport.Height - 16)
-                        Y += charSpeed * ticksSinceLastUpdate;
-
-                    //check collisions with environment walls
-                    CheckEnvironmentCollision(walls);
-                }
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                {
-                    currentAnimation = walkLeft;
-                    currentAnimation.Update(gameTime);
-                    if (X > 0)
-                        X += -(charSpeed * ticksSinceLastUpdate);
-
-                    //check collisions with environment walls
-                    CheckEnvironmentCollision(walls);
-                }
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                {
-                    currentAnimation = walkRight;
-                    currentAnimation.Update(gameTime);
-                    if (X < graphicsDevice.Viewport.Width - 16)
-                        X += charSpeed * ticksSinceLastUpdate;
-
-                    //check collisions with environment walls
-                    CheckEnvironmentCollision(walls);
-                }
-
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Up))
-                {
-                    currentAnimation = walkUp;
-                    currentAnimation.Update(gameTime);
-                    if (Y > 0)
-                        Y -= charSpeed * ticksSinceLastUpdate;
-
-                    //check collisions with environment walls
-                    CheckEnvironmentCollision(walls);
-                }
-
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && Game1.respawn > 0 && !OldKeyboardState.IsKeyDown(Keys.Space))
-                {
-
-                    Game1.respawn--;
-
-                    do
-                    {
-                        Random randomNumber = new Random();
-
-                        int gridAlignedX = randomNumber.Next(0, graphicsDevice.Viewport.Width);
-                        int gridAlignedY = randomNumber.Next(0, graphicsDevice.Viewport.Height);
-
-                        gridAlignedX = gridAlignedX - (gridAlignedX % 16);
-                        gridAlignedY = gridAlignedY - (gridAlignedY % 16);
-
-                        X = gridAlignedX;
-                        Y = gridAlignedY;
-                    } while (IsEnvironmentCollision(walls));
-
-                }
-
-                OldKeyboardState = Keyboard.GetState();
-
+                ProcessKeyboardInput(gameTime, walls);
             }
 
-            //check collisions with environment walls
+            // check collisions with environment walls
             CheckEnvironmentCollision(walls);
-
             currentAnimation.Update(gameTime);
 
+        }
+
+        void ProcessKeyboardInput(GameTime gameTime, EnvironmentBlock[] walls)
+        {
+            // select standing animation based off last walk animation
+            if (currentAnimation == walkLeft) currentAnimation = standLeft;
+            else if (currentAnimation == walkRight) currentAnimation = standRight;
+            else if (currentAnimation == walkUp) currentAnimation = standUp;
+            else if (currentAnimation == walkDown) currentAnimation = standDown;
+
+            // change character position and animation based on key press
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                currentAnimation = walkDown;
+                currentAnimation.Update(gameTime);
+
+                if (Y < GameConstants.windowHeight - 16)
+                    Y += charSpeed * ticksSinceLastUpdate;
+
+                //check collisions with environment walls
+                CheckEnvironmentCollision(walls);
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            {
+                currentAnimation = walkLeft;
+                currentAnimation.Update(gameTime);
+                if (X > 0)
+                    X += -(charSpeed * ticksSinceLastUpdate);
+
+                //check collisions with environment walls
+                CheckEnvironmentCollision(walls);
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                currentAnimation = walkRight;
+                currentAnimation.Update(gameTime);
+                if (X < GameConstants.windowWidth - 16)
+                    X += charSpeed * ticksSinceLastUpdate;
+
+                //check collisions with environment walls
+                CheckEnvironmentCollision(walls);
+            }
+
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                currentAnimation = walkUp;
+                currentAnimation.Update(gameTime);
+                if (Y > 0)
+                    Y -= charSpeed * ticksSinceLastUpdate;
+
+                //check collisions with environment walls
+                CheckEnvironmentCollision(walls);
+            }
+
+#if _DEBUG
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && Game1.respawn > 0 && !OldKeyboardState.IsKeyDown(Keys.Space))
+            {
+
+                Game1.respawn--;
+
+                do
+                {
+                    Random randomNumber = new Random();
+
+                    int gridAlignedX = randomNumber.Next(0, GameConstants.windowWidth);
+                    int gridAlignedY = randomNumber.Next(0, GameConstants.windowHeight);
+
+                    gridAlignedX = gridAlignedX - (gridAlignedX % 16);
+                    gridAlignedY = gridAlignedY - (gridAlignedY % 16);
+
+                    X = gridAlignedX;
+                    Y = gridAlignedY;
+                } while (IsEnvironmentCollision(walls));
+
+            }
+
+            OldKeyboardState = Keyboard.GetState();
+#endif
+        }
+
+        void ProcessTouchInput(Vector2 velocity)
+        {
+
+            // check collisions with walls via mouse / touch control.
+            if (X < GameConstants.windowWidth - 16 && X > 0)
+                X += velocity.X * charSpeed * ticksSinceLastUpdate;
+            else if (X > GameConstants.windowWidth - 16)
+                X -= 1;
+            else if (X < 0)
+                X += 1;
+
+            if (Y < GameConstants.windowHeight - 16 && Y > 0)
+                Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
+            else if (Y > GameConstants.windowHeight - 16)
+                Y -= 1;
+            else if (Y < 0)
+                Y += 1;
+
+
+            // select animation based on direction mouse/touch input is pointing
+            bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
+            if (movingHorizontally)
+            {
+                if (velocity.X > 0) currentAnimation = walkRight;
+                else currentAnimation = walkLeft;
+            }
+            else
+            {
+                if (velocity.Y > 0) currentAnimation = walkDown;
+                else currentAnimation = walkUp;
+            }
+        }
+
+
+
+        Vector2 GetDesiredVelocityFromInput()
+        {
+            Vector2 desiredVelocity = new Vector2();
+
+            TouchCollection touchCollection = TouchPanel.GetState();
+            MouseState mouseState = Mouse.GetState();
+
+            if (touchCollection.Count > 0)
+            {
+                desiredVelocity.X = touchCollection[0].Position.X - X;
+                desiredVelocity.Y = touchCollection[0].Position.Y - Y;
+
+                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
+                {
+                    desiredVelocity.Normalize();
+                }
+            }
+            else if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                desiredVelocity.X = mouseState.X - X;
+                desiredVelocity.Y = mouseState.Y - Y;
+
+                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
+                {
+                    desiredVelocity.Normalize();
+                }
+            }
+
+
+            return desiredVelocity;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -271,7 +327,7 @@ namespace LittleTiggy
                     X -= (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingLeft = true;
                     //if (Game1.collisionTimerOn == false)
-                        SetCollisionTimer();
+                        //SetCollisionTimer();
                 }
                     
                 if (character.Intersects(wallRight))
@@ -279,14 +335,14 @@ namespace LittleTiggy
                     X += (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingRight = true;
                     //if (Game1.collisionTimerOn == false)
-                        SetCollisionTimer();
+                        //SetCollisionTimer();
                 }
                 if (character.Intersects(wallUp))
                 {
                     Y -= (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingTop = true;
                     //if (Game1.collisionTimerOn == false) 
-                    SetCollisionTimer();
+                   // SetCollisionTimer();
                 }
 
                 if (character.Intersects(wallDown))
@@ -294,11 +350,11 @@ namespace LittleTiggy
                     Y += (charSpeed * ticksSinceLastUpdate);
                     Game1.collidingBottom = true;
                     //if (Game1.collisionTimerOn == false)
-                        SetCollisionTimer();
+                        //SetCollisionTimer();
                 }
 
                 //if (Game1.collisionTimerOn == true) 
-                    EvaluateCollisionTimer();
+                   // EvaluateCollisionTimer();
 
             }
 
@@ -324,37 +380,6 @@ namespace LittleTiggy
             }
         }
 
-        Vector2 GetDesiredVelocityFromInput()
-        {
-            Vector2 desiredVelocity = new Vector2();
-
-            TouchCollection touchCollection = TouchPanel.GetState();
-            MouseState mouseState = Mouse.GetState();
-
-            if (touchCollection.Count > 0 )
-            {
-                desiredVelocity.X = touchCollection[0].Position.X - X;
-                desiredVelocity.Y = touchCollection[0].Position.Y - Y;
-
-                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
-                {
-                    desiredVelocity.Normalize();
-                }
-            }
-            else if (mouseState.LeftButton == ButtonState.Pressed)
-            {
-                desiredVelocity.X = mouseState.X - X;
-                desiredVelocity.Y = mouseState.Y - Y;
-
-                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
-                {
-                    desiredVelocity.Normalize();
-                }
-            }
-            
-
-            return desiredVelocity;
-        }
 
 
 

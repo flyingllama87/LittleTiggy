@@ -116,7 +116,6 @@ namespace LittleTiggy
 
             //TODO: Check player collision
 
-
             if (isFollowingPath)
             {
 
@@ -125,22 +124,22 @@ namespace LittleTiggy
 
                 if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 1)
                 {
-                    this.X += (charSpeed * ticksSinceLastUpdate);
+                    this.X += (charSpeed * ticksSinceLastUpdate) * (float) 2;
                     currentAnimation = walkRight;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < -1)
                 {
-                    this.X -= (charSpeed * ticksSinceLastUpdate);
+                    this.X -= (charSpeed * ticksSinceLastUpdate) * (float)2;
                     currentAnimation = walkLeft;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 1)
                 {
-                    this.Y += (charSpeed * ticksSinceLastUpdate);
+                    this.Y += (charSpeed * ticksSinceLastUpdate) * (float)2;
                     currentAnimation = walkDown;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < -1)
                 {
-                    this.Y -= (charSpeed * ticksSinceLastUpdate);
+                    this.Y -= (charSpeed * ticksSinceLastUpdate) * (float)2;
                     currentAnimation = walkUp;
                 }
                 // Check 

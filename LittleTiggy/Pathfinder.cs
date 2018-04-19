@@ -107,7 +107,7 @@ namespace LittleTiggy
         public void Draw(SpriteBatch spriteBatch)
         {
             Color tintColor = Color.White;
-
+            /*
 
             var DeletedNodesSourceRectangle = DeletedNodesCurrentAnimation.CurrentRectangle;
 
@@ -121,14 +121,15 @@ namespace LittleTiggy
 
             var sourceRectangle = PathCurrentAnimation.CurrentRectangle;
 
+            
             if (Path != null)
             {
-                /*
+                
                 for (int i = 0; i < Path.Count; i++)
                 {
                     Vector2 topLeftOfPathSquare = Path.Pop();
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
-                } */
+                } 
 
                 foreach (Vector2 topLeftOfPathSquare in Path)
                 {
@@ -142,7 +143,7 @@ namespace LittleTiggy
                 {
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
-            }
+            } */
         }
 
         // Main A* pathfinding algorithm implementation

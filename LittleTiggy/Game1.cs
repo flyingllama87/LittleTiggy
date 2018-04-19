@@ -3,15 +3,20 @@
 
 /*
  * TO DO:
- * - GENERAL: Code clean up / rename
+ * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation
  * - GENERAL: Remove use of animation system for static items such as power up & walls
+ * - GENERAL: Refactor main character input and collision detection to not allow a player to move to a location where they will collide with a wall as opposed to letting them collide and moving them back
  * - FEATURE: Add logic for win condition once player reaches bottom of game map
- * - FEATURE: Add logic for text display system
+ * - FEATURE: Add text display system
  * - FEATURE: Add logic for player to lose when it collides with enemy player
  * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
- * - FEATURE: Add logic for levels
+ * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
+ * 
+ * WIN CONDITION: 1) Restart with new map 2) show text "you win".
+ * LOSE CONDITION: 1) Restart with new map 2) Show text "you lose".
+ * 
 */
 
 using Microsoft.Xna.Framework;
@@ -24,9 +29,11 @@ namespace LittleTiggy
 
     public static class GameConstants
     {
-        const int windowWidth = 512;
-        const int windowHeight = 512;
-        const int tileSize = 16;
+        public const int windowWidth = 512;
+        public const int windowHeight = 512;
+        public const int tileSize = 16;
+        public const int characterHeight = 13;
+        public const int characterWidth = 13;
     }
 
     public class Game1 : Game
@@ -66,8 +73,6 @@ namespace LittleTiggy
             //Mouse.WindowHandle = Window.Handle;
             this.IsMouseVisible = true;
 
-            // mainFont = new SpriteFont();
-
             graphics.PreferredBackBufferWidth = 512;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 512;   // set this value to the desired height of your window
             graphics.ApplyChanges();
@@ -85,9 +90,13 @@ namespace LittleTiggy
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new mainCharacter(this.GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
+            LoadLevel();
+        }
 
-
-            
+        public void LoadLevel()
+        {
+            mainCharacter.X = 1;
+            mainCharacter.Y = 1;
             // Loop until valid start conditions from random generation are met.
 
             do
@@ -170,20 +179,11 @@ namespace LittleTiggy
             } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
  
         protected override void Update(GameTime gameTime)
         {
@@ -196,12 +196,17 @@ namespace LittleTiggy
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
             pathfinder.Update(GraphicsDevice, walls, enemy);
+            CheckWinCondition();
 
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
+        void CheckWinCondition()
+        {
+            if (mainCharacter.GridAlignedY == GameConstants.windowHeight - 16)
+            {
+                LoadLevel();
+            }
+        }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -210,6 +215,8 @@ namespace LittleTiggy
 
             spriteBatch.Begin();
 
+
+            // Draw each wall
             for (int i = 0; i < walls.Length; i++)
             { 
 
@@ -221,17 +228,12 @@ namespace LittleTiggy
             enemy.Draw(spriteBatch);
             powerUp.Draw(spriteBatch);
 
-
+            // DEBUG code for drawing wall and collision information
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
 
             spriteBatch.DrawString(mainFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
-            //Vector2 topLeftOfSprite = new Vector2(50, 50);
-            //Color tintColor = Color.White;
-
-            //spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, tintColor);
-
             spriteBatch.End();
 
             base.Draw(gameTime);
