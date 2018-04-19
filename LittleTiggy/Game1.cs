@@ -13,6 +13,7 @@
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
+ * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
  * 
  * WIN CONDITION: 1) Restart with new map 2) show text "you win".
  * LOSE CONDITION: 1) Restart with new map 2) Show text "you lose".
@@ -197,7 +198,7 @@ namespace LittleTiggy
             powerUp.Update(gameTime, GraphicsDevice);
             pathfinder.Update(GraphicsDevice, walls, enemy);
             CheckWinCondition();
-
+            CheckLoseCondition();
         }
 
         void CheckWinCondition()
@@ -206,6 +207,13 @@ namespace LittleTiggy
             {
                 LoadLevel();
             }
+        }
+
+        void CheckLoseCondition()
+        {
+            if (enemy.IsPlayerCollision())
+                LoadLevel();
+
         }
 
         protected override void Draw(GameTime gameTime)
