@@ -20,8 +20,11 @@ namespace LittleTiggy
         Animation standLeft;
         Animation standRight;
         Animation standUp;
-        Animation Idle;
+        Animation idle;
         Animation currentAnimation;
+
+
+        Boolean IsPoweredUp;
 
         KeyboardState OldKeyboardState;
 
@@ -91,8 +94,8 @@ namespace LittleTiggy
             walkUp.AddFrame(new Rectangle(147, 1, 10, 15), TimeSpan.FromSeconds(.25));
             walkUp.AddFrame(new Rectangle(179, 1, 10, 15), TimeSpan.FromSeconds(.25));
 
-            Idle = new Animation();
-            Idle.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
+            idle = new Animation();
+            idle.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
 
             standDown = new Animation();
             standDown.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
@@ -106,7 +109,7 @@ namespace LittleTiggy
             standUp = new Animation();
             standUp.AddFrame(new Rectangle(147, 1, 10, 15), TimeSpan.FromSeconds(.25));
 
-            currentAnimation = Idle;
+            currentAnimation = idle;
 
             X = 1; Y = 1;
 
@@ -150,7 +153,7 @@ namespace LittleTiggy
                 currentAnimation = walkDown;
                 currentAnimation.Update(gameTime);
 
-                if (Y < GameConstants.windowHeight - 16)
+                if (Y < GameConstants.windowHeight - GameConstants.characterHeight)
                     Y += charSpeed * ticksSinceLastUpdate;
 
                 //check collisions with environment walls
@@ -161,6 +164,7 @@ namespace LittleTiggy
             {
                 currentAnimation = walkLeft;
                 currentAnimation.Update(gameTime);
+
                 if (X > 0)
                     X += -(charSpeed * ticksSinceLastUpdate);
 
@@ -172,7 +176,8 @@ namespace LittleTiggy
             {
                 currentAnimation = walkRight;
                 currentAnimation.Update(gameTime);
-                if (X < GameConstants.windowWidth - 16)
+
+                if (X < GameConstants.windowWidth - GameConstants.characterWidth)
                     X += charSpeed * ticksSinceLastUpdate;
 
                 //check collisions with environment walls
@@ -184,6 +189,7 @@ namespace LittleTiggy
             {
                 currentAnimation = walkUp;
                 currentAnimation.Update(gameTime);
+
                 if (Y > 0)
                     Y -= charSpeed * ticksSinceLastUpdate;
 
@@ -221,16 +227,16 @@ namespace LittleTiggy
         {
 
             // check collisions with walls via mouse / touch control.
-            if (X < GameConstants.windowWidth - 16 && X > 0)
+            if (X < GameConstants.windowWidth - GameConstants.characterWidth && X > 0)
                 X += velocity.X * charSpeed * ticksSinceLastUpdate;
-            else if (X > GameConstants.windowWidth - 16)
+            else if (X > GameConstants.windowWidth - GameConstants.characterWidth)
                 X -= 1;
             else if (X < 0)
                 X += 1;
 
-            if (Y < GameConstants.windowHeight - 16 && Y > 0)
+            if (Y < GameConstants.windowHeight - GameConstants.characterHeight && Y > 0)
                 Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
-            else if (Y > GameConstants.windowHeight - 16)
+            else if (Y > GameConstants.windowHeight - GameConstants.characterHeight)
                 Y -= 1;
             else if (Y < 0)
                 Y += 1;
@@ -309,7 +315,6 @@ namespace LittleTiggy
             }
 
             return false;
-
         }
 
         void CheckEnvironmentCollision(EnvironmentBlock[] walls)
@@ -325,41 +330,32 @@ namespace LittleTiggy
                 if (character.Intersects(wallLeft))
                 {
                     X -= (charSpeed * ticksSinceLastUpdate);
-                    Game1.collidingLeft = true;
-                    //if (Game1.collisionTimerOn == false)
-                        //SetCollisionTimer();
+                    // Game1.collidingLeft = true;
                 }
                     
                 if (character.Intersects(wallRight))
                 {
                     X += (charSpeed * ticksSinceLastUpdate);
-                    Game1.collidingRight = true;
-                    //if (Game1.collisionTimerOn == false)
-                        //SetCollisionTimer();
+                    // Game1.collidingRight = true;
                 }
                 if (character.Intersects(wallUp))
                 {
                     Y -= (charSpeed * ticksSinceLastUpdate);
-                    Game1.collidingTop = true;
-                    //if (Game1.collisionTimerOn == false) 
-                   // SetCollisionTimer();
+                    // Game1.collidingTop = true;
                 }
 
                 if (character.Intersects(wallDown))
                 {
                     Y += (charSpeed * ticksSinceLastUpdate);
-                    Game1.collidingBottom = true;
-                    //if (Game1.collisionTimerOn == false)
-                        //SetCollisionTimer();
+                    // Game1.collidingBottom = true;
                 }
 
-                //if (Game1.collisionTimerOn == true) 
-                   // EvaluateCollisionTimer();
 
             }
 
         }
 
+#if _DEBUG
         void SetCollisionTimer()
         {
             Game1.collisionTimerOn = true;
@@ -379,9 +375,7 @@ namespace LittleTiggy
                 Game1.collidingTop = false;
             }
         }
-
-
-
+#endif
 
     }
 }

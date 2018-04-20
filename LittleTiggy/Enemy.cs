@@ -13,6 +13,7 @@ namespace LittleTiggy
     public class Enemy
     {
         static Texture2D characterSheetTexture;
+        static int randomSeed = 1;
         Animation walkDown;
         Animation walkLeft;
         Animation walkRight;
@@ -112,7 +113,7 @@ namespace LittleTiggy
 
             currentAnimation = Idle;
 
-            Random randomNumber = new Random();
+            Random randomNumber = new Random(randomSeed);
             do
             {
                 this.X = (float)randomNumber.Next(0, 512);
@@ -123,6 +124,7 @@ namespace LittleTiggy
 
             } while (IsEnvironmentCollision(walls));
 
+            randomSeed++;
         }
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Pathfinder pathfinder)

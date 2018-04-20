@@ -3,17 +3,16 @@
 
 /*
  * TO DO:
- * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation
+ * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - GENERAL: Remove use of animation system for static items such as power up & walls
  * - GENERAL: Refactor main character input and collision detection to not allow a player to move to a location where they will collide with a wall as opposed to letting them collide and moving them back
- * - FEATURE: Add logic for win condition once player reaches bottom of game map
  * - FEATURE: Add text display system
- * - FEATURE: Add logic for player to lose when it collides with enemy player
  * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
  * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
+ * - FEATURE: Add instructions screen.
  * 
  * WIN CONDITION: 1) Restart with new map 2) show text "you win".
  * LOSE CONDITION: 1) Restart with new map 2) Show text "you lose".
@@ -24,6 +23,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace LittleTiggy
 {
@@ -33,8 +33,8 @@ namespace LittleTiggy
         public const int windowWidth = 512;
         public const int windowHeight = 512;
         public const int tileSize = 16;
-        public const int characterHeight = 13;
-        public const int characterWidth = 13;
+        public const int characterHeight = 15;
+        public const int characterWidth = 10;
     }
 
     public class Game1 : Game
@@ -42,13 +42,15 @@ namespace LittleTiggy
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         mainCharacter character;
-        Enemy enemy;
+        List<Enemy> enemies;
         PowerUp powerUp;
         SpriteFont mainFont;
         public EnvironmentBlock[] walls = new EnvironmentBlock[300];
 
         Pathfinder pathfinder;
 
+
+#if _DEBUG
         public static bool collidingLeft { get; set; } = false;
         public static bool collidingRight { get; set; } = false;
         public static bool collidingTop { get; set; } = false;
@@ -62,8 +64,9 @@ namespace LittleTiggy
 
         int numberOfRandomWalls = 0;
         int numberOfPlacedWalls = 0;
+#endif
 
-        public static int score { get; set; } = 0;
+        public static int level { get; set; } = 2;
         public static int respawn { get; set; } = 30;
 
 
@@ -91,10 +94,10 @@ namespace LittleTiggy
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new mainCharacter(this.GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
-            LoadLevel();
+            LoadLevel(level);
         }
 
-        public void LoadLevel()
+        public void LoadLevel(int level)
         {
             mainCharacter.X = 1;
             mainCharacter.Y = 1;
@@ -116,7 +119,7 @@ namespace LittleTiggy
                     gridAlignedY = gridAlignedY - (gridAlignedY % 16);
 
                     walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                    numberOfRandomWalls++;
+                    // numberOfRandomWalls++;
                 }
 
                 // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish type level. 
@@ -132,7 +135,6 @@ namespace LittleTiggy
                     {
                         for (int d = 0; d < this.GraphicsDevice.Viewport.Height; d = d + 16)
                         {
-
                             for (int e = f; e < i; e++)
                             {
                                 if ((walls[e].X == (c - 16)) || (walls[e].Y == (d - 16)))
@@ -144,7 +146,7 @@ namespace LittleTiggy
                                         f = e;
                                         f++;
                                         walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                                        numberOfPlacedWalls++;
+                                        // numberOfPlacedWalls++;
                                         break;
                                     }
                                 }
@@ -165,19 +167,28 @@ namespace LittleTiggy
                         gridAlignedY = gridAlignedY - (gridAlignedY % 16);
 
                         walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                        numberOfRandomWalls++;
+                        // numberOfRandomWalls++;
                     }
 
                 }
 
                 // spawn other elements on map now that walls have been created
-                enemy = new Enemy(this.GraphicsDevice, walls);
+
+                enemies = new List<Enemy>();
+                for (int noOfEnemiesToSpawn = 0; noOfEnemiesToSpawn < level; noOfEnemiesToSpawn++)
+                {
+                    Enemy enemy = new Enemy(this.GraphicsDevice, walls);
+                    enemies.Add(enemy);
+                }
+                
+
                 powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
-            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false);
+            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 
         protected override void UnloadContent()
@@ -193,26 +204,33 @@ namespace LittleTiggy
 
             // TODO: Add your update logic here
             character.Update(gameTime, GraphicsDevice, walls);
-            enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
+            }
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
-            pathfinder.Update(GraphicsDevice, walls, enemy);
+            // pathfinder.Update(GraphicsDevice, walls, enemy);
             CheckWinCondition();
             CheckLoseCondition();
         }
 
         void CheckWinCondition()
         {
-            if (mainCharacter.GridAlignedY == GameConstants.windowHeight - 16)
+            if (mainCharacter.GridAlignedY == GameConstants.windowHeight - (GameConstants.characterHeight + 1))
             {
-                LoadLevel();
+                level++;
+                LoadLevel(level);
             }
         }
 
         void CheckLoseCondition()
         {
-            if (enemy.IsPlayerCollision())
-                LoadLevel();
+            foreach (Enemy enemy in enemies)
+            {
+                if (enemy.IsPlayerCollision())
+                    LoadLevel(1);
+            }
 
         }
 
@@ -227,13 +245,15 @@ namespace LittleTiggy
             // Draw each wall
             for (int i = 0; i < walls.Length; i++)
             { 
-
                 walls[i].Draw(spriteBatch);
             }
 
             pathfinder.Draw(spriteBatch);
             character.Draw(spriteBatch);
-            enemy.Draw(spriteBatch);
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Draw(spriteBatch);
+            }
             powerUp.Draw(spriteBatch);
 
             // DEBUG code for drawing wall and collision information
