@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace LittleTiggy
 {
-    public class Node : IEquatable<Node>  //device graph node data type used in graph searchs
+    public class Node : IEquatable<Node>  //device graph node data type used in graph search
     {
         public ushort h_score { get; set; }
         public ushort g_score { get; set; }
@@ -23,7 +23,7 @@ namespace LittleTiggy
 
 
         public Vector2 position { get; set; }
-        public Vector2 parent { get; set; } //parent node
+        public Vector2 parent { get; set; } //parent node position
 
         public Node(Vector2 Position, ushort H_Score, ushort G_Score)
         {
@@ -51,12 +51,15 @@ namespace LittleTiggy
         public static List<Vector2> PathToDraw = new List<Vector2>();
         List<Vector2> Path = new List<Vector2>();
         List<Vector2> DeletedNodes = new List<Vector2>();
-        Animation DeletedNodesIdle;
-        Animation DeletedNodesCurrentAnimation;
 
+
+        //The following exist for visualisation of path finding if debug is enabled
         static Texture2D environmentSheetTexture;
         Animation PathIdle;
         Animation PathCurrentAnimation;
+        Animation DeletedNodesIdle;
+        Animation DeletedNodesCurrentAnimation;
+
         KeyboardState OldKeyboardState;
 
         public Pathfinder(GraphicsDevice graphicsDevice)
@@ -93,10 +96,9 @@ namespace LittleTiggy
 
                 // Path = new Stack<Vector2>();
 
-                DeletedNodes = new List<Vector2>();
+                // DeletedNodes = new List<Vector2>();
 
                 Path = Pathfind(source, destination, walls);
-                //Pathfind(source, destination, walls);
 
             }
 
@@ -325,7 +327,6 @@ namespace LittleTiggy
                 }
             }
 
-
             do
             {
                 List<Node> cleanNodeList = new List<Node>(nodes);
@@ -349,10 +350,7 @@ namespace LittleTiggy
                 nodes = cleanNodeList;
 
             } while (!foundStartPosition && timer.CompareTo(DateTime.Now) > 0);
-
             return vectorList;
-
         }
     }
-
 }

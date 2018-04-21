@@ -13,7 +13,8 @@ namespace LittleTiggy
     public class Enemy
     {
         static Texture2D characterSheetTexture;
-        static int randomSeed = 1;
+        static Random randomNumber = new Random();
+
         Animation walkDown;
         Animation walkLeft;
         Animation walkRight;
@@ -112,8 +113,7 @@ namespace LittleTiggy
             standUp.AddFrame(new Rectangle(144, 16, 16, 16), TimeSpan.FromSeconds(.25));
 
             currentAnimation = Idle;
-
-            Random randomNumber = new Random(randomSeed);
+            
             do
             {
                 this.X = (float)randomNumber.Next(0, 512);
@@ -124,7 +124,6 @@ namespace LittleTiggy
 
             } while (IsEnvironmentCollision(walls));
 
-            randomSeed++;
         }
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Pathfinder pathfinder)
@@ -141,22 +140,22 @@ namespace LittleTiggy
                 // Move enemy closer to destination at normal speed if it's more than 1 unit away.
                 if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 1)
                 {
-                    this.X += (charSpeed * ticksSinceLastUpdate) * (float) 2;
+                    this.X += (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkRight;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < -1)
                 {
-                    this.X -= (charSpeed * ticksSinceLastUpdate) * (float)2;
+                    this.X -= (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkLeft;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 1)
                 {
-                    this.Y += (charSpeed * ticksSinceLastUpdate) * (float)2;
+                    this.Y += (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkDown;
                 }
                 else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < -1)
                 {
-                    this.Y -= (charSpeed * ticksSinceLastUpdate) * (float)2;
+                    this.Y -= (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkUp;
                 }
                 // Move enemy closer to destination just a little bit if it's just one unit away. 
@@ -205,7 +204,7 @@ namespace LittleTiggy
 
             currentAnimation.Update(gameTime);
    
-            // Logic to stop enemy object from going outside game play area.  Probably not needed.
+            // Logic to stop enemy object from going outside game play area.
 
             
             if (this.X > graphicsDevice.Viewport.Width - 10)
@@ -219,7 +218,6 @@ namespace LittleTiggy
 
             if (this.Y < 0)
                 this.Y += charSpeed * ticksSinceLastUpdate;
-
         }
 
         public void Draw(SpriteBatch spriteBatch)

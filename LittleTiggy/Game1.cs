@@ -5,10 +5,9 @@
  * TO DO:
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - GENERAL: Remove use of animation system for static items such as power up & walls
- * - GENERAL: Refactor main character input and collision detection to not allow a player to move to a location where they will collide with a wall as opposed to letting them collide and moving them back
  * - FEATURE: Add text display system
  * - FEATURE: Draw level number
- * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
+ * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn randomly
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
@@ -16,6 +15,8 @@
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add music / sounds
  * - FEATURE: Add leaderboards
+ * - PLATFORM: Try to build / deploy on android.
+ * - BUGFIX: Don't allow maps to spawn if there is a wall at 0,0 
  * 
  * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".
  * LOSE CONDITION: 1) Restart with new map with -1 level 2) Show text "you lose".
@@ -48,7 +49,7 @@ namespace LittleTiggy
         List<Enemy> enemies;
         PowerUp powerUp;
         SpriteFont mainFont;
-        public EnvironmentBlock[] walls = new EnvironmentBlock[300];
+        public static EnvironmentBlock[] walls = new EnvironmentBlock[300];
 
         Pathfinder pathfinder;
 
@@ -190,7 +191,7 @@ namespace LittleTiggy
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
-            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false);
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || mainCharacter.IsEnvironmentCollision(walls, new Vector2(1,1)));
             // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
         }
 

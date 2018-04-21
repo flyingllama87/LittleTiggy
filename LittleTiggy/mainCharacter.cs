@@ -23,10 +23,11 @@ namespace LittleTiggy
         Animation idle;
         Animation currentAnimation;
 
+        Vector2 desiredDestinationPosition;
 
-        Boolean IsPoweredUp;
+        Boolean isPoweredUp;
 
-        KeyboardState OldKeyboardState;
+        // KeyboardState oldKeyboardState;
 
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
@@ -119,22 +120,20 @@ namespace LittleTiggy
         {
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
-            
-            // Touch / mouse controls
 
-            var velocity = GetDesiredVelocityFromInput();
+            desiredDestinationPosition = new Vector2(mainCharacter.X, mainCharacter.Y);
+     
+            Vector2 velocity = GetDesiredVelocityFromInput();  // Touch / mouse controls
 
             if (velocity != Vector2.Zero) // if we have input from either touch or mouse
             {
                 ProcessTouchInput(velocity);
             }
             else // keyboard controls
-            {
+            { 
                 ProcessKeyboardInput(gameTime, walls);
             }
 
-            // check collisions with environment walls
-            CheckEnvironmentCollision(walls);
             currentAnimation.Update(gameTime);
 
         }
@@ -153,11 +152,18 @@ namespace LittleTiggy
                 currentAnimation = walkDown;
                 currentAnimation.Update(gameTime);
 
-                if (Y < GameConstants.windowHeight - GameConstants.characterHeight)
-                    Y += charSpeed * ticksSinceLastUpdate;
+                desiredDestinationPosition.Y += charSpeed * ticksSinceLastUpdate;
 
-                //check collisions with environment walls
-                CheckEnvironmentCollision(walls);
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                currentAnimation = walkUp;
+                currentAnimation.Update(gameTime);
+
+                desiredDestinationPosition.Y -= charSpeed * ticksSinceLastUpdate;
+
+
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
@@ -165,11 +171,8 @@ namespace LittleTiggy
                 currentAnimation = walkLeft;
                 currentAnimation.Update(gameTime);
 
-                if (X > 0)
-                    X += -(charSpeed * ticksSinceLastUpdate);
+                desiredDestinationPosition.X -= charSpeed * ticksSinceLastUpdate;
 
-                //check collisions with environment walls
-                CheckEnvironmentCollision(walls);
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
@@ -177,24 +180,21 @@ namespace LittleTiggy
                 currentAnimation = walkRight;
                 currentAnimation.Update(gameTime);
 
-                if (X < GameConstants.windowWidth - GameConstants.characterWidth)
-                    X += charSpeed * ticksSinceLastUpdate;
+                desiredDestinationPosition.X += charSpeed * ticksSinceLastUpdate;
 
-                //check collisions with environment walls
-                CheckEnvironmentCollision(walls);
             }
 
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            //check collisions
+
+            if (IsEnvironmentCollision(walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
             {
-                currentAnimation = walkUp;
-                currentAnimation.Update(gameTime);
+                X = desiredDestinationPosition.X;
+            }
 
-                if (Y > 0)
-                    Y -= charSpeed * ticksSinceLastUpdate;
-
-                //check collisions with environment walls
-                CheckEnvironmentCollision(walls);
+            if (IsEnvironmentCollision(walls, new Vector2(X, desiredDestinationPosition.Y)) == false)
+            {
+                Y = desiredDestinationPosition.Y;
             }
 
 #if _DEBUG
@@ -225,23 +225,19 @@ namespace LittleTiggy
 
         void ProcessTouchInput(Vector2 velocity)
         {
+            desiredDestinationPosition.X += velocity.X * charSpeed * ticksSinceLastUpdate;
+            desiredDestinationPosition.Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
 
-            // check collisions with walls via mouse / touch control.
-            if (X < GameConstants.windowWidth - GameConstants.characterWidth && X > 0)
-                X += velocity.X * charSpeed * ticksSinceLastUpdate;
-            else if (X > GameConstants.windowWidth - GameConstants.characterWidth)
-                X -= 1;
-            else if (X < 0)
-                X += 1;
+            if (IsEnvironmentCollision(Game1.walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
+            {
+                X = desiredDestinationPosition.X;
+            }
 
-            if (Y < GameConstants.windowHeight - GameConstants.characterHeight && Y > 0)
-                Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
-            else if (Y > GameConstants.windowHeight - GameConstants.characterHeight)
-                Y -= 1;
-            else if (Y < 0)
-                Y += 1;
-
-
+            if (IsEnvironmentCollision(Game1.walls, new Vector2(X, desiredDestinationPosition.Y)) == false)
+            {
+                Y = desiredDestinationPosition.Y;
+            }
+            
             // select animation based on direction mouse/touch input is pointing
             bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
             if (movingHorizontally)
@@ -286,7 +282,6 @@ namespace LittleTiggy
                 }
             }
 
-
             return desiredVelocity;
         }
 
@@ -300,62 +295,27 @@ namespace LittleTiggy
 
         }
 
-        bool IsEnvironmentCollision(EnvironmentBlock[] walls)
+        public static bool IsEnvironmentCollision(EnvironmentBlock[] walls, Vector2 position)
         {
-            for (int i = 0; i < walls.Length; i++)
-            {
-                Rectangle wall = new Rectangle((int)walls[i].X, (int)walls[i].Y, 16, 16);
-                Rectangle character = new Rectangle((int)X, (int)Y, 16, 16);
+            Rectangle characterRect = new Rectangle((int)position.X, (int)position.Y, 10, 15);
 
-                if (character.Intersects(wall))
+            foreach (EnvironmentBlock wall in walls)
+           {
+                Rectangle wallRect = new Rectangle((int)wall.X, (int)wall.Y, 16, 16);
+
+                if (characterRect.Intersects(wallRect))
                 {
                     return true;
                 }
-
             }
+
+            if (position.X > GameConstants.windowWidth - GameConstants.characterWidth || position.X < 0 || position.Y < 0)
+                return true;
 
             return false;
         }
 
-        void CheckEnvironmentCollision(EnvironmentBlock[] walls)
-        {
-           for (int i = 0; i < walls.Length; i++)
-           {
-                Rectangle wallLeft = new Rectangle((int)walls[i].X, (int)walls[i].Y, 0, 16);
-                Rectangle wallRight = new Rectangle((int)walls[i].X + 16, (int)walls[i].Y, 0, 16);
-                Rectangle wallUp = new Rectangle((int)walls[i].X, (int)walls[i].Y, 16, 0);
-                Rectangle wallDown = new Rectangle((int)walls[i].X, (int)walls[i].Y + 16, 16, 0);
-                Rectangle character = new Rectangle((int)X, (int)Y, 10, 15);
-
-                if (character.Intersects(wallLeft))
-                {
-                    X -= (charSpeed * ticksSinceLastUpdate);
-                    // Game1.collidingLeft = true;
-                }
-                    
-                if (character.Intersects(wallRight))
-                {
-                    X += (charSpeed * ticksSinceLastUpdate);
-                    // Game1.collidingRight = true;
-                }
-                if (character.Intersects(wallUp))
-                {
-                    Y -= (charSpeed * ticksSinceLastUpdate);
-                    // Game1.collidingTop = true;
-                }
-
-                if (character.Intersects(wallDown))
-                {
-                    Y += (charSpeed * ticksSinceLastUpdate);
-                    // Game1.collidingBottom = true;
-                }
-
-
-            }
-
-        }
-
-#if _DEBUG
+ #if _DEBUG
         void SetCollisionTimer()
         {
             Game1.collisionTimerOn = true;
