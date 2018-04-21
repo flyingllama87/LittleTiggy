@@ -7,15 +7,18 @@
  * - GENERAL: Remove use of animation system for static items such as power up & walls
  * - GENERAL: Refactor main character input and collision detection to not allow a player to move to a location where they will collide with a wall as opposed to letting them collide and moving them back
  * - FEATURE: Add text display system
+ * - FEATURE: Draw level number
  * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn at 1,1
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
  * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
  * - FEATURE: Add instructions screen.
+ * - FEATURE: Add music / sounds
+ * - FEATURE: Add leaderboards
  * 
- * WIN CONDITION: 1) Restart with new map 2) show text "you win".
- * LOSE CONDITION: 1) Restart with new map 2) Show text "you lose".
+ * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".
+ * LOSE CONDITION: 1) Restart with new map with -1 level 2) Show text "you lose".
  * 
 */
 
@@ -66,8 +69,8 @@ namespace LittleTiggy
         int numberOfPlacedWalls = 0;
 #endif
 
-        public static int level { get; set; } = 2;
-        public static int respawn { get; set; } = 30;
+        public static int level { get; set; } = 1;
+        // public static int respawn { get; set; } = 1;
 
 
         public Game1()
@@ -229,7 +232,13 @@ namespace LittleTiggy
             foreach (Enemy enemy in enemies)
             {
                 if (enemy.IsPlayerCollision())
-                    LoadLevel(1);
+                {
+                    if (level > 1)
+                        level--;
+                    LoadLevel(level);
+                }
+
+                    
             }
 
         }
@@ -262,6 +271,8 @@ namespace LittleTiggy
 
             spriteBatch.DrawString(mainFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
+            spriteBatch.DrawString(mainFont, "Level: " + level, new Vector2(20, 10), Color.Red);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
