@@ -205,13 +205,13 @@ namespace LittleTiggy
    
             // Logic to stop enemy object from going outside game play area.
             
-            if (this.X > graphicsDevice.Viewport.Width - 10)
+            if (this.X > graphicsDevice.Viewport.Width - GameConstants.characterWidth)
                 this.X -= charSpeed * ticksSinceLastUpdate;
 
             if (this.X < 0 )
                 this.X += charSpeed * ticksSinceLastUpdate;
 
-            if (this.Y > graphicsDevice.Viewport.Height - 10)
+            if (this.Y > graphicsDevice.Viewport.Height - GameConstants.characterHeight)
                 this.Y -= charSpeed * ticksSinceLastUpdate;
 
             if (this.Y < 0)
@@ -249,53 +249,6 @@ namespace LittleTiggy
             }
             else
             {
-                Random direction = new Random();
-                int loopCount = 0;
-
-                do
-                {
-
-                    vectorDestinationPosition.X = this.X;
-                    vectorDestinationPosition.Y = this.Y;
-
-                    switch (direction.Next(1, 4))
-                    {
-                        case 1:
-                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16)) + 16;
-                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16));
-                            break;
-                        case 2:
-                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16)) - 16;
-                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16));
-                            break;
-                        case 3:
-                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16)) + 16;
-                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16));
-                            break;
-                        case 4:
-                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16)) - 16;
-                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16));
-                            break;
-                    }
-
-                    loopCount++;
-                    if (loopCount > 100)
-                    {
-                        Random randomNumber = new Random();
-
-                        do
-                        {
-                            this.X = (float)randomNumber.Next(0, 512);
-                            this.Y = randomNumber.Next(0, 512);
-
-                            this.X -= this.X % 16;
-                            this.Y -= this.Y % 16;
-
-                        } while (IsEnvironmentCollision(walls));
-                    }
-
-                } while (IsEnvironmentCollision(walls, new Vector2(vectorDestinationPosition.X, vectorDestinationPosition.Y)));
-
                 // select appropriate animation based on movement direction
 
                 velocity = GetPlayerVelocity();
@@ -372,6 +325,9 @@ namespace LittleTiggy
             {
                 this.X = 1;
                 this.Y = 1;
+                isFollowingPath = false;
+                vectorDestinationPosition = new Vector2(0, 0);
+                pathToFollow.Clear();
                 return true;
             }
             return false;

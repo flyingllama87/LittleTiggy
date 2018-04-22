@@ -12,16 +12,16 @@ namespace LittleTiggy
     public class mainCharacter
     {
         static Texture2D characterSheetTexture;
-        Animation walkDown;
-        Animation walkLeft;
-        Animation walkRight;
-        Animation walkUp;
-        Animation standDown;
-        Animation standLeft;
-        Animation standRight;
-        Animation standUp;
-        Animation idle;
-        Animation currentAnimation;
+        static Animation walkDown;
+        static Animation walkLeft;
+        static Animation walkRight;
+        static Animation walkUp;
+        static Animation standDown;
+        static Animation standLeft;
+        static Animation standRight;
+        static Animation standUp;
+        static Animation idle;
+        static Animation currentAnimation;
 
         Vector2 desiredDestinationPosition;
 
@@ -137,9 +137,10 @@ namespace LittleTiggy
             
             currentAnimation.Update(gameTime);
 
-            if (isPoweredUp & (powerUpTimer.CompareTo(DateTime.Now) < 0))
+            if (isPoweredUp && (powerUpTimer.CompareTo(DateTime.Now) < 0))
             {
                 isPoweredUp = false;
+                changeSkin();
             }
 
         }
@@ -325,7 +326,7 @@ namespace LittleTiggy
             return false;
         }
 
- #if _DEBUG
+#if _DEBUG
         void SetCollisionTimer()
         {
             Game1.collisionTimerOn = true;
@@ -346,6 +347,93 @@ namespace LittleTiggy
             }
         }
 #endif
+        public static void changeSkin()
+        {
+            if (isPoweredUp)
+            {
 
+                walkDown = new Animation();
+                walkDown.AddFrame(new Rectangle(3, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(19, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(3, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(35, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkLeft = new Animation();
+                walkLeft.AddFrame(new Rectangle(51, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(67, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(51, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(83, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkRight = new Animation();
+                walkRight.AddFrame(new Rectangle(99, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(115, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(99, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(131, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkUp = new Animation();
+                walkUp.AddFrame(new Rectangle(147, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(163, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(147, 33, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(179, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                idle = new Animation();
+                idle.AddFrame(new Rectangle(3, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standDown = new Animation();
+                standDown.AddFrame(new Rectangle(3, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standLeft = new Animation();
+                standLeft.AddFrame(new Rectangle(51, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standRight = new Animation();
+                standRight.AddFrame(new Rectangle(99, 33, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standUp = new Animation();
+                standUp.AddFrame(new Rectangle(147, 33, 10, 15), TimeSpan.FromSeconds(.25));
+            }
+            else
+            {
+
+                walkDown = new Animation();
+                walkDown.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(19, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkDown.AddFrame(new Rectangle(35, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkLeft = new Animation();
+                walkLeft.AddFrame(new Rectangle(51, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(67, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(51, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkLeft.AddFrame(new Rectangle(83, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkRight = new Animation();
+                walkRight.AddFrame(new Rectangle(99, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(115, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(99, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkRight.AddFrame(new Rectangle(131, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                walkUp = new Animation();
+                walkUp.AddFrame(new Rectangle(147, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(163, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(147, 1, 10, 15), TimeSpan.FromSeconds(.25));
+                walkUp.AddFrame(new Rectangle(179, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                idle = new Animation();
+                idle.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standDown = new Animation();
+                standDown.AddFrame(new Rectangle(3, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standLeft = new Animation();
+                standLeft.AddFrame(new Rectangle(51, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standRight = new Animation();
+                standRight.AddFrame(new Rectangle(99, 1, 10, 15), TimeSpan.FromSeconds(.25));
+
+                standUp = new Animation();
+                standUp.AddFrame(new Rectangle(147, 1, 10, 15), TimeSpan.FromSeconds(.25));
+            }
+        }
     }
 }
+
