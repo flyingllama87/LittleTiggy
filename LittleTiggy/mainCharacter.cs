@@ -25,7 +25,8 @@ namespace LittleTiggy
 
         Vector2 desiredDestinationPosition;
 
-        Boolean isPoweredUp;
+        public static Boolean isPoweredUp = false;
+        public static DateTime powerUpTimer;
 
         // KeyboardState oldKeyboardState;
 
@@ -133,8 +134,13 @@ namespace LittleTiggy
             { 
                 ProcessKeyboardInput(gameTime, walls);
             }
-
+            
             currentAnimation.Update(gameTime);
+
+            if (isPoweredUp & (powerUpTimer.CompareTo(DateTime.Now) < 0))
+            {
+                isPoweredUp = false;
+            }
 
         }
 
@@ -184,8 +190,7 @@ namespace LittleTiggy
 
             }
 
-
-            //check collisions
+            //check collisions & if the player isn't going to collide with the environment, allow them to move in that direction.  Process the X & Y co-ordinate independantly.
 
             if (IsEnvironmentCollision(walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
             {
@@ -197,7 +202,9 @@ namespace LittleTiggy
                 Y = desiredDestinationPosition.Y;
             }
 
-#if _DEBUG
+
+
+#if _DEBUG // Code used for a 'teleport' function when the space bar is pressed.
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && Game1.respawn > 0 && !OldKeyboardState.IsKeyDown(Keys.Space))
             {
 
@@ -221,10 +228,13 @@ namespace LittleTiggy
 
             OldKeyboardState = Keyboard.GetState();
 #endif
+
         }
 
         void ProcessTouchInput(Vector2 velocity)
         {
+            // Generate the position the player is trying to move to.  Then assess if a wall is in the way but assess the X & Y positions independantly.  Allow the player to move in the desired location if a wall is not in the way.
+
             desiredDestinationPosition.X += velocity.X * charSpeed * ticksSinceLastUpdate;
             desiredDestinationPosition.Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
 
@@ -254,14 +264,14 @@ namespace LittleTiggy
 
 
 
-        Vector2 GetDesiredVelocityFromInput()
+        Vector2 GetDesiredVelocityFromInput()  // Acquire a normalised velocity in the direction the player has their touch or mouse input.
         {
             Vector2 desiredVelocity = new Vector2();
 
             TouchCollection touchCollection = TouchPanel.GetState();
             MouseState mouseState = Mouse.GetState();
 
-            if (touchCollection.Count > 0)
+            if (touchCollection.Count > 0) // If the player is using a touch screen and has touched the screen.
             {
                 desiredVelocity.X = touchCollection[0].Position.X - X;
                 desiredVelocity.Y = touchCollection[0].Position.Y - Y;
@@ -271,7 +281,7 @@ namespace LittleTiggy
                     desiredVelocity.Normalize();
                 }
             }
-            else if (mouseState.LeftButton == ButtonState.Pressed)
+            else if (mouseState.LeftButton == ButtonState.Pressed) // if not & the player has the mouse pressed, move the character.
             {
                 desiredVelocity.X = mouseState.X - X;
                 desiredVelocity.Y = mouseState.Y - Y;
@@ -295,13 +305,13 @@ namespace LittleTiggy
 
         }
 
-        public static bool IsEnvironmentCollision(EnvironmentBlock[] walls, Vector2 position)
+        public static bool IsEnvironmentCollision(EnvironmentBlock[] walls, Vector2 position) // Determine if a particular XY position + character dimensions will collide with the environment.
         {
-            Rectangle characterRect = new Rectangle((int)position.X, (int)position.Y, 10, 15);
+            Rectangle characterRect = new Rectangle((int)position.X, (int)position.Y, GameConstants.characterWidth, GameConstants.characterHeight);
 
             foreach (EnvironmentBlock wall in walls)
            {
-                Rectangle wallRect = new Rectangle((int)wall.X, (int)wall.Y, 16, 16);
+                Rectangle wallRect = new Rectangle((int)wall.X, (int)wall.Y, GameConstants.tileSize, GameConstants.tileSize);
 
                 if (characterRect.Intersects(wallRect))
                 {
@@ -309,7 +319,7 @@ namespace LittleTiggy
                 }
             }
 
-            if (position.X > GameConstants.windowWidth - GameConstants.characterWidth || position.X < 0 || position.Y < 0)
+            if (position.X > GameConstants.windowWidth - GameConstants.characterWidth || position.X < 0 || position.Y < 0) // See if the player is trying to go outside the game play area.
                 return true;
 
             return false;

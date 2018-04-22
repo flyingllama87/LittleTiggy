@@ -154,6 +154,11 @@ namespace LittleTiggy
         public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
         {
 
+            if (from == destination)
+            {
+                return new List<Vector2>(); // Return empty vector list if asked to path find between two equal locations.
+            }
+
             Node goalNode = new Node(destination, 0, 0);
             Node startNode = new Node(from, ManhattanDistance(from, destination), 0);
 
@@ -310,9 +315,10 @@ namespace LittleTiggy
 
             List<Vector2> vectorList = new List<Vector2>();
             Node tempNode = new Node(new Vector2(0,0), 999, 999);
+
             bool foundStartPosition = false;
             DateTime timer = DateTime.Now;
-            timer = timer.AddSeconds(0.5);
+            timer = timer.AddSeconds(0.25);
 
             vectorList.Add(lastNode.position);
 
@@ -344,12 +350,19 @@ namespace LittleTiggy
                             foundStartPosition = true;
                             break;
                         }
+
                     }
                 }
 
                 nodes = cleanNodeList;
 
-            } while (!foundStartPosition && timer.CompareTo(DateTime.Now) > 0);
+                if (timer.CompareTo(DateTime.Now) < 0)
+                {
+                    foundStartPosition = true;
+                    break;
+                }
+
+            } while (!foundStartPosition);
             return vectorList;
         }
     }

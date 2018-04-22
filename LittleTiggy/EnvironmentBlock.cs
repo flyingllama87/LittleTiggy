@@ -26,7 +26,6 @@ namespace LittleTiggy
         }
 
 
-
         public EnvironmentBlock(GraphicsDevice graphicsDevice, int X, int Y)
         {
             if (environmentSheetTexture == null)

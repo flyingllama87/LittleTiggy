@@ -42,20 +42,21 @@ namespace LittleTiggy
                 }
             }
 
-
             Idle = new Animation();
             Idle.AddFrame(new Rectangle(0, 0, 16, 16), TimeSpan.FromSeconds(.25));
 
             currentAnimation = Idle;
 
-            Random randomNumber = new Random();
-            do
-            {
-                this.X = (float)randomNumber.Next(0, 512);
-                this.Y = randomNumber.Next(0, 512);
+            // Place this object in a random, grid aligned location on the map & ensure it's not colliding with the environment / a wall.
 
-                this.X -= this.X % 16;
-                this.Y -= this.Y % 16;
+            Random randomNumber = new Random();
+            do 
+            {
+                this.X = (float)randomNumber.Next(0, GameConstants.windowWidth);
+                this.Y = randomNumber.Next(0, GameConstants.windowHeight);
+
+                this.X -= this.X % GameConstants.tileSize;
+                this.Y -= this.Y % GameConstants.tileSize;
 
             } while (IsEnvironmentCollision(walls));
 
@@ -65,13 +66,10 @@ namespace LittleTiggy
         {
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            //TODO: check collisions with environment walls
-
-
-            //TODO: Check player collision
-
             if (IsPlayerCollision())
             {
+                mainCharacter.isPoweredUp = true;
+                mainCharacter.powerUpTimer = DateTime.Now.AddSeconds(5.0);
                 this.X = -16;
                 this.Y = -16;
             }
@@ -79,8 +77,6 @@ namespace LittleTiggy
 
 
         }
-
-
 
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -91,7 +87,6 @@ namespace LittleTiggy
             spriteBatch.Draw(itemSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
 
         }
-
 
         bool IsEnvironmentCollision(EnvironmentBlock[] walls)
         {
@@ -139,18 +134,5 @@ namespace LittleTiggy
             return false;
 
         }
-
-        Vector2 GetPlayerVelocity()
-        {
-            //get velocity of player character relative to enemy's position & normalize so we end up with a direction to move in.
-
-            Vector2 desiredVelocity = new Vector2(mainCharacter.X - this.X, mainCharacter.Y - this.Y);
-
-            desiredVelocity.Normalize();
-
-            return desiredVelocity;
-        }
-
-
     }
 }

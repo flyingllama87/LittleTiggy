@@ -4,13 +4,12 @@
 /*
  * TO DO:
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
- * - GENERAL: Remove use of animation system for static items such as power up & walls
- * - FEATURE: Add text display system
- * - FEATURE: Draw level number
+ * - FEATURE: Add text display system - MAYBE
+ * - FEATURE: Draw level number - DONE
  * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn randomly
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
  * - FEATURE: Add Art for when player is 'powered up'
- * - FEATURE: Add logic for levels (Support for multiple enemies and power ups)
+ * - FEATURE: Add logic for levels (Support for multiple enemies and power ups) - DONE EXCEPT POWER UPS
  * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add music / sounds
@@ -39,6 +38,7 @@ namespace LittleTiggy
         public const int tileSize = 16;
         public const int characterHeight = 15;
         public const int characterWidth = 10;
+        public const int noWallsToSpawn = 300;
     }
 
     public class Game1 : Game
@@ -49,7 +49,7 @@ namespace LittleTiggy
         List<Enemy> enemies;
         PowerUp powerUp;
         SpriteFont mainFont;
-        public static EnvironmentBlock[] walls = new EnvironmentBlock[300];
+        public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
 
         Pathfinder pathfinder;
 
@@ -78,11 +78,10 @@ namespace LittleTiggy
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            //Mouse.WindowHandle = Window.Handle;
             this.IsMouseVisible = true;
 
-            graphics.PreferredBackBufferWidth = 512;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = 512;   // set this value to the desired height of your window
+            graphics.PreferredBackBufferWidth = GameConstants.windowWidth;  // Set window width
+            graphics.PreferredBackBufferHeight = GameConstants.windowHeight;   // Set window height
             graphics.ApplyChanges();
 
         }
@@ -103,14 +102,19 @@ namespace LittleTiggy
 
         public void LoadLevel(int level)
         {
+
+            // main character start position
             mainCharacter.X = 1;
             mainCharacter.Y = 1;
+
             // Loop until valid start conditions from random generation are met.
+
+            // numberOfPlacedWalls = 0; //Used for debugging only
+            // numberOfRandomWalls = 0; //Used for debugging only
 
             do
             {
-
-                // Place 10 walls randomly (aligned to a 16x16 grid) around level.
+                // Place 10 walls randomly (aligned to a GameConstants.tileSizexGameConstants.tileSize grid) around level.
 
                 Random randomNumber = new Random();
 
@@ -119,59 +123,59 @@ namespace LittleTiggy
                     int gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
                     int gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
 
-                    gridAlignedX = gridAlignedX - (gridAlignedX % 16);
-                    gridAlignedY = gridAlignedY - (gridAlignedY % 16);
+                    gridAlignedX = gridAlignedX - (gridAlignedX % GameConstants.tileSize);
+                    gridAlignedY = gridAlignedY - (gridAlignedY % GameConstants.tileSize);
 
                     walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                    // numberOfRandomWalls++;
+                    // numberOfRandomWalls++; //Used for debugging only
                 }
 
-                // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish type level. 
+                // Randomly place more walls (grid aligned) adjacent to other walls to create a maze-ish level.  This works but is confusing - should have commented it more when I wrote it.
 
                 int f = 0;
 
-                for (int i = 10; i < walls.Length; i++)
+                for (int i = 10; i < walls.Length; i++) // Keep going until we have a position for every wall
                 {
                     int gridAlignedX = 0;
                     int gridAlignedY = 0;
 
-                    for (int c = 0; c < this.GraphicsDevice.Viewport.Width; c = c + 16)
+                    for (int c = 0; c < this.GraphicsDevice.Viewport.Width; c = c + GameConstants.tileSize) //Assess each grid square a column at a time
                     {
-                        for (int d = 0; d < this.GraphicsDevice.Viewport.Height; d = d + 16)
+                        for (int d = 0; d < this.GraphicsDevice.Viewport.Height; d = d + GameConstants.tileSize) // See above
                         {
-                            for (int e = f; e < i; e++)
+                            for (int e = f; e < i; e++) // Used to count between previously generated walls? & the total number of placed walls
                             {
-                                if ((walls[e].X == (c - 16)) || (walls[e].Y == (d - 16)))
+                                if ((walls[e].X == (c - GameConstants.tileSize)) || (walls[e].Y == (d - GameConstants.tileSize))) // If any previously generated walls exists above or to the left of the current tile being evaluated
                                 {
-                                    if (randomNumber.Next(1, 100) == 15)
+                                    if (randomNumber.Next(1, 100) == 15) // This is only True 1% of the time however as each grid square gets evaluated for every wall to be allocated, it gets a lot of attempts.
                                     {
                                         gridAlignedX = c;
                                         gridAlignedY = d;
                                         f = e;
                                         f++;
                                         walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                                        // numberOfPlacedWalls++;
-                                        break;
+                                        // numberOfPlacedWalls++; // Used for debugging only
+                                        break; // We've assigned a wall, so exit the loop
                                     }
                                 }
                             }
-                            if (gridAlignedX > 0 || gridAlignedY > 0)
+                            if (gridAlignedX > 0 || gridAlignedY > 0) // If we assigned a wall, exit loop
                                 break;
                         }
-                        if (gridAlignedX > 0 || gridAlignedY > 0)
+                        if (gridAlignedX > 0 || gridAlignedY > 0) // If we assigned a wall, exit loop
                             break;
                     }
 
-                    if (!(gridAlignedX > 0 || gridAlignedY > 0))
+                    if (!(gridAlignedX > 0 || gridAlignedY > 0)) // If the above code did not generate a wall adjacent to an already existing wall based on chance, place a random wall.
                     {
                         gridAlignedX = randomNumber.Next(0, this.GraphicsDevice.Viewport.Width);
                         gridAlignedY = randomNumber.Next(0, this.GraphicsDevice.Viewport.Height);
 
-                        gridAlignedX = gridAlignedX - (gridAlignedX % 16);
-                        gridAlignedY = gridAlignedY - (gridAlignedY % 16);
+                        gridAlignedX = gridAlignedX - (gridAlignedX % GameConstants.tileSize);
+                        gridAlignedY = gridAlignedY - (gridAlignedY % GameConstants.tileSize);
 
                         walls[i] = new EnvironmentBlock(this.GraphicsDevice, gridAlignedX, gridAlignedY);
-                        // numberOfRandomWalls++;
+                        // numberOfRandomWalls++; // Used for debugging only
                     }
 
                 }
@@ -185,7 +189,6 @@ namespace LittleTiggy
                     enemies.Add(enemy);
                 }
                 
-
                 powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
@@ -201,12 +204,11 @@ namespace LittleTiggy
         }
 
  
-        protected override void Update(GameTime gameTime)
+        protected override void Update(GameTime gameTime) // Primary game logic that's updated for every game loop
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
             character.Update(gameTime, GraphicsDevice, walls);
             foreach (Enemy enemy in enemies)
             {
@@ -214,7 +216,6 @@ namespace LittleTiggy
             }
             base.Update(gameTime);
             powerUp.Update(gameTime, GraphicsDevice);
-            // pathfinder.Update(GraphicsDevice, walls, enemy);
             CheckWinCondition();
             CheckLoseCondition();
         }
@@ -232,14 +233,12 @@ namespace LittleTiggy
         {
             foreach (Enemy enemy in enemies)
             {
-                if (enemy.IsPlayerCollision())
+                if (enemy.IsPlayerCollision() && !mainCharacter.isPoweredUp)
                 {
                     if (level > 1)
                         level--;
                     LoadLevel(level);
                 }
-
-                    
             }
 
         }
@@ -248,9 +247,7 @@ namespace LittleTiggy
         {
             GraphicsDevice.Clear(new Color(82,82,82)); // set BG color
 
-
             spriteBatch.Begin();
-
 
             // Draw each wall
             for (int i = 0; i < walls.Length; i++)
@@ -266,13 +263,13 @@ namespace LittleTiggy
             }
             powerUp.Draw(spriteBatch);
 
-            // DEBUG code for drawing wall and collision information
+            // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
             spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
 
             spriteBatch.DrawString(mainFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
-            spriteBatch.DrawString(mainFont, "Level: " + level, new Vector2(20, 10), Color.Red);
+            spriteBatch.DrawString(mainFont, "Level: " + level, new Vector2(16, 16), Color.Red);
 
             spriteBatch.End();
 

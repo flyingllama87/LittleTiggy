@@ -29,7 +29,7 @@ namespace LittleTiggy
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
 
-        Vector2 vectorFinalDestinationPosition;
+        Vector2 vectorDestinationPosition;
         bool isFollowingPath = false;
 
         List<Vector2> pathToFollow;
@@ -131,68 +131,67 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            if (isFollowingPath) // Continue following path set by pathfinding algorithm if one is set.
+            if (isFollowingPath) // Continue following path set by pathfinding algorithm if one is set to the nearest grid tile.
             {
-                // Check if the destination set by the path is reached.
-                if (Math.Floor(vectorFinalDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorFinalDestinationPosition.Y) == Math.Floor(this.Y))
+                // Check if the destination set to the next grid tile by the path is reached.
+                if (Math.Floor(vectorDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorDestinationPosition.Y) == Math.Floor(this.Y))
                     isFollowingPath = false;
 
                 // Move enemy closer to destination at normal speed if it's more than 1 unit away.
-                if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) > 1)
+                if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) > 1)
                 {
                     this.X += (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkRight;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) < -1)
+                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) < -1)
                 {
                     this.X -= (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkLeft;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) > 1)
+                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) > 1)
                 {
                     this.Y += (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkDown;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) < -1)
+                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) < -1)
                 {
                     this.Y -= (charSpeed * ticksSinceLastUpdate);
                     currentAnimation = walkUp;
                 }
                 // Move enemy closer to destination just a little bit if it's just one unit away. 
-                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == 1)
+                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == 1)
                 {
                     this.X += 1;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.X) - Math.Floor(this.X) == -1)
+                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == -1)
                 {
                     this.X -= 1;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == 1)
+                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == 1)
                 {
                     this.Y += 1;
                 }
-                else if (Math.Floor(vectorFinalDestinationPosition.Y) - Math.Floor(this.Y) == -1)
+                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == -1)
                 {
                     this.Y -= 1;
                 }
 
             }
-            else
+            else // If not moving toward a set grid tile
             {
-                // Refresh the path to follow every second.
+                // Refresh the path to follow periodically
                 if (pathfindingTimer.CompareTo(DateTime.Now) < 0)
                 {
-
                     pathfindingTimer = DateTime.Now;
-                    pathfindingTimer = pathfindingTimer.AddSeconds(1.0);
+                    pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
 
                     pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
                     Pathfinder.PathToDraw = pathToFollow;
                 }
 
-                if (!(pathToFollow.Count == 0))
+                if (!(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
                 {
-                    vectorFinalDestinationPosition = pathToFollow[pathToFollow.Count - 1];
+                    vectorDestinationPosition = pathToFollow[pathToFollow.Count - 1];
                     pathToFollow.RemoveAt(pathToFollow.Count - 1);
                 }
 
@@ -205,7 +204,6 @@ namespace LittleTiggy
             currentAnimation.Update(gameTime);
    
             // Logic to stop enemy object from going outside game play area.
-
             
             if (this.X > graphicsDevice.Viewport.Width - 10)
                 this.X -= charSpeed * ticksSinceLastUpdate;
@@ -218,6 +216,8 @@ namespace LittleTiggy
 
             if (this.Y < 0)
                 this.Y += charSpeed * ticksSinceLastUpdate;
+            
+
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -255,26 +255,26 @@ namespace LittleTiggy
                 do
                 {
 
-                    vectorFinalDestinationPosition.X = this.X;
-                    vectorFinalDestinationPosition.Y = this.Y;
+                    vectorDestinationPosition.X = this.X;
+                    vectorDestinationPosition.Y = this.Y;
 
                     switch (direction.Next(1, 4))
                     {
                         case 1:
-                            vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) + 16;
-                            vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16));
+                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16)) + 16;
+                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16));
                             break;
                         case 2:
-                            vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16)) - 16;
-                            vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16));
+                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16)) - 16;
+                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16));
                             break;
                         case 3:
-                            vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) + 16;
-                            vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16));
+                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16)) + 16;
+                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16));
                             break;
                         case 4:
-                            vectorFinalDestinationPosition.Y = (vectorFinalDestinationPosition.Y - (vectorFinalDestinationPosition.Y % 16)) - 16;
-                            vectorFinalDestinationPosition.X = (vectorFinalDestinationPosition.X - (vectorFinalDestinationPosition.X % 16));
+                            vectorDestinationPosition.Y = (vectorDestinationPosition.Y - (vectorDestinationPosition.Y % 16)) - 16;
+                            vectorDestinationPosition.X = (vectorDestinationPosition.X - (vectorDestinationPosition.X % 16));
                             break;
                     }
 
@@ -294,7 +294,7 @@ namespace LittleTiggy
                         } while (IsEnvironmentCollision(walls));
                     }
 
-                } while (IsEnvironmentCollision(walls, new Vector2(vectorFinalDestinationPosition.X, vectorFinalDestinationPosition.Y)));
+                } while (IsEnvironmentCollision(walls, new Vector2(vectorDestinationPosition.X, vectorDestinationPosition.Y)));
 
                 // select appropriate animation based on movement direction
 
@@ -369,7 +369,11 @@ namespace LittleTiggy
             Rectangle mainCharacterRectangle = new Rectangle((int)mainCharacter.X, (int)mainCharacter.Y, 10, 15);
             Rectangle thisEnemyRectangle = new Rectangle((int)this.X, (int)this.Y, 10, 15);
             if (thisEnemyRectangle.Intersects(mainCharacterRectangle))
+            {
+                this.X = 1;
+                this.Y = 1;
                 return true;
+            }
             return false;
         }
 
