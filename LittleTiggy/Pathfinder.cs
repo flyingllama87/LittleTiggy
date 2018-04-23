@@ -318,7 +318,7 @@ namespace LittleTiggy
 
             bool foundStartPosition = false;
             DateTime timer = DateTime.Now;
-            timer = timer.AddSeconds(0.25);
+            timer = timer.AddSeconds(0.1);
 
             vectorList.Add(lastNode.position);
 
