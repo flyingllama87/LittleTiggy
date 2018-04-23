@@ -5,13 +5,10 @@
  * TO DO:
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - FEATURE: Add text display system - MAYBE
- * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn - DONE
- * - FEATURE: Add logic for enemy to run away from player if player is powered up
- * - FEATURE: Add logic for levels (Support for multiple enemies and power ups) - DONE EXCEPT POWER UPS
- * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
+ * - FEATURE: Add logic for enemy to run away from player if player is powered up - DONE
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add music / sounds
- * - FEATURE: Add leaderboards
+ * - FEATURE: Add leaderboards?
  * - PLATFORM: Try to build / deploy on android.
  * - BUGFIX: Don't allow maps to spawn if there is a wall at 0,0 
  * - BUGFIX: Animation does not update 
@@ -47,7 +44,6 @@ namespace LittleTiggy
         mainCharacter character;
         List<Enemy> enemies;
         List<PowerUp> powerUps;
-        //PowerUp powerUp;
         SpriteFont mainFont;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
 
@@ -190,7 +186,7 @@ namespace LittleTiggy
                 }
 
                 powerUps = new List<PowerUp>();
-                for (int noOfPowerUpsToSpawn = 0; noOfPowerUpsToSpawn < level; noOfPowerUpsToSpawn++)
+                for (int noOfPowerUpsToSpawn = 0; noOfPowerUpsToSpawn < (level / 2); noOfPowerUpsToSpawn++)
                 {
                     PowerUp powerUp = new PowerUp(this.GraphicsDevice, walls);
                     powerUps.Add(powerUp);
