@@ -12,6 +12,7 @@ namespace LittleTiggy
     public class PowerUp
     {
         static Texture2D itemSheetTexture;
+        static Random randomNumber = new Random();
 
         Animation Idle;
         Animation currentAnimation;
@@ -49,7 +50,7 @@ namespace LittleTiggy
 
             // Place this object in a random, grid aligned location on the map & ensure it's not colliding with the environment / a wall.
 
-            Random randomNumber = new Random();
+            
             do 
             {
                 this.X = (float)randomNumber.Next(0, GameConstants.windowWidth);

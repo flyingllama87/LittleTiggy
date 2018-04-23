@@ -5,10 +5,8 @@
  * TO DO:
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - FEATURE: Add text display system - MAYBE
- * - FEATURE: Draw level number - DONE
- * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn randomly
+ * - FEATURE: Add logic for power up to allow player to 'capture' enemy and have enemy respawn - DONE
  * - FEATURE: Add logic for enemy to run away from player if player is powered up
- * - FEATURE: Add Art for when player is 'powered up'
  * - FEATURE: Add logic for levels (Support for multiple enemies and power ups) - DONE EXCEPT POWER UPS
  * - FEATURE: If an enemy is close to the main character, have enemy run directly towards main char
  * - FEATURE: Add instructions screen.
@@ -16,6 +14,7 @@
  * - FEATURE: Add leaderboards
  * - PLATFORM: Try to build / deploy on android.
  * - BUGFIX: Don't allow maps to spawn if there is a wall at 0,0 
+ * - BUGFIX: Animation does not update 
  * 
  * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".
  * LOSE CONDITION: 1) Restart with new map with -1 level 2) Show text "you lose".
@@ -47,7 +46,8 @@ namespace LittleTiggy
         SpriteBatch spriteBatch;
         mainCharacter character;
         List<Enemy> enemies;
-        PowerUp powerUp;
+        List<PowerUp> powerUps;
+        //PowerUp powerUp;
         SpriteFont mainFont;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
 
@@ -188,8 +188,15 @@ namespace LittleTiggy
                     Enemy enemy = new Enemy(this.GraphicsDevice, walls);
                     enemies.Add(enemy);
                 }
-                
-                powerUp = new PowerUp(this.GraphicsDevice, walls);
+
+                powerUps = new List<PowerUp>();
+                for (int noOfPowerUpsToSpawn = 0; noOfPowerUpsToSpawn < level; noOfPowerUpsToSpawn++)
+                {
+                    PowerUp powerUp = new PowerUp(this.GraphicsDevice, walls);
+                    powerUps.Add(powerUp);
+                }
+
+                // powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
@@ -215,7 +222,11 @@ namespace LittleTiggy
                 enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
             }
             base.Update(gameTime);
-            powerUp.Update(gameTime, GraphicsDevice);
+            foreach (PowerUp powerUp in powerUps)
+            {
+                powerUp.Update(gameTime, GraphicsDevice);
+            }
+
             CheckWinCondition();
             CheckLoseCondition();
         }
@@ -261,7 +272,11 @@ namespace LittleTiggy
             {
                 enemy.Draw(spriteBatch);
             }
-            powerUp.Draw(spriteBatch);
+            foreach (PowerUp powerUp in powerUps)
+            {
+                powerUp.Draw(spriteBatch);
+            }
+            // powerUp.Draw(spriteBatch);
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG

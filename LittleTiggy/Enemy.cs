@@ -131,74 +131,82 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            if (isFollowingPath) // Continue following path set by pathfinding algorithm if one is set to the nearest grid tile.
-            {
-                // Check if the destination set to the next grid tile by the path is reached.
-                if (Math.Floor(vectorDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorDestinationPosition.Y) == Math.Floor(this.Y))
-                    isFollowingPath = false;
 
-                // Move enemy closer to destination at normal speed if it's more than 1 unit away.
-                if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) > 1)
+            if ((ManhattanDistance(new Vector2(this.X, this.Y), new Vector2(mainCharacter.X, mainCharacter.Y)) < 32))
+            {
+                MoveDirectlyTowardsPlayer(walls);
+            }
+            else
+            {
+
+                if (isFollowingPath) // Continue following path set by pathfinding algorithm if one is set to the nearest grid tile.
                 {
-                    this.X += (charSpeed * ticksSinceLastUpdate);
-                    currentAnimation = walkRight;
+                    // Check if the destination set to the next grid tile by the path is reached.
+                    if (Math.Floor(vectorDestinationPosition.X) == Math.Floor(this.X) && Math.Floor(vectorDestinationPosition.Y) == Math.Floor(this.Y))
+                        isFollowingPath = false;
+
+                    // Move enemy closer to destination at normal speed if it's more than 1 unit away.
+                    if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) > 1)
+                    {
+                        this.X += (charSpeed * ticksSinceLastUpdate);
+                        currentAnimation = walkRight;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) < -1)
+                    {
+                        this.X -= (charSpeed * ticksSinceLastUpdate);
+                        currentAnimation = walkLeft;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) > 1)
+                    {
+                        this.Y += (charSpeed * ticksSinceLastUpdate);
+                        currentAnimation = walkDown;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) < -1)
+                    {
+                        this.Y -= (charSpeed * ticksSinceLastUpdate);
+                        currentAnimation = walkUp;
+                    }
+                    // Move enemy closer to destination just a little bit if it's just one unit away. 
+                    else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == 1)
+                    {
+                        this.X += 1;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == -1)
+                    {
+                        this.X -= 1;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == 1)
+                    {
+                        this.Y += 1;
+                    }
+                    else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == -1)
+                    {
+                        this.Y -= 1;
+                    }
+
                 }
-                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) < -1)
+                else // If not moving toward a set grid tile
                 {
-                    this.X -= (charSpeed * ticksSinceLastUpdate);
-                    currentAnimation = walkLeft;
-                }
-                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) > 1)
-                {
-                    this.Y += (charSpeed * ticksSinceLastUpdate);
-                    currentAnimation = walkDown;
-                }
-                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) < -1)
-                {
-                    this.Y -= (charSpeed * ticksSinceLastUpdate);
-                    currentAnimation = walkUp;
-                }
-                // Move enemy closer to destination just a little bit if it's just one unit away. 
-                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == 1)
-                {
-                    this.X += 1;
-                }
-                else if (Math.Floor(vectorDestinationPosition.X) - Math.Floor(this.X) == -1)
-                {
-                    this.X -= 1;
-                }
-                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == 1)
-                {
-                    this.Y += 1;
-                }
-                else if (Math.Floor(vectorDestinationPosition.Y) - Math.Floor(this.Y) == -1)
-                {
-                    this.Y -= 1;
+                    // Refresh the path to follow periodically
+                    if (pathfindingTimer.CompareTo(DateTime.Now) < 0)
+                    {
+                        pathfindingTimer = DateTime.Now;
+                        pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
+
+                        pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
+                        Pathfinder.PathToDraw = pathToFollow;
+                    }
+
+                    if (!(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
+                    {
+                        vectorDestinationPosition = pathToFollow[pathToFollow.Count - 1];
+                        pathToFollow.RemoveAt(pathToFollow.Count - 1);
+                    }
+
+                    isFollowingPath = true;
                 }
 
             }
-            else // If not moving toward a set grid tile
-            {
-                // Refresh the path to follow periodically
-                if (pathfindingTimer.CompareTo(DateTime.Now) < 0)
-                {
-                    pathfindingTimer = DateTime.Now;
-                    pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
-
-                    pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
-                    Pathfinder.PathToDraw = pathToFollow;
-                }
-
-                if (!(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
-                {
-                    vectorDestinationPosition = pathToFollow[pathToFollow.Count - 1];
-                    pathToFollow.RemoveAt(pathToFollow.Count - 1);
-                }
-
-                isFollowingPath = true;
-                }
-
-
                 // select appropriate animation based on movement direction
 
             currentAnimation.Update(gameTime);
@@ -233,11 +241,12 @@ namespace LittleTiggy
 
         // Get direction of player character and set enemy to move in that direction at half player speed.
 
-        void MoveDirectlyTowardsPlayer(Vector2 velocity, EnvironmentBlock[] walls)
+        void MoveDirectlyTowardsPlayer(EnvironmentBlock[] walls)
         {
+            Vector2 velocity = GetPlayerVelocity();
 
-            float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate) / 2);
-            float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate) / 2);
+            float XPosToMoveTo = this.X + (velocity.X * (charSpeed * ticksSinceLastUpdate));
+            float YPosToMoveTo = this.Y + (velocity.Y * (charSpeed * ticksSinceLastUpdate));
 
 
             Vector2 vectorImmediatePosToMoveTo = new Vector2(XPosToMoveTo, YPosToMoveTo);
@@ -251,7 +260,7 @@ namespace LittleTiggy
             {
                 // select appropriate animation based on movement direction
 
-                velocity = GetPlayerVelocity();
+                
 
                 bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
 
@@ -333,7 +342,10 @@ namespace LittleTiggy
             return false;
         }
 
-
+        public ushort ManhattanDistance(Vector2 source, Vector2 destination)
+        {
+            return (ushort)Math.Floor(Math.Abs(source.X - destination.X) + (Math.Abs(source.Y - destination.Y)));
+        }
 
     }
 }
