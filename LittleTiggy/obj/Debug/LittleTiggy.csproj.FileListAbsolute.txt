@@ -115,3 +115,13 @@ C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.
 C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.csproj.CoreCompileInputs.cache
 C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.exe
 C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\obj\Debug\LittleTiggy.pdb
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\bgm.ogg
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\bgm.xnb
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\losegame.xnb
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\powerup.xnb
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\wingame.xnb
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\bgm.mp3
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\losegame.wav
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\powerup.wav
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\wingame.wav
+C:\Users\morgan.robertson\Desktop\LittleTiggy\LittleTiggy\bin\DesktopGL\AnyCPU\Debug\Content\killenemy.xnb

@@ -21,6 +21,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 
@@ -46,6 +48,12 @@ namespace LittleTiggy
         List<PowerUp> powerUps;
         SpriteFont mainFont;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
+
+        Song songBGM;
+        public static SoundEffect powerUpSound;
+        SoundEffect winGameSound;
+        SoundEffect loseGameSound;
+        public static SoundEffect killEnemySound;
 
         Pathfinder pathfinder;
 
@@ -93,6 +101,15 @@ namespace LittleTiggy
             spriteBatch = new SpriteBatch(GraphicsDevice);
             character = new mainCharacter(this.GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
+            songBGM = Content.Load<Song>("bgm");
+            MediaPlayer.Play(songBGM);
+            MediaPlayer.IsRepeating = true;
+
+            powerUpSound = Content.Load<SoundEffect>("powerup");
+            winGameSound = Content.Load<SoundEffect>("wingame");
+            loseGameSound = Content.Load<SoundEffect>("losegame");
+            killEnemySound = Content.Load<SoundEffect>("killenemy");
+
             LoadLevel(level);
         }
 
@@ -232,6 +249,7 @@ namespace LittleTiggy
             if (mainCharacter.GridAlignedY == GameConstants.windowHeight - (GameConstants.characterHeight + 1))
             {
                 level++;
+                winGameSound.Play();
                 LoadLevel(level);
             }
         }
@@ -244,6 +262,7 @@ namespace LittleTiggy
                 {
                     if (level > 1)
                         level--;
+                    loseGameSound.Play();
                     LoadLevel(level);
                 }
             }
@@ -288,3 +307,4 @@ namespace LittleTiggy
         }
     }
 }
+

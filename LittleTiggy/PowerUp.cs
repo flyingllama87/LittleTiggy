@@ -70,6 +70,7 @@ namespace LittleTiggy
             if (IsPlayerCollision())
             {
                 mainCharacter.isPoweredUp = true;
+                Game1.powerUpSound.Play();
                 mainCharacter.changeSkin();
                 mainCharacter.powerUpTimer = DateTime.Now.AddSeconds(5.0);
                 this.X = -16;
