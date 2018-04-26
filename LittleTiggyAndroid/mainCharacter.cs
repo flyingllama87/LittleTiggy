@@ -274,8 +274,8 @@ namespace LittleTiggy
 
             if (touchCollection.Count > 0) // If the player is using a touch screen and has touched the screen.
             {
-                desiredVelocity.X = touchCollection[0].Position.X - X;
-                desiredVelocity.Y = touchCollection[0].Position.Y - Y;
+                desiredVelocity.X = touchCollection[0].Position.X - (Game1.viewportWidth / 2);
+                desiredVelocity.Y = touchCollection[0].Position.Y - (Game1.viewportHeight / 2);
 
                 if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
                 {

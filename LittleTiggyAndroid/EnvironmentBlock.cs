@@ -51,6 +51,7 @@ namespace LittleTiggy
             Color tintColor = Color.White;
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
+            // spriteBatch.Draw(environmentSheetTexture, topLeftOfSprite, sourceRectangle, tintColor, 0f, Vector2.Zero, Game1.scaleFactor, SpriteEffects.None, 0f);
             spriteBatch.Draw(environmentSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
 
         }
