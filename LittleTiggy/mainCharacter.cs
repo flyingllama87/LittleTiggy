@@ -239,12 +239,12 @@ namespace LittleTiggy
             desiredDestinationPosition.X += velocity.X * charSpeed * ticksSinceLastUpdate;
             desiredDestinationPosition.Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
 
-            if (IsEnvironmentCollision(Game1.walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
+            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
             {
                 X = desiredDestinationPosition.X;
             }
 
-            if (IsEnvironmentCollision(Game1.walls, new Vector2(X, desiredDestinationPosition.Y)) == false)
+            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(X, desiredDestinationPosition.Y)) == false)
             {
                 Y = desiredDestinationPosition.Y;
             }

@@ -47,7 +47,7 @@
     <Compile Include="PowerUp.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnvironmentBlock.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="LittleTiggy.cs" />
     <Compile Include="mainCharacter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

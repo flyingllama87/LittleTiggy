@@ -427,7 +427,7 @@ namespace LittleTiggy
                 vectorDestinationPosition = new Vector2(0, 0);
                 pathToFollow.Clear();
                 if (mainCharacter.isPoweredUp)
-                    Game1.killEnemySound.Play();
+                    LittleTiggy.killEnemySound.Play();
                 return true;
             }
             return false;

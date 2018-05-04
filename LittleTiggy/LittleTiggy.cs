@@ -6,8 +6,7 @@
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add leaderboards?
- * - FEATURE: Add threading for pathfinding?
- * - FEATURE: Fix up monogame splash screen
+ * - PLATFORM: Try to build / deploy on android.
  * - BUGFIX: When idle, player animation does not switch back to normal skin after powerup expires. 
  * 
  * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".
@@ -25,7 +24,6 @@ using System.Collections.Generic;
 
 namespace LittleTiggy
 {
-
     public static class GameConstants
     {
         public const int windowWidth = 512;
@@ -36,7 +34,7 @@ namespace LittleTiggy
         public const int noWallsToSpawn = 300;
     }
 
-    public class Game1 : Game
+    public class LittleTiggy : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -80,21 +78,15 @@ namespace LittleTiggy
         // public static int respawn { get; set; } = 1;
 
 
-        public Game1()
+        public LittleTiggy()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             this.IsMouseVisible = true;
 
-            graphics.PreferredBackBufferWidth = 512;  // Set window width
-            graphics.PreferredBackBufferHeight = 512;   // Set window height
+            graphics.PreferredBackBufferWidth = 1024;  // Set window width
+            graphics.PreferredBackBufferHeight = 1024;   // Set window height
             graphics.ApplyChanges();
-
-        }
-
-        protected override void Initialize()
-        {
-            base.Initialize();
 
             viewportWidth = GraphicsDevice.Viewport.Width;
             viewportHeight = GraphicsDevice.Viewport.Height;
@@ -104,8 +96,12 @@ namespace LittleTiggy
             else
                 scaleFactor = GraphicsDevice.Viewport.Width / GameConstants.windowWidth;
 
-            graphics.ApplyChanges();
 
+        }
+
+        protected override void Initialize()
+        {
+            base.Initialize();
         }
 
         protected override void LoadContent()
