@@ -23,6 +23,10 @@ namespace LittleTiggy
         static Animation idle;
         static Animation currentAnimation;
 
+        Texture2D virtualJoystickTexture;
+        Boolean bWasTouchPresentLastUpdate = false;
+        Vector2 virtualJoystickPosition;
+
         Vector2 desiredDestinationPosition;
 
         public static Boolean isPoweredUp = false;
@@ -64,6 +68,14 @@ namespace LittleTiggy
 
         public mainCharacter(GraphicsDevice graphicsDevice)
         {
+            if (virtualJoystickTexture == null)
+            {
+                using (var stream = TitleContainer.OpenStream("Content/joystickCircle.png"))
+                {
+                    virtualJoystickTexture = Texture2D.FromStream(graphicsDevice, stream);
+                }
+            }
+
             if (characterSheetTexture == null)
             {
                 using (var stream = TitleContainer.OpenStream("Content/charactersheet.png"))
@@ -274,15 +286,30 @@ namespace LittleTiggy
 
             if (touchCollection.Count > 0) // If the player is using a touch screen and has touched the screen.
             {
-                desiredVelocity.X = touchCollection[0].Position.X - (Game1.viewportWidth / 2);
-                desiredVelocity.Y = touchCollection[0].Position.Y - (Game1.viewportHeight / 2);
+                // If we detect a new touch, set the touch position as the middle of the virtual joystick.
+
+                if (bWasTouchPresentLastUpdate == false)
+                    virtualJoystickPosition = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
+
+                bWasTouchPresentLastUpdate = true;
+
+                desiredVelocity.X = touchCollection[0].Position.X - virtualJoystickPosition.X;
+                desiredVelocity.Y = touchCollection[0].Position.Y - virtualJoystickPosition.Y;
+
+                //desiredVelocity.X = touchCollection[0].Position.X - (Game1.viewportWidth / 2);
+                //desiredVelocity.Y = touchCollection[0].Position.Y - (Game1.viewportHeight / 2);
 
                 if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
                 {
                     desiredVelocity.Normalize();
                 }
             }
-            else if (mouseState.LeftButton == ButtonState.Pressed) // if not & the player has the mouse pressed, move the character.
+            else
+            {
+                bWasTouchPresentLastUpdate = false;
+            }
+
+            if (mouseState.LeftButton == ButtonState.Pressed) // if not & the player has the mouse pressed, move the character.
             {
                 desiredVelocity.X = mouseState.X - X;
                 desiredVelocity.Y = mouseState.Y - Y;
@@ -292,6 +319,7 @@ namespace LittleTiggy
                     desiredVelocity.Normalize();
                 }
             }
+
 
             return desiredVelocity;
         }
@@ -303,6 +331,15 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
+
+            if (virtualJoystickPosition != null)
+            {
+                Rectangle joystickRectangle = new Rectangle(1, 1, 49, 49);
+
+                spriteBatch.Draw(virtualJoystickTexture, new Vector2(virtualJoystickPosition.X, virtualJoystickPosition.Y), joystickRectangle, Color.White * 0.25f);
+
+            }
+            
 
         }
 

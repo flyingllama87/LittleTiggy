@@ -6,7 +6,8 @@
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add leaderboards?
- * - PLATFORM: Try to build / deploy on android.
+ * - FEATURE: Add threading for pathfinding?
+ * - FEATURE: Fix up monogame splash screen
  * - BUGFIX: When idle, player animation does not switch back to normal skin after powerup expires. 
  * 
  * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".

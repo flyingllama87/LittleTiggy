@@ -126,6 +126,9 @@
     <Content Include="Content\itemsheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\joystickCircle.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\killenemy.wav" />
     <Content Include="Content\losegame.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
