@@ -23,16 +23,13 @@ namespace LittleTiggy
         static Animation idle;
         static Animation currentAnimation;
 
-        Texture2D virtualJoystickTexture;
-        Boolean bWasTouchPresentLastUpdate = false;
-        Vector2 virtualJoystickPosition;
+        Vector2 desiredDestinationPosition; // Used for storing the position the player is trying to move to.
+        Vector2 desiredDestinationTilePosition; // Used for storing the destination tile the player is moving to when touch controls are active.
 
-        Vector2 desiredDestinationPosition;
+        public bool isMovingToTile = false; // Used as a switch for controlling and determining if the player is moving to a set tile when touch controls are active.
 
         public static Boolean isPoweredUp = false;
         public static DateTime powerUpTimer;
-
-        // KeyboardState oldKeyboardState;
 
         const float charSpeed = 0.00001F;
         long ticksSinceLastUpdate = 0;
@@ -68,13 +65,6 @@ namespace LittleTiggy
 
         public mainCharacter(GraphicsDevice graphicsDevice)
         {
-            if (virtualJoystickTexture == null)
-            {
-                using (var stream = TitleContainer.OpenStream("Content/joystickCircle.png"))
-                {
-                    virtualJoystickTexture = Texture2D.FromStream(graphicsDevice, stream);
-                }
-            }
 
             if (characterSheetTexture == null)
             {
@@ -134,19 +124,28 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            desiredDestinationPosition = new Vector2(mainCharacter.X, mainCharacter.Y);
-     
-            Vector2 velocity = GetDesiredVelocityFromInput();  // Touch / mouse controls
-
-            if (velocity != Vector2.Zero) // if we have input from either touch or mouse
+            if (isMovingToTile)
             {
-                ProcessTouchInput(velocity);
+                MoveToTile();
             }
-            else // keyboard controls
-            { 
-                ProcessKeyboardInput(gameTime, walls);
+            else
+            {
+                desiredDestinationPosition = new Vector2(mainCharacter.X, mainCharacter.Y);
+
+                Vector2 velocity = GetDesiredVelocityFromInput();  // Touch / mouse controls
+
+                if (velocity != Vector2.Zero) // if we have input from either touch or mouse
+                {
+                    ProcessTouchInput(velocity);
+                }
+                else // keyboard controls
+                {
+                    ProcessKeyboardInput(gameTime, walls);
+                }
             }
-            
+
+
+
             currentAnimation.Update(gameTime);
 
             if (isPoweredUp && (powerUpTimer.CompareTo(DateTime.Now) < 0))
@@ -155,6 +154,52 @@ namespace LittleTiggy
                 changeSkin();
             }
 
+        }
+
+        void MoveToTile()
+        {
+            // Check if the destination set to the next grid tile by the path is reached.
+            if (Math.Floor(desiredDestinationTilePosition.X) == Math.Floor(X) && Math.Floor(desiredDestinationTilePosition.Y) == Math.Floor(Y))
+                isMovingToTile = false;
+
+            // Move enemy closer to destination at normal speed if it's more than 1 unit away.
+            if (Math.Floor(desiredDestinationTilePosition.X) - Math.Floor(X) > 1)
+            {
+                X += (charSpeed * ticksSinceLastUpdate);
+                currentAnimation = walkRight;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.X) - Math.Floor(X) < -1)
+            {
+                X -= (charSpeed * ticksSinceLastUpdate);
+                currentAnimation = walkLeft;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.Y) - Math.Floor(Y) > 1)
+            {
+                Y += (charSpeed * ticksSinceLastUpdate);
+                currentAnimation = walkDown;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.Y) - Math.Floor(Y) < -1)
+            {
+                Y -= (charSpeed * ticksSinceLastUpdate);
+                currentAnimation = walkUp;
+            }
+            // Move enemy closer to destination just a little bit if it's just one unit away. 
+            else if (Math.Floor(desiredDestinationTilePosition.X) - Math.Floor(X) == 1)
+            {
+                X += 1;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.X) - Math.Floor(X) == -1)
+            {
+                X -= 1;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.Y) - Math.Floor(Y) == 1)
+            {
+                Y += 1;
+            }
+            else if (Math.Floor(desiredDestinationTilePosition.Y) - Math.Floor(Y) == -1)
+            {
+                Y -= 1;
+            }
         }
 
         void ProcessKeyboardInput(GameTime gameTime, EnvironmentBlock[] walls)
@@ -275,8 +320,6 @@ namespace LittleTiggy
             }
         }
 
-
-
         Vector2 GetDesiredVelocityFromInput()  // Acquire a normalised velocity in the direction the player has their touch or mouse input.
         {
             Vector2 desiredVelocity = new Vector2();
@@ -288,25 +331,55 @@ namespace LittleTiggy
             {
                 // If we detect a new touch, set the touch position as the middle of the virtual joystick.
 
-                if (bWasTouchPresentLastUpdate == false)
-                    virtualJoystickPosition = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
+                // desiredVelocity.X = touchCollection[0].Position.X - VirtualJoystick.virtualJoystickPosition.X;
+                // desiredVelocity.Y = touchCollection[0].Position.Y - VirtualJoystick.virtualJoystickPosition.Y;
 
-                bWasTouchPresentLastUpdate = true;
+                desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
+                desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
 
-                desiredVelocity.X = touchCollection[0].Position.X - virtualJoystickPosition.X;
-                desiredVelocity.Y = touchCollection[0].Position.Y - virtualJoystickPosition.Y;
+                desiredVelocity.Normalize();
 
-                //desiredVelocity.X = touchCollection[0].Position.X - (Game1.viewportWidth / 2);
-                //desiredVelocity.Y = touchCollection[0].Position.Y - (Game1.viewportHeight / 2);
-
-                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
+                if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
                 {
-                    desiredVelocity.Normalize();
+                    //desiredVelocity = new Vector2(1.0f, 0.0f);
+                    desiredDestinationTilePosition = new Vector2(GridAlignedX + 16, GridAlignedY);
+
+                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
+                    {
+                        isMovingToTile = true;
+                    }
                 }
-            }
-            else
-            {
-                bWasTouchPresentLastUpdate = false;
+                else if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X < 0)
+                {
+                    //desiredVelocity = new Vector2(-1.0f, 0.0f);
+                    desiredDestinationTilePosition = new Vector2(GridAlignedX - 16, GridAlignedY);
+                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
+                    {
+                        isMovingToTile = true;
+                    }
+                }
+                else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y > 0)
+                {
+                    //desiredVelocity = new Vector2(0.0f, 1.0f);
+                    desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY + 16);
+                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
+                    {
+                        isMovingToTile = true;
+                    }
+                }
+                else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y < 0)
+                {
+                    //desiredVelocity = new Vector2(0.0f, -1.0f);
+                    desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY - 16);
+                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
+                    {
+                        isMovingToTile = true;
+                    }
+                }
+                
+
+                // 
+
             }
 
             if (mouseState.LeftButton == ButtonState.Pressed) // if not & the player has the mouse pressed, move the character.
@@ -331,15 +404,6 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
-
-            if (virtualJoystickPosition != null)
-            {
-                Rectangle joystickRectangle = new Rectangle(1, 1, 49, 49);
-
-                spriteBatch.Draw(virtualJoystickTexture, new Vector2(virtualJoystickPosition.X, virtualJoystickPosition.Y), joystickRectangle, Color.White * 0.25f);
-
-            }
-            
 
         }
 

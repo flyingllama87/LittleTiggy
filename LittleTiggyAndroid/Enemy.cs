@@ -26,7 +26,12 @@ namespace LittleTiggy
         Animation Idle;
         Animation currentAnimation;
 
+#if ANDROID||IOS
+        const float charSpeed = 0.000008F;
+#endif
+#if !ANDROID
         const float charSpeed = 0.00001F;
+#endif
         long ticksSinceLastUpdate = 0;
 
         Vector2 vectorDestinationPosition;

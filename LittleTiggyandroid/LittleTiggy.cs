@@ -49,6 +49,7 @@ namespace LittleTiggy
         List<Enemy> enemies;
         List<PowerUp> powerUps;
         SpriteFont mainFont;
+        VirtualJoystick virtualJoystick;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
 
         Song songBGM;
@@ -112,8 +113,9 @@ namespace LittleTiggy
         {
             // Create main game objects
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            character = new mainCharacter(this.GraphicsDevice);
+            character = new mainCharacter(GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
+            virtualJoystick = new VirtualJoystick(GraphicsDevice);
             songBGM = Content.Load<Song>("bgm");
             MediaPlayer.Play(songBGM);
             MediaPlayer.IsRepeating = true;
@@ -132,6 +134,7 @@ namespace LittleTiggy
             // main character start position
             mainCharacter.X = 1;
             mainCharacter.Y = 1;
+            character.isMovingToTile = false;
 
             // Loop until valid start conditions from random generation are met.
 
@@ -225,6 +228,8 @@ namespace LittleTiggy
                 // powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
+
+
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
             } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || mainCharacter.IsEnvironmentCollision(walls, new Vector2(1, 1)));
@@ -242,6 +247,7 @@ namespace LittleTiggy
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            virtualJoystick.Update();
             character.Update(gameTime, GraphicsDevice, walls);
             foreach (Enemy enemy in enemies)
             {
@@ -294,6 +300,7 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
+            virtualJoystick.Draw(spriteBatch);
             pathfinder.Draw(spriteBatch);
             character.Draw(spriteBatch);
             foreach (Enemy enemy in enemies)
