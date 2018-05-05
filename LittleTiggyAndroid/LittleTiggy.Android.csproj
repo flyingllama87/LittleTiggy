@@ -67,7 +67,7 @@
     <Compile Include="Enemy.cs" />
     <Compile Include="EnvironmentBlock.cs" />
     <Compile Include="LittleTiggy.cs" />
-    <Compile Include="mainCharacter.cs" />
+    <Compile Include="MainCharacter.cs" />
     <Compile Include="Pathfinder.cs" />
     <Compile Include="PowerUp.cs" />
     <Compile Include="Program.cs" />

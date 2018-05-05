@@ -69,10 +69,10 @@ namespace LittleTiggy
 
             if (IsPlayerCollision())
             {
-                mainCharacter.isPoweredUp = true;
+                MainCharacter.isPoweredUp = true;
                 LittleTiggy.powerUpSound.Play();
-                mainCharacter.changeSkin();
-                mainCharacter.powerUpTimer = DateTime.Now.AddSeconds(5.0);
+                MainCharacter.changeSkin();
+                MainCharacter.powerUpTimer = DateTime.Now.AddSeconds(5.0);
                 this.X = -16;
                 this.Y = -16;
             }
@@ -111,7 +111,7 @@ namespace LittleTiggy
 
         bool IsPlayerCollision()
         {
-            Rectangle character = new Rectangle((int)mainCharacter.X, (int)mainCharacter.Y, 16, 16);
+            Rectangle character = new Rectangle((int)MainCharacter.X, (int)MainCharacter.Y, 16, 16);
             Rectangle powerUp = new Rectangle((int)this.X, (int)this.Y, 16, 16);
 
             if (character.Intersects(powerUp))

@@ -38,6 +38,9 @@ namespace LittleTiggy
                 }
             }
 
+            virtualJoystickPosition.X = LittleTiggy.viewportWidth / 2;
+            virtualJoystickPosition.Y = LittleTiggy.viewportHeight / 2;
+
         }
 
         public void Update()

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace LittleTiggy
 {
 
-    public class mainCharacter
+    public class MainCharacter
     {
         static Texture2D characterSheetTexture;
         static Animation walkDown;
@@ -63,7 +63,7 @@ namespace LittleTiggy
             }
         }
 
-        public mainCharacter(GraphicsDevice graphicsDevice)
+        public MainCharacter(GraphicsDevice graphicsDevice)
         {
 
             if (characterSheetTexture == null)
@@ -130,21 +130,24 @@ namespace LittleTiggy
             }
             else
             {
-                desiredDestinationPosition = new Vector2(mainCharacter.X, mainCharacter.Y);
+                desiredDestinationPosition = new Vector2(MainCharacter.X, MainCharacter.Y); //Reset this var to the player's current position.  To be modified by the input functions and then checked for validity.
 
-                Vector2 velocity = GetDesiredVelocityFromInput();  // Touch / mouse controls
+                MouseState mouseState = Mouse.GetState();
+                TouchCollection touchCollection = TouchPanel.GetState();
 
-                if (velocity != Vector2.Zero) // if we have input from either touch or mouse
+                if (mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    ProcessTouchInput(velocity);
+                    ProcessMouseInput(mouseState);
+                }
+                else if (touchCollection.Count > 0)
+                {
+                    ProcessTouchInput(touchCollection);
                 }
                 else // keyboard controls
                 {
                     ProcessKeyboardInput(gameTime, walls);
                 }
             }
-
-
 
             currentAnimation.Update(gameTime);
 
@@ -289,12 +292,22 @@ namespace LittleTiggy
 
         }
 
-        void ProcessTouchInput(Vector2 velocity)
+        void ProcessMouseInput(MouseState mouseState)
         {
             // Generate the position the player is trying to move to.  Then assess if a wall is in the way but assess the X & Y positions independantly.  Allow the player to move in the desired location if a wall is not in the way.
 
-            desiredDestinationPosition.X += velocity.X * charSpeed * ticksSinceLastUpdate;
-            desiredDestinationPosition.Y += velocity.Y * charSpeed * ticksSinceLastUpdate;
+            Vector2 desiredVelocity = new Vector2();
+
+            desiredVelocity.X = mouseState.X - X;
+            desiredVelocity.Y = mouseState.Y - Y;
+
+            if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
+            {
+                desiredVelocity.Normalize();
+            }
+
+            desiredDestinationPosition.X += desiredVelocity.X * charSpeed * ticksSinceLastUpdate;
+            desiredDestinationPosition.Y += desiredVelocity.Y * charSpeed * ticksSinceLastUpdate;
 
             if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
             {
@@ -307,94 +320,73 @@ namespace LittleTiggy
             }
             
             // select animation based on direction mouse/touch input is pointing
-            bool movingHorizontally = Math.Abs(velocity.X) > Math.Abs(velocity.Y);
+            bool movingHorizontally = Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y);
             if (movingHorizontally)
             {
-                if (velocity.X > 0) currentAnimation = walkRight;
+                if (desiredVelocity.X > 0) currentAnimation = walkRight;
                 else currentAnimation = walkLeft;
             }
             else
             {
-                if (velocity.Y > 0) currentAnimation = walkDown;
+                if (desiredVelocity.Y > 0) currentAnimation = walkDown;
                 else currentAnimation = walkUp;
             }
         }
 
-        Vector2 GetDesiredVelocityFromInput()  // Acquire a normalised velocity in the direction the player has their touch or mouse input.
+        void ProcessTouchInput(TouchCollection touchCollection)  // Acquire a normalised velocity in the direction the player has their touch or mouse input.
         {
             Vector2 desiredVelocity = new Vector2();
 
-            TouchCollection touchCollection = TouchPanel.GetState();
-            MouseState mouseState = Mouse.GetState();
+            // Acquire the direction the player wants to move based off where they are touching the screen relative to the virtual joystick position.
 
-            if (touchCollection.Count > 0) // If the player is using a touch screen and has touched the screen.
+            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.scaleFactor) - VirtualJoystick.virtualJoystickPosition.X;
+            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.scaleFactor) - VirtualJoystick.virtualJoystickPosition.Y;
+
+            // If we detect a new touch, set the touch position as the middle of the virtual joystick.
+
+            // desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
+            // desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
+
+            desiredVelocity.Normalize();
+
+            if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
             {
-                // If we detect a new touch, set the touch position as the middle of the virtual joystick.
+                //desiredVelocity = new Vector2(1.0f, 0.0f);
+                desiredDestinationTilePosition = new Vector2(GridAlignedX + 16, GridAlignedY);
 
-                // desiredVelocity.X = touchCollection[0].Position.X - VirtualJoystick.virtualJoystickPosition.X;
-                // desiredVelocity.Y = touchCollection[0].Position.Y - VirtualJoystick.virtualJoystickPosition.Y;
-
-                desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
-                desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
-
-                desiredVelocity.Normalize();
-
-                if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
+                if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
-                    //desiredVelocity = new Vector2(1.0f, 0.0f);
-                    desiredDestinationTilePosition = new Vector2(GridAlignedX + 16, GridAlignedY);
-
-                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
-                    {
-                        isMovingToTile = true;
-                    }
+                    isMovingToTile = true;
                 }
-                else if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X < 0)
+            }
+            else if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X < 0)
+            {
+                //desiredVelocity = new Vector2(-1.0f, 0.0f);
+                desiredDestinationTilePosition = new Vector2(GridAlignedX - 16, GridAlignedY);
+                if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
-                    //desiredVelocity = new Vector2(-1.0f, 0.0f);
-                    desiredDestinationTilePosition = new Vector2(GridAlignedX - 16, GridAlignedY);
-                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
-                    {
-                        isMovingToTile = true;
-                    }
+                    isMovingToTile = true;
                 }
-                else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y > 0)
+            }
+            else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y > 0)
+            {
+                //desiredVelocity = new Vector2(0.0f, 1.0f);
+                desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY + 16);
+                if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
-                    //desiredVelocity = new Vector2(0.0f, 1.0f);
-                    desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY + 16);
-                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
-                    {
-                        isMovingToTile = true;
-                    }
+                    isMovingToTile = true;
                 }
-                else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y < 0)
+            }
+            else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y < 0)
+            {
+                //desiredVelocity = new Vector2(0.0f, -1.0f);
+                desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY - 16);
+                if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
-                    //desiredVelocity = new Vector2(0.0f, -1.0f);
-                    desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY - 16);
-                    if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
-                    {
-                        isMovingToTile = true;
-                    }
+                    isMovingToTile = true;
                 }
+            }
                 
-
-                // 
-
-            }
-
-            if (mouseState.LeftButton == ButtonState.Pressed) // if not & the player has the mouse pressed, move the character.
-            {
-                desiredVelocity.X = mouseState.X - X;
-                desiredVelocity.Y = mouseState.Y - Y;
-
-                if (desiredVelocity.X != 0 || desiredVelocity.Y != 0)
-                {
-                    desiredVelocity.Normalize();
-                }
-            }
-
-
-            return desiredVelocity;
         }
 
         public void Draw(SpriteBatch spriteBatch)

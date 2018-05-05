@@ -137,13 +137,13 @@ namespace LittleTiggy
         {
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            if (mainCharacter.isPoweredUp) // If the player is powered up.
+            if (MainCharacter.isPoweredUp) // If the player is powered up.
             {
                 AvoidPlayer(pathfinder, walls); // Avoid the player
             }
             else // If the player is not powered up
             {
-                if ((ManhattanDistance(new Vector2(this.X, this.Y), new Vector2(mainCharacter.X, mainCharacter.Y)) < 32)) // If we are close to the character, run directly towards them.
+                if ((ManhattanDistance(new Vector2(this.X, this.Y), new Vector2(MainCharacter.X, MainCharacter.Y)) < 32)) // If we are close to the character, run directly towards them.
                 {
                     MoveDirectlyTowardsPlayer(walls);
                 }
@@ -234,7 +234,7 @@ namespace LittleTiggy
                 pathfindingTimer = DateTime.Now;
                 pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
 
-                pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(mainCharacter.X - mainCharacter.X % 16, mainCharacter.Y - mainCharacter.Y % 16), walls);
+                pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16), walls);
                 Pathfinder.PathToDraw = pathToFollow;
             }
 
@@ -380,7 +380,7 @@ namespace LittleTiggy
         {
             //get velocity of player character relative to enemy's position & normalize so we end up with a direction to face.
 
-            Vector2 desiredVelocity = new Vector2(mainCharacter.X - this.X, mainCharacter.Y - this.Y);
+            Vector2 desiredVelocity = new Vector2(MainCharacter.X - this.X, MainCharacter.Y - this.Y);
 
             desiredVelocity.Normalize();
 
@@ -422,7 +422,7 @@ namespace LittleTiggy
 
         public bool IsPlayerCollision()
         {
-            Rectangle mainCharacterRectangle = new Rectangle((int)mainCharacter.X, (int)mainCharacter.Y, 10, 15);
+            Rectangle mainCharacterRectangle = new Rectangle((int)MainCharacter.X, (int)MainCharacter.Y, 10, 15);
             Rectangle thisEnemyRectangle = new Rectangle((int)this.X, (int)this.Y, 10, 15);
             if (thisEnemyRectangle.Intersects(mainCharacterRectangle))
             {
@@ -430,8 +430,9 @@ namespace LittleTiggy
                 this.Y = 1;
                 isFollowingPath = false;
                 vectorDestinationPosition = new Vector2(0, 0);
-                pathToFollow.Clear();
-                if (mainCharacter.isPoweredUp)
+                if (pathToFollow != null)
+                    pathToFollow.Clear();
+                if (MainCharacter.isPoweredUp)
                     LittleTiggy.killEnemySound.Play();
                 return true;
             }

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace LittleTiggy
 {
 
-    public class mainCharacter
+    public class MainCharacter
     {
         static Texture2D characterSheetTexture;
         static Animation walkDown;
@@ -62,7 +62,7 @@ namespace LittleTiggy
             }
         }
 
-        public mainCharacter(GraphicsDevice graphicsDevice)
+        public MainCharacter(GraphicsDevice graphicsDevice)
         {
             if (characterSheetTexture == null)
             {
@@ -122,7 +122,7 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            desiredDestinationPosition = new Vector2(mainCharacter.X, mainCharacter.Y);
+            desiredDestinationPosition = new Vector2(MainCharacter.X, MainCharacter.Y);
      
             Vector2 velocity = GetDesiredVelocityFromInput();  // Touch / mouse controls
 

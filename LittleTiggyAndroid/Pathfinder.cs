@@ -92,7 +92,7 @@ namespace LittleTiggy
             {
                 Vector2 source = new Vector2(enemy.X - (enemy.X % 16), enemy.Y - (enemy.Y % 16));
 
-                Vector2 destination = new Vector2(mainCharacter.X - (mainCharacter.X % 16), mainCharacter.Y - (mainCharacter.Y % 16));
+                Vector2 destination = new Vector2(MainCharacter.X - (MainCharacter.X % 16), MainCharacter.Y - (MainCharacter.Y % 16));
 
                 // Path = new Stack<Vector2>();
 

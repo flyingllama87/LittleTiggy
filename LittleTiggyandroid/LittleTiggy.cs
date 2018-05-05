@@ -45,7 +45,7 @@ namespace LittleTiggy
         public static int viewportWidth;
         public static int viewportHeight;
 
-        mainCharacter character;
+        MainCharacter character;
         List<Enemy> enemies;
         List<PowerUp> powerUps;
         SpriteFont mainFont;
@@ -113,7 +113,7 @@ namespace LittleTiggy
         {
             // Create main game objects
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            character = new mainCharacter(GraphicsDevice);
+            character = new MainCharacter(GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
             virtualJoystick = new VirtualJoystick(GraphicsDevice);
             songBGM = Content.Load<Song>("bgm");
@@ -132,8 +132,8 @@ namespace LittleTiggy
         {
 
             // main character start position
-            mainCharacter.X = 1;
-            mainCharacter.Y = 1;
+            MainCharacter.X = 1;
+            MainCharacter.Y = 1;
             character.isMovingToTile = false;
 
             // Loop until valid start conditions from random generation are met.
@@ -232,8 +232,8 @@ namespace LittleTiggy
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
-            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || mainCharacter.IsEnvironmentCollision(walls, new Vector2(1, 1)));
-            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
+            } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || MainCharacter.IsEnvironmentCollision(walls, new Vector2(1, 1)));
+            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(MainCharacter.X, MainCharacter.Y), walls) == false);
         }
 
         protected override void UnloadContent()
@@ -247,8 +247,8 @@ namespace LittleTiggy
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            virtualJoystick.Update();
             character.Update(gameTime, GraphicsDevice, walls);
+            virtualJoystick.Update();
             foreach (Enemy enemy in enemies)
             {
                 enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
@@ -265,7 +265,7 @@ namespace LittleTiggy
 
         void CheckWinCondition()
         {
-            if (mainCharacter.GridAlignedY == GameConstants.windowHeight - (GameConstants.characterHeight + 1))
+            if (MainCharacter.GridAlignedY == GameConstants.windowHeight - (GameConstants.characterHeight + 1))
             {
                 level++;
                 winGameSound.Play();
@@ -277,7 +277,7 @@ namespace LittleTiggy
         {
             foreach (Enemy enemy in enemies)
             {
-                if (enemy.IsPlayerCollision() && !mainCharacter.isPoweredUp)
+                if (enemy.IsPlayerCollision() && !MainCharacter.isPoweredUp)
                 {
                     if (level > 1)
                         level--;
