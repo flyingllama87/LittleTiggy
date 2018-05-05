@@ -124,7 +124,7 @@ namespace LittleTiggy
 
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-            if (isMovingToTile)
+            if (isMovingToTile) // if moving to a tile previously set by touch controls.
             {
                 MoveToTile();
             }

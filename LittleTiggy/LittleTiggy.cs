@@ -6,7 +6,8 @@
  * - GENERAL: Code clean up / rename / make use of constants / sort out tile aligned values / move code to methods / capatilisation / commenting
  * - FEATURE: Add instructions screen.
  * - FEATURE: Add leaderboards?
- * - PLATFORM: Try to build / deploy on android.
+ * - FEATURE: Add threading for pathfinding?
+ * - FEATURE: Fix up monogame splash screen
  * - BUGFIX: When idle, player animation does not switch back to normal skin after powerup expires. 
  * 
  * WIN CONDITION: 1) Restart with new map with +1 level 2) show text "you win".
@@ -24,6 +25,7 @@ using System.Collections.Generic;
 
 namespace LittleTiggy
 {
+
     public static class GameConstants
     {
         public const int windowWidth = 512;
@@ -47,6 +49,7 @@ namespace LittleTiggy
         List<Enemy> enemies;
         List<PowerUp> powerUps;
         SpriteFont mainFont;
+        VirtualJoystick virtualJoystick;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
 
         Song songBGM;
@@ -88,6 +91,12 @@ namespace LittleTiggy
             graphics.PreferredBackBufferHeight = 1024;   // Set window height
             graphics.ApplyChanges();
 
+        }
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+
             viewportWidth = GraphicsDevice.Viewport.Width;
             viewportHeight = GraphicsDevice.Viewport.Height;
 
@@ -96,20 +105,17 @@ namespace LittleTiggy
             else
                 scaleFactor = GraphicsDevice.Viewport.Width / GameConstants.windowWidth;
 
+            graphics.ApplyChanges();
 
-        }
-
-        protected override void Initialize()
-        {
-            base.Initialize();
         }
 
         protected override void LoadContent()
         {
             // Create main game objects
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            character = new MainCharacter(this.GraphicsDevice);
+            character = new MainCharacter(GraphicsDevice);
             mainFont = Content.Load<SpriteFont>("MainFont");
+            virtualJoystick = new VirtualJoystick(GraphicsDevice);
             songBGM = Content.Load<Song>("bgm");
             MediaPlayer.Play(songBGM);
             MediaPlayer.IsRepeating = true;
@@ -128,6 +134,7 @@ namespace LittleTiggy
             // main character start position
             MainCharacter.X = 1;
             MainCharacter.Y = 1;
+            character.isMovingToTile = false;
 
             // Loop until valid start conditions from random generation are met.
 
@@ -221,10 +228,12 @@ namespace LittleTiggy
                 // powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
 
+
+
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
             } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || MainCharacter.IsEnvironmentCollision(walls, new Vector2(1, 1)));
-            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(mainCharacter.X, mainCharacter.Y), walls) == false);
+            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(MainCharacter.X, MainCharacter.Y), walls) == false);
         }
 
         protected override void UnloadContent()
@@ -239,6 +248,7 @@ namespace LittleTiggy
                 Exit();
 
             character.Update(gameTime, GraphicsDevice, walls);
+            virtualJoystick.Update();
             foreach (Enemy enemy in enemies)
             {
                 enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
@@ -290,6 +300,7 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
+            virtualJoystick.Draw(spriteBatch);
             pathfinder.Draw(spriteBatch);
             character.Draw(spriteBatch);
             foreach (Enemy enemy in enemies)
