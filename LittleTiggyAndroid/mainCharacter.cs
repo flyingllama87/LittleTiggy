@@ -318,7 +318,7 @@ namespace LittleTiggy
             {
                 Y = desiredDestinationPosition.Y;
             }
-            
+
             // select animation based on direction mouse/touch input is pointing
             bool movingHorizontally = Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y);
             if (movingHorizontally)
@@ -386,7 +386,7 @@ namespace LittleTiggy
                     isMovingToTile = true;
                 }
             }
-                
+
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -404,7 +404,7 @@ namespace LittleTiggy
             Rectangle characterRect = new Rectangle((int)position.X, (int)position.Y, GameConstants.characterWidth, GameConstants.characterHeight);
 
             foreach (EnvironmentBlock wall in walls)
-           {
+            {
                 Rectangle wallRect = new Rectangle((int)wall.X, (int)wall.Y, GameConstants.tileSize, GameConstants.tileSize);
 
                 if (characterRect.Intersects(wallRect))

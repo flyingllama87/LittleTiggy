@@ -26,7 +26,12 @@ namespace LittleTiggy
         Animation Idle;
         Animation currentAnimation;
 
+#if ANDROID||IOS
+        const float charSpeed = 0.000008F;
+#endif
+#if !ANDROID
         const float charSpeed = 0.00001F;
+#endif
         long ticksSinceLastUpdate = 0;
 
         Vector2 vectorDestinationPosition;
@@ -73,6 +78,8 @@ namespace LittleTiggy
                 }
             }
 
+            // define animation frames
+
             walkDown = new Animation();
             walkDown.AddFrame(new Rectangle(0, 16, 16, 16), TimeSpan.FromSeconds(.25));
             walkDown.AddFrame(new Rectangle(16, 16, 16, 16), TimeSpan.FromSeconds(.25));
@@ -114,10 +121,10 @@ namespace LittleTiggy
 
             currentAnimation = Idle;
             
-            do
+            do // Spawn enemy in grid aligned random position on map where no walls exist.
             {
-                this.X = (float)randomNumber.Next(0, 512);
-                this.Y = randomNumber.Next(0, 512);
+                this.X = (float)randomNumber.Next(128, GameConstants.windowWidth - GameConstants.tileSize); // Don't allow enemy to spawn too close to the player start position.
+                this.Y = randomNumber.Next(128, GameConstants.windowHeight - GameConstants.tileSize);
 
                 this.X -= this.X % 16;
                 this.Y -= this.Y % 16;
@@ -130,18 +137,17 @@ namespace LittleTiggy
         {
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
-
             if (MainCharacter.isPoweredUp) // If the player is powered up.
             {
-                AvoidPlayer(pathfinder, walls);
+                AvoidPlayer(pathfinder, walls); // Avoid the player
             }
-            else
+            else // If the player is not powered up
             {
                 if ((ManhattanDistance(new Vector2(this.X, this.Y), new Vector2(MainCharacter.X, MainCharacter.Y)) < 32)) // If we are close to the character, run directly towards them.
                 {
                     MoveDirectlyTowardsPlayer(walls);
                 }
-                else
+                else // If not, use a* pathfinding algorithm
                 {
                     if (isFollowingPath) // If a path is set, continue following path to the nearest grid tile.
                     {
@@ -424,7 +430,8 @@ namespace LittleTiggy
                 this.Y = 1;
                 isFollowingPath = false;
                 vectorDestinationPosition = new Vector2(0, 0);
-                pathToFollow.Clear();
+                if (pathToFollow != null)
+                    pathToFollow.Clear();
                 if (MainCharacter.isPoweredUp)
                     LittleTiggy.killEnemySound.Play();
                 return true;
