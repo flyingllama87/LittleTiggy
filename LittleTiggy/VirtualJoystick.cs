@@ -32,7 +32,7 @@ namespace LittleTiggy
         {
             if (virtualJoystickTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/joystickCircle.png"))
+                using (var stream = TitleContainer.OpenStream("Content/JoystickCircle.png"))
                 {
                     virtualJoystickTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
@@ -53,7 +53,7 @@ namespace LittleTiggy
                 // If we detect a new touch, set the touch position as the middle of the virtual joystick.
 
                 if (bWasTouchPresentLastUpdate == false)
-                    virtualJoystickPosition = new Vector2(touchCollection[0].Position.X / LittleTiggy.scaleFactor, touchCollection[0].Position.Y / LittleTiggy.scaleFactor);
+                    virtualJoystickPosition = new Vector2(touchCollection[0].Position.X / LittleTiggy.gameScaleFactor, touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor);
 
                 bWasTouchPresentLastUpdate = true;
 

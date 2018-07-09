@@ -37,7 +37,7 @@ namespace LittleTiggy
         {
             if (itemSheetTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/itemsheet.png"))
+                using (var stream = TitleContainer.OpenStream("Content/ItemSheet.png"))
                 {
                     itemSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
@@ -53,8 +53,8 @@ namespace LittleTiggy
             
             do 
             {
-                this.X = (float)randomNumber.Next(0, GameConstants.windowWidth);
-                this.Y = randomNumber.Next(0, GameConstants.windowHeight);
+                this.X = (float)randomNumber.Next(0, GameConstants.gameWidth);
+                this.Y = randomNumber.Next(0, GameConstants.gameHeight);
 
                 this.X -= this.X % GameConstants.tileSize;
                 this.Y -= this.Y % GameConstants.tileSize;

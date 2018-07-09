@@ -18,12 +18,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\$(MonoGamePlatform)\$(Platform)\$(Configuration)\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;LINUX</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;DesktopGL</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\$(MonoGamePlatform)\$(Platform)\$(Configuration)\</OutputPath>
@@ -43,6 +44,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AnimationFrame.cs" />
+    <Compile Include="LeaderBoardClient.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="Pathfinder.cs" />
     <Compile Include="PowerUp.cs" />
     <Compile Include="Enemy.cs" />
@@ -55,8 +59,14 @@
     <Compile Include="VirtualJoystick.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="JsonRPC">
+      <HintPath>..\..\..\source\repos\JsonRPC\JsonRPC.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\source\repos\JsonRPC\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -112,29 +122,34 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="app.manifest" />
-    <None Include="Content\MainFont.spritefont" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\bgm.mp3">
+    <Content Include="Content\BackgroundMusic.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\charactersheet.png">
+    <Content Include="Content\CharacterSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\environmentSheet.png">
+    <Content Include="Content\EnvironmentSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\itemsheet.png">
+    <Content Include="Content\ItemSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\joystickCircle.png">
+    <Content Include="Content\JoystickCircle.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\killenemy.wav" />
+    <Content Include="Content\LittleTiggy.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\losegame.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\powerup.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\RoundedRectangle.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\wingame.wav">

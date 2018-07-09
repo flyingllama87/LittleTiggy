@@ -68,7 +68,7 @@ namespace LittleTiggy
 
             if (characterSheetTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/charactersheet.png"))
+                using (var stream = TitleContainer.OpenStream("Content/CharacterSheet.png"))
                 {
                     characterSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
@@ -339,8 +339,8 @@ namespace LittleTiggy
 
             // Acquire the direction the player wants to move based off where they are touching the screen relative to the virtual joystick position.
 
-            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.scaleFactor) - VirtualJoystick.virtualJoystickPosition.X;
-            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.scaleFactor) - VirtualJoystick.virtualJoystickPosition.Y;
+            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - VirtualJoystick.virtualJoystickPosition.X;
+            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - VirtualJoystick.virtualJoystickPosition.Y;
 
             // If we detect a new touch, set the touch position as the middle of the virtual joystick.
 
@@ -413,7 +413,7 @@ namespace LittleTiggy
                 }
             }
 
-            if (position.X > GameConstants.windowWidth - GameConstants.characterWidth || position.X < 0 || position.Y < 0) // See if the player is trying to go outside the game play area.
+            if (position.X > GameConstants.gameWidth - GameConstants.characterWidth || position.X < 0 || position.Y < 0) // See if the player is trying to go outside the game play area.
                 return true;
 
             return false;
