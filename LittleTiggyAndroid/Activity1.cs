@@ -5,9 +5,9 @@ using Android.Views;
 
 namespace LittleTiggy
 {
-    [Activity(Label = "LittleTiggy.Android"
+    [Activity(Label = "LittleTiggy"
         , MainLauncher = true
-        , Icon = "@drawable/icon"
+        , Icon = "@drawable/LTIcon"
         , Theme = "@style/Theme.Splash"
         , AlwaysRetainTaskState = true
         , LaunchMode = Android.Content.PM.LaunchMode.SingleInstance

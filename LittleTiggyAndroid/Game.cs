@@ -232,7 +232,7 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
-            virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+            // virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
             pathfinder.Draw(spriteBatch);
             character.Draw(spriteBatch);
             foreach (Enemy enemy in enemies)

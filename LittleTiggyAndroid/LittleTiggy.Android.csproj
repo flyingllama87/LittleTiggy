@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
     <AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>
     <AndroidLinkMode>None</AndroidLinkMode>
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -49,8 +52,14 @@
     <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JsonRPC">
+      <HintPath>..\JsonRPC\JsonRPC.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\JsonRPC\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK-1.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -66,8 +75,11 @@
     <Compile Include="AnimationFrame.cs" />
     <Compile Include="Enemy.cs" />
     <Compile Include="EnvironmentBlock.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="LeaderBoardClient.cs" />
     <Compile Include="LittleTiggy.cs" />
     <Compile Include="MainCharacter.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="Pathfinder.cs" />
     <Compile Include="PowerUp.cs" />
     <Compile Include="Program.cs" />
@@ -76,20 +88,13 @@
     <Compile Include="VirtualJoystick.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\MainFont.spritefont" />
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\Drawable\Icon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Resources\Layout\" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\Drawable\Splash.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\Values\Styles.xml" />
@@ -101,22 +106,17 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\bgm.mp3">
+    <AndroidAsset Include="Content\CharacterSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\charactersheet.png">
+    <AndroidAsset Include="Content\EnvironmentSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\environmentSheet.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AndroidAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidAsset Include="Content\itemsheet.png">
+    <AndroidAsset Include="Content\ItemSheet.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AndroidAsset>
   </ItemGroup>
@@ -139,9 +139,16 @@
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\joystickCircle.png">
+    <AndroidAsset Include="Content\JoystickCircle.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AndroidAsset>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="Content\RoundedRectangle.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidResource Include="Resources\Drawable\LTIcon.png" />
+    <AndroidResource Include="Resources\Drawable\LTSplash.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />

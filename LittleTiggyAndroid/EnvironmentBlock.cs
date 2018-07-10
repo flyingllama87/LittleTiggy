@@ -30,7 +30,7 @@ namespace LittleTiggy
         {
             if (environmentSheetTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/environmentSheet.png"))
+                using (var stream = TitleContainer.OpenStream("Content/EnvironmentSheet.png"))
                 {
                     environmentSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }

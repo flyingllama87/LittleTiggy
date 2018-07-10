@@ -72,7 +72,7 @@ namespace LittleTiggy
         {
             if (characterSheetTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/charactersheet.png"))
+                using (var stream = TitleContainer.OpenStream("Content/CharacterSheet.png"))
                 {
                     characterSheetTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
@@ -123,8 +123,8 @@ namespace LittleTiggy
             
             do // Spawn enemy in grid aligned random position on map where no walls exist.
             {
-                this.X = (float)randomNumber.Next(128, GameConstants.windowWidth - GameConstants.tileSize); // Don't allow enemy to spawn too close to the player start position.
-                this.Y = randomNumber.Next(128, GameConstants.windowHeight - GameConstants.tileSize);
+                this.X = (float)randomNumber.Next(128, GameConstants.gameWidth - GameConstants.tileSize); // Don't allow enemy to spawn too close to the player start position.
+                this.Y = randomNumber.Next(128, GameConstants.gameHeight - GameConstants.tileSize);
 
                 this.X -= this.X % 16;
                 this.Y -= this.Y % 16;
