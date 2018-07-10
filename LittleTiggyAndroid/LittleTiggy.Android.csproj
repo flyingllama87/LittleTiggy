@@ -70,22 +70,48 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\LittleTiggy\Animation.cs">
+      <Link>Animation.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\AnimationFrame.cs">
+      <Link>AnimationFrame.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\Enemy.cs">
+      <Link>Enemy.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\EnvironmentBlock.cs">
+      <Link>EnvironmentBlock.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\Game.cs">
+      <Link>Game.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\LeaderBoardClient.cs">
+      <Link>LeaderBoardClient.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\LittleTiggy.cs">
+      <Link>LittleTiggy.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\MainCharacter.cs">
+      <Link>MainCharacter.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\Menu.cs">
+      <Link>Menu.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\Pathfinder.cs">
+      <Link>Pathfinder.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\PowerUp.cs">
+      <Link>PowerUp.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\Program.cs">
+      <Link>Program.cs</Link>
+    </Compile>
+    <Compile Include="..\LittleTiggy\VirtualJoystick.cs">
+      <Link>VirtualJoystick.cs</Link>
+    </Compile>
     <Compile Include="Activity1.cs" />
-    <Compile Include="Animation.cs" />
-    <Compile Include="AnimationFrame.cs" />
-    <Compile Include="Enemy.cs" />
-    <Compile Include="EnvironmentBlock.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="LeaderBoardClient.cs" />
-    <Compile Include="LittleTiggy.cs" />
-    <Compile Include="MainCharacter.cs" />
-    <Compile Include="Menu.cs" />
-    <Compile Include="Pathfinder.cs" />
-    <Compile Include="PowerUp.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VirtualJoystick.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
