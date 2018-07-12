@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 
 
 namespace LittleTiggy
@@ -337,21 +336,17 @@ namespace LittleTiggy
         {
             Vector2 desiredVelocity = new Vector2();
 
-            // Acquire the direction the player wants to move based off where they are touching the screen relative to the virtual joystick position.
+            // Acquire the direction the player wants to move based on where they are touching the screen relative to player's position
 
-            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - VirtualJoystick.virtualJoystickPosition.X;
-            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - VirtualJoystick.virtualJoystickPosition.Y;
+            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - X;
+            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - Y;
 
-            // If we detect a new touch, set the touch position as the middle of the virtual joystick.
-
-            // desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
-            // desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
+            // Normalize the input vector and use the direction to move the character to the nearest grid aligned position.
 
             desiredVelocity.Normalize();
 
             if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
             {
-                //desiredVelocity = new Vector2(1.0f, 0.0f);
                 desiredDestinationTilePosition = new Vector2(GridAlignedX + 16, GridAlignedY);
 
                 if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
@@ -361,7 +356,6 @@ namespace LittleTiggy
             }
             else if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X < 0)
             {
-                //desiredVelocity = new Vector2(-1.0f, 0.0f);
                 desiredDestinationTilePosition = new Vector2(GridAlignedX - 16, GridAlignedY);
                 if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
@@ -370,7 +364,6 @@ namespace LittleTiggy
             }
             else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y > 0)
             {
-                //desiredVelocity = new Vector2(0.0f, 1.0f);
                 desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY + 16);
                 if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
@@ -379,14 +372,12 @@ namespace LittleTiggy
             }
             else if (Math.Abs(desiredVelocity.X) < Math.Abs(desiredVelocity.Y) && desiredVelocity.Y < 0)
             {
-                //desiredVelocity = new Vector2(0.0f, -1.0f);
                 desiredDestinationTilePosition = new Vector2(GridAlignedX, GridAlignedY - 16);
                 if (IsEnvironmentCollision(LittleTiggy.walls, desiredDestinationTilePosition) == false)
                 {
                     isMovingToTile = true;
                 }
             }
-
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -1,17 +1,17 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
-
-
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace LittleTiggy
 {
 
     public class Enemy
     {
+        private BackgroundWorker BackgroundPathfinderWorker = new BackgroundWorker();
+
         static Texture2D characterSheetTexture;
         static Random randomNumber = new Random();
 
@@ -26,8 +26,13 @@ namespace LittleTiggy
         Animation Idle;
         Animation currentAnimation;
 
+        bool bPathfinderTaskRequested = false;
+        bool bPathfinderTaskComplete = false;
+
+        Pathfinder pathfinder;
+
 #if ANDROID||IOS
-        const float charSpeed = 0.000008F;
+        const float charSpeed = 0.000005F;
 #endif
 #if !ANDROID
         const float charSpeed = 0.00001F;
@@ -70,6 +75,9 @@ namespace LittleTiggy
 
         public Enemy(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
+            this.pathfinder = new Pathfinder(graphicsDevice);
+            BackgroundPathfinderWorker_Initialise();
+            
             if (characterSheetTexture == null)
             {
                 using (var stream = TitleContainer.OpenStream("Content/CharacterSheet.png"))
@@ -133,13 +141,13 @@ namespace LittleTiggy
 
         }
 
-        public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Pathfinder pathfinder)
+        public void Update(GameTime gameTime, GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
             ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
             if (MainCharacter.isPoweredUp) // If the player is powered up.
             {
-                AvoidPlayer(pathfinder, walls); // Avoid the player
+                AvoidPlayer(walls); // Avoid the player
             }
             else // If the player is not powered up
             {
@@ -155,7 +163,7 @@ namespace LittleTiggy
                     }
                     else // If not moving toward a set grid tile, set a path!
                     {
-                        SetPath(pathfinder, walls);
+                        SetPath(walls);
                     }
                 }
             }
@@ -226,7 +234,7 @@ namespace LittleTiggy
             }
         }
 
-        void SetPath(Pathfinder pathfinder, EnvironmentBlock[] walls)
+        void SetPath( EnvironmentBlock[] walls)
         {
             // Refresh the path to follow periodically
             if (pathfindingTimer.CompareTo(DateTime.Now) < 0)
@@ -234,11 +242,19 @@ namespace LittleTiggy
                 pathfindingTimer = DateTime.Now;
                 pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
 
-                pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16), walls);
-                Pathfinder.PathToDraw = pathToFollow;
+                //pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16), walls);
+
+                pathfinder.from = new Vector2(this.X - this.X % 16, this.Y - this.Y % 16);
+                pathfinder.destination = new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16);
+                pathfinder.walls = walls;
+
+                BackgroundPathfinderWorker.RunWorkerAsync();
+                // BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
+
+                //pathfinder.PathToDraw = pathToFollow;
             }
 
-            if (!(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
+            if (pathToFollow!= null && !(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
             {
                 vectorDestinationPosition = pathToFollow[pathToFollow.Count - 1];
                 pathToFollow.RemoveAt(pathToFollow.Count - 1);
@@ -247,7 +263,7 @@ namespace LittleTiggy
             isFollowingPath = true;
         }
 
-        void AvoidPlayer(Pathfinder pathfinder, EnvironmentBlock[] walls)
+        void AvoidPlayer(EnvironmentBlock[] walls)
         {
             if (isFollowingPath)
             {
@@ -317,7 +333,7 @@ namespace LittleTiggy
 
 
                     pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(randomGridAlignedX, randomGridAlignedY), walls);
-                    Pathfinder.PathToDraw = pathToFollow;
+                    pathfinder.PathToDraw = pathToFollow;
                 }
 
                 if (!(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination
@@ -337,6 +353,8 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
+
+            // pathfinder.Draw(spriteBatch);
         }
 
 
@@ -386,6 +404,37 @@ namespace LittleTiggy
 
             return desiredVelocity;
         }
+
+        private void BackgroundPathfinderWorker_Initialise()
+        {
+            BackgroundPathfinderWorker.DoWork += new DoWorkEventHandler(BackgroundPathfinderWorker_DoWork);
+            BackgroundPathfinderWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundPathfinderWorker_Complete);
+
+        }
+
+        private void BackgroundPathfinderWorker_DoWork(object sender, DoWorkEventArgs eventArgs)
+        {
+               eventArgs.Result = this.pathfinder.Pathfind();
+
+        }
+
+        private void BackgroundPathfinderWorker_Complete(object sender, RunWorkerCompletedEventArgs eventArgs)
+        {
+            if (eventArgs.Result != null)
+            {
+                bPathfinderTaskComplete = true;
+                Debug.WriteLine("BG Pathfinding task completed");
+
+                pathToFollow = (List<Vector2>)eventArgs.Result;
+                
+                isFollowingPath = true;
+
+            }
+
+            BackgroundPathfinderWorker.DoWork -= new DoWorkEventHandler(BackgroundPathfinderWorker_DoWork);
+            BackgroundPathfinderWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(BackgroundPathfinderWorker_Complete);
+        }
+        
 
         bool IsEnvironmentCollision(EnvironmentBlock[] walls)
         {

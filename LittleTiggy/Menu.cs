@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Audio;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -122,7 +121,7 @@ namespace LittleTiggy
                     bHasEnteredName = false;
                     androidNameTask = null;
                     kbName = "";
-                    bAddScoreComplete = false;
+                    // bAddScoreComplete = false;
                 }
 
             }
@@ -144,30 +143,11 @@ namespace LittleTiggy
                 {
                     playerName = androidNameTask.Result;
 
-                    BackgroundHTTPWorker_Initialise(LeaderBoardAPICall.AddScore);
-                    LeaderBoardClient LittleTiggyLBClient = new LeaderBoardClient();
-
-                    LittleTiggyLBClient.APICall = LeaderBoardAPICall.AddScore;
-                    LittleTiggyLBClient.name = playerName;
-                    LittleTiggyLBClient.score = 12;
-
-                    BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
-
                     bHasEnteredName = true;
-
                 }
                 else if (kbName != "" && !bLeaderboardNetworkFailure)
                 {
                     playerName = kbName;
-
-                    BackgroundHTTPWorker_Initialise(LeaderBoardAPICall.AddScore);
-                    LeaderBoardClient LittleTiggyLBClient = new LeaderBoardClient();
-
-                    LittleTiggyLBClient.APICall = LeaderBoardAPICall.AddScore;
-                    LittleTiggyLBClient.name = playerName;
-                    LittleTiggyLBClient.score = 12;
-
-                    BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
 
                     bHasEnteredName = true;
                 }
@@ -331,7 +311,7 @@ namespace LittleTiggy
             Vector2 stringSize2 = font.MeasureString(playerName);
             textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), 600 * menuScaleFactor);
             spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTRed);
-            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2 + stringSize2.X), 600 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, 600 * menuScaleFactor);
             spriteBatch.DrawString(font, playerName, textPosition, colorLTGreen);
 #endif
 

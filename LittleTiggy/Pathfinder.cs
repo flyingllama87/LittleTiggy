@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 
+
 // This source file is for the implementation of the A* pathfinding / graph search algorithm.  Two classes are defined.  The first is a data type for nodes on the graph and the second is the actual implementation of the search built using the former data type.  Drawing functions for debugging exist too.
 
 
@@ -48,7 +49,7 @@ namespace LittleTiggy
     public class Pathfinder
     {
 
-        public static List<Vector2> PathToDraw = new List<Vector2>();
+        public List<Vector2> PathToDraw = new List<Vector2>();
         List<Vector2> Path = new List<Vector2>();
         List<Vector2> DeletedNodes = new List<Vector2>();
 
@@ -61,6 +62,10 @@ namespace LittleTiggy
         Animation DeletedNodesCurrentAnimation;
 
         KeyboardState OldKeyboardState;
+
+        public Vector2 from;
+        public Vector2 destination;
+        public EnvironmentBlock[] walls;
 
         public Pathfinder(GraphicsDevice graphicsDevice)
         {
@@ -109,7 +114,6 @@ namespace LittleTiggy
         public void Draw(SpriteBatch spriteBatch)
         {
             Color tintColor = Color.White;
-#if _DEBUG
 
             var DeletedNodesSourceRectangle = DeletedNodesCurrentAnimation.CurrentRectangle;
 
@@ -129,7 +133,8 @@ namespace LittleTiggy
                 
                 for (int i = 0; i < Path.Count; i++)
                 {
-                    Vector2 topLeftOfPathSquare = Path.Pop();
+                    Vector2 topLeftOfPathSquare = Path[0];
+                    Path.RemoveAt(0);
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 } 
 
@@ -146,12 +151,70 @@ namespace LittleTiggy
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
             } 
-#endif
         }
 
         // Main A* pathfinding algorithm implementation
 
         public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
+        {
+
+            if (from == destination)
+            {
+                return new List<Vector2>(); // Return empty vector list if asked to path find between two equal locations.
+            }
+
+            Node goalNode = new Node(destination, 0, 0);
+            Node startNode = new Node(from, ManhattanDistance(from, destination), 0);
+
+            List<Node> open = new List<Node>();                 //list of nodes
+            List<Node> closed = new List<Node>();
+            open.Add(startNode);                                //Add starting point
+
+            while (open.Count > 0)
+            {
+
+                Node node = GetBestNode(open);                  // Get node with lowest F value
+
+                open.Remove(node);
+                closed.Add(node);
+
+                if (node.position == goalNode.position)         // Goal reached
+                {
+                    return GetPath(node, closed, from);
+                }
+
+                List<Node> neighbours = GetNeighbours(node, walls, closed); //get all valid neighbour nodes; i.e. areas not taken up by walls or outside the play area 
+
+                // DEBUG: following foreach is purely for visualisation of a*
+                /*
+                foreach (Node neighbour in neighbours)
+                {
+                    DeletedNodes.Add(neighbour.position);
+                }*/
+
+                foreach (Node neighbour in neighbours)
+                {
+                    ushort g_score = (ushort)(node.g_score + 16);
+                    ushort h_score = ManhattanDistance(neighbour.position, goalNode.position);
+                    ushort f_score = (ushort)(g_score + h_score);
+
+                    if (!open.Contains(neighbour) || f_score < (neighbour.g_score + neighbour.h_score))
+                    {
+                        neighbour.parent = node.position;
+                        neighbour.g_score = g_score;
+                        neighbour.h_score = h_score;
+                        if (!open.Contains(neighbour))
+                        {
+                            open.Add(neighbour);
+                        }
+                    }
+                }
+            }
+            List<Vector2> emptyVectorList = new List<Vector2>();
+            return emptyVectorList;
+        }
+
+        public List<Vector2> Pathfind()
         {
 
             if (from == destination)

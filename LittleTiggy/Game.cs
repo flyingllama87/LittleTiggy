@@ -68,8 +68,25 @@ namespace LittleTiggy
             LoadLevel(level);
         }
 
+        void SubmitScore(int level)
+        {
+            BackgroundHTTPWorker_Initialise(LeaderBoardAPICall.AddScore);
+            LeaderBoardClient LittleTiggyLBClient = new LeaderBoardClient();
+
+            LittleTiggyLBClient.APICall = LeaderBoardAPICall.AddScore;
+            LittleTiggyLBClient.name = playerName;
+            LittleTiggyLBClient.score = level;
+
+            BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
+        }
+
         public void LoadLevel(int level)
         {
+
+            if (level > 1 && !string.IsNullOrEmpty(playerName))
+            {
+                SubmitScore(level);
+            }
 
             // main character start position
             MainCharacter.X = 1;
@@ -185,7 +202,7 @@ namespace LittleTiggy
             virtualJoystick.Update();
             foreach (Enemy enemy in enemies)
             {
-                enemy.Update(gameTime, GraphicsDevice, walls, pathfinder);
+                enemy.Update(gameTime, GraphicsDevice, walls);
             }
 
             foreach (PowerUp powerUp in powerUps)
@@ -232,9 +249,9 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
-            virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
-            pathfinder.Draw(spriteBatch);
-            character.Draw(spriteBatch);
+            // virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+            // pathfinder.Draw(spriteBatch); // Used for visualising pathfinding path
+            
             foreach (Enemy enemy in enemies)
             {
                 enemy.Draw(spriteBatch);
@@ -245,13 +262,15 @@ namespace LittleTiggy
             }
             // powerUp.Draw(spriteBatch);
 
+            character.Draw(spriteBatch);
+
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
-            spriteBatch.DrawString(mainFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
+            spriteBatch.DrawString(gameFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
 
-            spriteBatch.DrawString(mainFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
+            spriteBatch.DrawString(gameFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
-            spriteBatch.DrawString(gameFont, "Level: " + level, new Vector2(16, 16), Color.Red);
+            spriteBatch.DrawString(gameFont, "Level: " + level, new Vector2(16, 16), colorLTGreen);
         }
     }
 

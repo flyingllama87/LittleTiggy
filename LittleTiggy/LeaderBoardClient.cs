@@ -119,7 +119,7 @@ namespace LittleTiggy
     {
 
         public static bool bLeaderboardNetworkFailure = false;
-        bool bAddScoreComplete = false;
+        // bool bAddScoreComplete = false;
         bool bGetScoresRequested = false;
         bool bGetScoresComplete = false;
         public static string LeaderBoardAPIEndpoint = "http://BNEWKS0036.bne.gameloft.org:5000/api";
@@ -137,7 +137,6 @@ namespace LittleTiggy
             {
                 BackgroundHTTPWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundHTTPWorker_GetScoresComplete);
             }
-
         }
 
         private void BackgroundHTTPWorker_DoWork(object sender, DoWorkEventArgs eventArgs)
@@ -159,7 +158,7 @@ namespace LittleTiggy
         {
             if (eventArgs.Result != null && (bool)eventArgs.Result)
             {
-                bAddScoreComplete = true;
+                // bAddScoreComplete = true;
                 Debug.WriteLine("AddScore BG worker completed");
             }
             BackgroundHTTPWorker.DoWork -= new DoWorkEventHandler(BackgroundHTTPWorker_DoWork);
