@@ -3,7 +3,6 @@
 /*
  * TO DO:
  *
- * - FEATURE ANDROID: Draw game in middle of screen as opposed to at the top.
  * - FEATURE: Host leaderboard online for acess from anywhere
  * - FEATURE: Prompt player to input name if they have not done so before beginning game
  * - FEATURE: save and load player name from file?
@@ -12,8 +11,6 @@
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
- * - STYLE: Abstract menu button code into own class?
- * 
  * - BUGFIX - ANDROID: fix issue if player hits cancel on naem input
  */
 

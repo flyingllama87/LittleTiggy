@@ -10,7 +10,7 @@ namespace LittleTiggy
 {
     public partial class LittleTiggy : Game
     {
-
+        GameBorder gameBorder;
         MainCharacter character;
         List<Enemy> enemies;
         List<PowerUp> powerUps;
@@ -50,10 +50,13 @@ namespace LittleTiggy
                 gameScaleFactor = (float)GraphicsDevice.Viewport.Height / (float)GameConstants.gameHeight;
             else
                 gameScaleFactor = (float)GraphicsDevice.Viewport.Width / (float)GameConstants.gameWidth;
+
+            gameBorder.LoadContent(GraphicsDevice);
         }
 
         void LoadGame()
         {
+            gameBorder = new GameBorder();
             character = new MainCharacter(GraphicsDevice);
             virtualJoystick = new VirtualJoystick(GraphicsDevice);
             songBGM = Content.Load<Song>("BackgroundMusic");
@@ -239,19 +242,24 @@ namespace LittleTiggy
 
         }
 
+
+
         void inGameDraw(GameTime gameTime)
         {
 
+            // Scale game to render on render targets of all sizes
             Matrix renderMatrix = Matrix.CreateScale(gameScaleFactor);
 
+            // Set up matrix to translate game to middle of viewport.
             float offsetY = (viewportHeight - (GameConstants.gameHeight * gameScaleFactor)) / 2;
             float offsetX = (viewportWidth - (GameConstants.gameWidth * gameScaleFactor)) / 2;
             Matrix translationMatrix = Matrix.CreateTranslation(offsetX, offsetY, 0);
 
             renderMatrix = Matrix.Multiply(renderMatrix, translationMatrix); 
 
-
             spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null, renderMatrix);
+
+
 
             // Draw each wall
             for (int i = 0; i < walls.Length; i++)
@@ -259,7 +267,8 @@ namespace LittleTiggy
                 walls[i].Draw(spriteBatch);
             }
 
-            // virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+
+
             // pathfinder.Draw(spriteBatch); // Used for visualising pathfinding path
             
             foreach (Enemy enemy in enemies)
@@ -270,9 +279,10 @@ namespace LittleTiggy
             {
                 powerUp.Draw(spriteBatch);
             }
-            // powerUp.Draw(spriteBatch);
 
             character.Draw(spriteBatch);
+
+            
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
@@ -281,7 +291,60 @@ namespace LittleTiggy
             spriteBatch.DrawString(gameFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
             spriteBatch.DrawString(gameFont, "Level: " + level, new Vector2(16, 16), colorLTGreen);
+
+#if ANDROID // If we are on android, draw a border and virtual joystick
+            virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+
+            spriteBatch.End();
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
+                // Draw game border
+                gameBorder.Draw(spriteBatch);
+            // Main LT source file ends the spriteBatch
+#endif
+        }
+
+
+    }
+
+    class GameBorder
+    {
+        Texture2D borderTexture;
+        int borderStartY;
+        int borderStartX;
+        int borderSizeX;
+        int borderSizeY;
+        Rectangle leftBorder;
+        Rectangle rightBorder;
+        Rectangle topBorder;
+        Rectangle bottomBorder;
+
+        public void LoadContent(GraphicsDevice graphicsDevice)
+        {
+            borderTexture = new Texture2D(graphicsDevice, 1, 1);
+            borderTexture.SetData(new Color[] { Color.White });
+
+            borderStartY = (int)(LittleTiggy.viewportHeight - ((float)GameConstants.gameHeight * LittleTiggy.gameScaleFactor)) / 2;
+            borderStartX = (int)(LittleTiggy.viewportWidth - ((float)GameConstants.gameWidth * LittleTiggy.gameScaleFactor)) / 2;
+
+            borderSizeX = (int)((float)GameConstants.gameHeight * LittleTiggy.gameScaleFactor) - 1;
+            borderSizeY = (int)((float)GameConstants.gameHeight * LittleTiggy.gameScaleFactor) - 1;
+
+            leftBorder = new Rectangle(borderStartX, borderStartY, 1, borderSizeY);
+            rightBorder = new Rectangle(borderStartX + borderSizeX, borderStartY, 1, borderSizeY);
+            topBorder = new Rectangle(borderStartX, borderStartY, borderSizeX, 1);
+            bottomBorder = new Rectangle(borderStartX, borderStartY + borderSizeY, borderSizeX, 1);
+
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(borderTexture, leftBorder, Color.Red);
+            spriteBatch.Draw(borderTexture, rightBorder, Color.Red);
+            spriteBatch.Draw(borderTexture, topBorder, Color.Red);
+            spriteBatch.Draw(borderTexture, bottomBorder, Color.Red);
         }
     }
+    
 
 }

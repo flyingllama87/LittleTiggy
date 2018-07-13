@@ -71,10 +71,13 @@ namespace LittleTiggy
 
             if (virtualJoystickPosition != null)
             {
-                Rectangle joystickRectangle = new Rectangle(1, 1, 49, 49);
+                Rectangle joystickRectangle = new Rectangle(0, 0, 511, 511);
+                
+                // virtualJoystickPosition.X = (GameConstants.gameWidth / 2) - (virtualJoystickTexture.Width / 2);
+                // virtualJoystickPosition.Y = (GameConstants.gameHeight / 2) - (virtualJoystickTexture.Height / 2);
 
-                spriteBatch.Draw(virtualJoystickTexture, new Vector2(virtualJoystickPosition.X, virtualJoystickPosition.Y), joystickRectangle, Color.White * 0.25f);
-
+                // spriteBatch.Draw(virtualJoystickTexture, new Vector2(virtualJoystickPosition.X, virtualJoystickPosition.Y), joystickRectangle, Color.White * 0.1f);
+                spriteBatch.Draw(virtualJoystickTexture, new Vector2(0, 0), joystickRectangle, Color.White * 0.1f);
             }
 
         }

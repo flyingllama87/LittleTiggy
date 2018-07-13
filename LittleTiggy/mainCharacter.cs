@@ -305,12 +305,12 @@ namespace LittleTiggy
             desiredDestinationPosition.X += desiredVelocity.X * charSpeed * ticksSinceLastUpdate;
             desiredDestinationPosition.Y += desiredVelocity.Y * charSpeed * ticksSinceLastUpdate;
 
-            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(desiredDestinationPosition.X, Y)) == false)
+            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(desiredDestinationPosition.X, (int)Y)) == false)
             {
                 X = desiredDestinationPosition.X;
             }
 
-            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2(X, desiredDestinationPosition.Y)) == false)
+            if (IsEnvironmentCollision(LittleTiggy.walls, new Vector2((int)X, desiredDestinationPosition.Y)) == false)
             {
                 Y = desiredDestinationPosition.Y;
             }
@@ -382,7 +382,12 @@ namespace LittleTiggy
 
         public void Draw(SpriteBatch spriteBatch)
         {
+#if ANDROID // Compensate for touch collision detection (grid based) by offsetting the main character by drawing character 3 pixels to the right.  Looks more natural.
+            Vector2 topLeftOfSprite = new Vector2(X+3, Y);
+#endif
+#if !ANDROID
             Vector2 topLeftOfSprite = new Vector2(X, Y);
+#endif
             Color tintColor = Color.White;
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
