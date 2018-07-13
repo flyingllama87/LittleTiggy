@@ -14,15 +14,27 @@ namespace LittleTiggy
     public partial class LittleTiggy : Game
     {
         Texture2D menuRectangle;
+        Texture2D menuRectangleHover; // Used to change color of menu rectangle on mouse hover.  Unimplemented at the moment.
+        bool[] menuButtonHover = new bool[4];
+        Vector2 mouseXY = new Vector2();
+
         int menuButtonOffset;
+        public static SoundEffect menuSound;
         private SpriteFont smallFont, font, bigFont, arialFont, bigArialFont;
+
+        DateTime menuButtonTimer = DateTime.Now; 
+        double menuButtonTimeSeconds = 0.3; // Used to disallow activating a button again for the specified length of time.
+
         bool bHasEnteredName = false;
-        bool bHasTappedChangeNameLastUpdate = false; // android only
+        bool bHasTappedButtonLastUpdate = false; // used as button activation (i.e. rectangle intersection) can be detected for multiple update loops but we only need the button to be activated once.
+
+        
+
         static public string kbInput = "";
         static public string kbName = "";
         static public string playerName = "";
-        Task<string> androidNameTask = null;
-        public static float menuScaleFactor;
+        Task<string> androidNameTask = null; // Used for name input on android
+        public static float menuScaleFactor;  // Used to scale menu draw vertically on portrait screens (mobile)
 #if !ANDROID
         KbNameHandler kbNameHandler = new KbNameHandler();
 #endif
@@ -43,13 +55,32 @@ namespace LittleTiggy
                     menuRectangle = Texture2D.FromStream(GraphicsDevice, stream);
                 }
             }
+
+            if (menuRectangleHover == null)
+            {
+                using (var stream = TitleContainer.OpenStream("Content/RoundedRectangleDarkGreen.png"))
+                {
+                    menuRectangleHover = Texture2D.FromStream(GraphicsDevice, stream);
+                }
+            }
+
+            menuSound = Content.Load<SoundEffect>("killenemy");
+        }
+
+        void resetButtonHover()
+        {
+            menuButtonHover = new bool[4];
         }
 
         void menuUpdate(GameTime gameTime)
         {
+            resetButtonHover();
             MouseState mouseState = Mouse.GetState();
+            mouseXY = new Vector2(mouseState.X, mouseState.Y);
+
             TouchCollection touchCollection = TouchPanel.GetState();
             Vector2 touchXY = new Vector2(0, 0);
+
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
@@ -60,6 +91,7 @@ namespace LittleTiggy
                 touchXY = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
             }
 
+            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 2, 2);
             Rectangle rectanglePlayGame = new Rectangle(menuButtonOffset, (int)(275 * menuScaleFactor), 600, 150);
             Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(450 * menuScaleFactor), 600, 150);
@@ -68,24 +100,46 @@ namespace LittleTiggy
 
             if (touchXY.X != 0 && touchXY.Y != 0)
             {
-
                 if (rectanglePlayGame.Intersects(touchRectangle))
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.inGame;
                 }
                 if (rectangleChangeName.Intersects(touchRectangle))
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.nameInput;
                 }
                 if (rectangleLeaderBoards.Intersects(touchRectangle))
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.leaderBoard;
                 }
                 if (rectangleInstructions.Intersects(touchRectangle))
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.instructions;
                 }
+            }
 
+            if (mouseXY.X != 0 && mouseXY.Y != 0)
+            {
+                if (rectanglePlayGame.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[0] = true;
+                }
+                if (rectangleChangeName.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[1] = true;
+                }
+                if (rectangleLeaderBoards.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[2] = true;
+                }
+                if (rectangleInstructions.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[3] = true;
+                }
             }
 
             // message = "Rect position: " + rectanglePlayGame.X + " " + rectanglePlayGame.Y + " Touch Pos: " + touchXY.X + " " + touchXY.Y;
@@ -94,9 +148,12 @@ namespace LittleTiggy
         void changeNameUpdate(GameTime gameTime)
         {
 
+            resetButtonHover();
             MouseState mouseState = Mouse.GetState();
+            mouseXY = new Vector2(mouseState.X, mouseState.Y);
             TouchCollection touchCollection = TouchPanel.GetState();
             Vector2 touchXY = new Vector2(0, 0);
+            
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
@@ -107,26 +164,41 @@ namespace LittleTiggy
                 touchXY = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
             }
 
+            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
+            Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
+            Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(185 * menuScaleFactor), 600, 150);
+
             if (touchXY.X != 0 && touchXY.Y != 0)
             {
-                Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-                Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
-                Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(185 * menuScaleFactor), 600, 150);
-
-
                 if (rectangleGoBack.Intersects(touchRectangle))
                 {
                     gameState = GameState.menu;
+                    LittleTiggy.menuSound.Play();
                 }
 
-                if (rectangleChangeName.Intersects(touchRectangle) && !bHasTappedChangeNameLastUpdate)
+                if (rectangleChangeName.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
                 {
+                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                    LittleTiggy.menuSound.Play();
                     bHasEnteredName = false;
                     androidNameTask = null;
                     kbName = "";
-                    bHasTappedChangeNameLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
                 }
 
+            }
+
+            if (mouseXY.X != 0 && mouseXY.Y != 0)
+            {
+                if (rectangleGoBack.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[0] = true;
+                }
+                if (rectangleChangeName.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[1] = true;
+                }
             }
 
             if (bHasEnteredName == false)
@@ -143,7 +215,7 @@ namespace LittleTiggy
                     playerName = androidNameTask.Result;
 
                     bHasEnteredName = true;
-                    bHasTappedChangeNameLastUpdate = false;
+                    bHasTappedButtonLastUpdate = false;
                 }
 #endif
 
@@ -160,7 +232,7 @@ namespace LittleTiggy
                     
                 }
 
-                bHasTappedChangeNameLastUpdate = false;
+                bHasTappedButtonLastUpdate = false;
 #endif
 
             }
@@ -169,7 +241,9 @@ namespace LittleTiggy
 
         void instructionsUpdate(GameTime gameTime)
         {
+            resetButtonHover();
             MouseState mouseState = Mouse.GetState();
+            mouseXY = new Vector2(mouseState.X, mouseState.Y);
             TouchCollection touchCollection = TouchPanel.GetState();
             Vector2 touchXY = new Vector2(0, 0);
 
@@ -182,13 +256,23 @@ namespace LittleTiggy
                 touchXY = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
             }
 
+            Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
+            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
+
+            if (mouseXY.X != 0 && mouseXY.Y != 0)
+            {
+                if (rectangleGoBack.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[0] = true;
+                }
+            }
+
             if (touchXY.X != 0 && touchXY.Y != 0)
             {
-                Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-                Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
-
                 if (rectangleGoBack.Intersects(touchRectangle) == true)
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.menu;
                 }
             }
@@ -207,7 +291,9 @@ namespace LittleTiggy
                 bGetScoresRequested = true;
             }
 
+            resetButtonHover();
             MouseState mouseState = Mouse.GetState();
+            mouseXY = new Vector2(mouseState.X, mouseState.Y);
             TouchCollection touchCollection = TouchPanel.GetState();
             Vector2 touchXY = new Vector2(0, 0);
 
@@ -220,13 +306,23 @@ namespace LittleTiggy
                 touchXY = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
             }
 
+            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
+            Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(1 * menuScaleFactor), 600, 150);
+
+            if (mouseXY.X != 0 && mouseXY.Y != 0)
+            {
+                if (rectangleGoBack.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[0] = true;
+                }
+            }
+
             if (touchXY.X != 0 && touchXY.Y != 0)
             {
-                Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-                Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(1 * menuScaleFactor), 600, 150);
-
                 if (rectangleGoBack.Intersects(touchRectangle) == true)
                 {
+                    LittleTiggy.menuSound.Play();
                     gameState = GameState.menu;
                 }
             }
@@ -252,10 +348,25 @@ namespace LittleTiggy
 
             // Draw Rectangles for menu items
 
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 275 * menuScaleFactor), Color.White);
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 450 * menuScaleFactor), Color.White);
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 625 * menuScaleFactor), Color.White);
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 800 * menuScaleFactor), Color.White);
+            if (menuButtonHover[0] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 275 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 275 * menuScaleFactor), Color.White);
+
+            if (menuButtonHover[1] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 450 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 450 * menuScaleFactor), Color.White);
+
+            if (menuButtonHover[2] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 625 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 625 * menuScaleFactor), Color.White);
+
+            if (menuButtonHover[3] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 800 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 800 * menuScaleFactor), Color.White);
 
             // Draw menu items
 
@@ -294,14 +405,20 @@ namespace LittleTiggy
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
 
             // Draw back button
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            if (menuButtonHover[0] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
             Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
             spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
 
             // Draw change name button
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 185 * menuScaleFactor), Color.White);
+            if (menuButtonHover[1] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 185 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 185 * menuScaleFactor), Color.White);
 
             stringSize = font.MeasureString("Change Name");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 185 * menuScaleFactor);
@@ -343,7 +460,10 @@ namespace LittleTiggy
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
 
             // Draw back button
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            if (menuButtonHover[0] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
             Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
@@ -386,7 +506,10 @@ namespace LittleTiggy
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
 
             // Draw back button
-            spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            if (menuButtonHover[0] == true)
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
             Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
@@ -407,12 +530,24 @@ namespace LittleTiggy
             spriteBatch.DrawString(bigArialFont, "- If you get the power up,", textPosition, colorLTGreen);
 
             stringSize = bigArialFont.MeasureString("you can tag the enemies temporarily.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 400 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 375 * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "you can tag the enemies temporarily.", textPosition, colorLTGreen);
 
             stringSize = bigArialFont.MeasureString("- If you get tagged you will go back a level.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 475 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 450 * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- If you get tagged you will go back a level.", textPosition, colorLTGreen);
+
+            stringSize = bigArialFont.MeasureString("Touch controls:");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 525 * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "Touch controls:", textPosition, colorLTRed);
+
+            stringSize = bigArialFont.MeasureString("- Are relative to centre of screen.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 575 * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "- Are relative to centre of screen.", textPosition, colorLTGreen);
+
+            stringSize = bigArialFont.MeasureString("- Use of two hands is recommended.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 625 * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "- Use of two hands is recommended.", textPosition, colorLTGreen);
 
         }
 

@@ -241,7 +241,17 @@ namespace LittleTiggy
 
         void inGameDraw(GameTime gameTime)
         {
-            spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(gameScaleFactor));
+
+            Matrix renderMatrix = Matrix.CreateScale(gameScaleFactor);
+
+            float offsetY = (viewportHeight - (GameConstants.gameHeight * gameScaleFactor)) / 2;
+            float offsetX = (viewportWidth - (GameConstants.gameWidth * gameScaleFactor)) / 2;
+            Matrix translationMatrix = Matrix.CreateTranslation(offsetX, offsetY, 0);
+
+            renderMatrix = Matrix.Multiply(renderMatrix, translationMatrix); 
+
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null, renderMatrix);
 
             // Draw each wall
             for (int i = 0; i < walls.Length; i++)

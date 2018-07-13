@@ -3,19 +3,18 @@
 /*
  * TO DO:
  *
- * - FEATURE: Improve controls on android build.  Switch to moving player towards touch relative to player and not virtual joystick.
- * - FEATURE: Menu sounds.
- * - FEATURE: Menu button highlight on desktop with mouse over
- * - FEATURE: Menu button highlight attached to a time over on button press.
+ * - FEATURE ANDROID: Draw game in middle of screen as opposed to at the top.
  * - FEATURE: Host leaderboard online for acess from anywhere
- * - FEATURE: If player is touching near the edges of the game space, move towards that direction even if player 
- * - FEATURE: Prompt player to input name if they have not done so
+ * - FEATURE: Prompt player to input name if they have not done so before beginning game
+ * - FEATURE: save and load player name from file?
+ * - FEATURE: Add FPS counter
+ * - FEATURE: Get smooth enemy movement going
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
- * - STYLE: Move shared code to shared project as opposed to using winmerge
+ * - STYLE: Abstract menu button code into own class?
  * 
- * - BUGFIX: Fix up icon for desktopGL builds
+ * - BUGFIX - ANDROID: fix issue if player hits cancel on naem input
  */
 
 using Microsoft.Xna.Framework;

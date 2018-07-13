@@ -228,8 +228,6 @@ namespace LittleTiggy
                 currentAnimation.Update(gameTime);
 
                 desiredDestinationPosition.Y -= charSpeed * ticksSinceLastUpdate;
-
-
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
@@ -238,7 +236,6 @@ namespace LittleTiggy
                 currentAnimation.Update(gameTime);
 
                 desiredDestinationPosition.X -= charSpeed * ticksSinceLastUpdate;
-
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
@@ -337,9 +334,12 @@ namespace LittleTiggy
             Vector2 desiredVelocity = new Vector2();
 
             // Acquire the direction the player wants to move based on where they are touching the screen relative to player's position
+            // desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - X;
+            // desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - Y;
 
-            desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - X;
-            desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - Y;
+            // Acquire the direction the player wants to move based on where they are touching the screen relative to the centre of the game screen
+            desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
+            desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
 
             // Normalize the input vector and use the direction to move the character to the nearest grid aligned position.
 

@@ -147,7 +147,9 @@
     </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Content\killenemy.wav" />
+    <AndroidAsset Include="Content\killenemy.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Content\losegame.wav">
@@ -177,7 +179,12 @@
     <AndroidResource Include="Resources\Drawable\LTSplash.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\BackgroundMusic.mp3" />
+    <AndroidAsset Include="Content\BackgroundMusic.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Content\RoundedRectangleDarkGreen.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AndroidAsset>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
