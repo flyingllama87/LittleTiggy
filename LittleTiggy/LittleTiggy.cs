@@ -3,8 +3,6 @@
 /*
  * TO DO:
  *
- * - FEATURE: Add score submission to leaderboard for when player beats a level.
- * - FEATURE: Add BackGroundWorker for pathfinding
  * - FEATURE: Improve controls on android build.  Switch to moving player towards touch relative to player and not virtual joystick.
  * - FEATURE: Menu sounds.
  * - FEATURE: Menu button highlight on desktop with mouse over
@@ -17,8 +15,6 @@
  * - STYLE: Run stylecop over build for code consistency.
  * - STYLE: Move shared code to shared project as opposed to using winmerge
  * 
- * - BUGFIX: Fix name input on android builds
- * - BUGFIX: Fix issue of virtual keyboard input box not appearing a second time on android builds.
  * - BUGFIX: Fix up icon for desktopGL builds
  */
 

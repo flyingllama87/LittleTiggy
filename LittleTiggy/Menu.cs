@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace LittleTiggy
 {
@@ -16,6 +17,7 @@ namespace LittleTiggy
         int menuButtonOffset;
         private SpriteFont smallFont, font, bigFont, arialFont, bigArialFont;
         bool bHasEnteredName = false;
+        bool bHasTappedChangeNameLastUpdate = false; // android only
         static public string kbInput = "";
         static public string kbName = "";
         static public string playerName = "";
@@ -112,45 +114,55 @@ namespace LittleTiggy
                 Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(185 * menuScaleFactor), 600, 150);
 
 
-                if (rectangleGoBack.Intersects(touchRectangle) == true)
+                if (rectangleGoBack.Intersects(touchRectangle))
                 {
                     gameState = GameState.menu;
                 }
-                if (rectangleChangeName.Intersects(touchRectangle) == true)
+
+                if (rectangleChangeName.Intersects(touchRectangle) && !bHasTappedChangeNameLastUpdate)
                 {
                     bHasEnteredName = false;
                     androidNameTask = null;
                     kbName = "";
-                    // bAddScoreComplete = false;
+                    bHasTappedChangeNameLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
                 }
 
             }
 
             if (bHasEnteredName == false)
             {
-                if (androidNameTask == null && kbName == "")
+
+#if ANDROID     
+                if (androidNameTask == null && !KeyboardInput.IsVisible)
                 {
-#if ANDROID
                     androidNameTask = KeyboardInput.Show("Name", "What's your name?", "Player");
-#endif
-
-#if !ANDROID
-                    kbNameHandler.Update();
-#endif
-
                 }
-                else if (androidNameTask != null && androidNameTask.IsCompleted)
+
+                if (androidNameTask != null && androidNameTask.IsCompleted)
                 {
                     playerName = androidNameTask.Result;
 
                     bHasEnteredName = true;
+                    bHasTappedChangeNameLastUpdate = false;
                 }
-                else if (kbName != "")
+#endif
+
+#if !ANDROID
+                if (kbName == "")
+                {
+                    kbNameHandler.Update();
+                }
+                else
                 {
                     playerName = kbName;
 
                     bHasEnteredName = true;
+                    
                 }
+
+                bHasTappedChangeNameLastUpdate = false;
+#endif
+
             }
         }
 
