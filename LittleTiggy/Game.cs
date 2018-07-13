@@ -83,7 +83,7 @@ namespace LittleTiggy
         public void LoadLevel(int level)
         {
 
-            if (level > 1 && !string.IsNullOrEmpty(playerName))
+            if (level > 1 && !string.IsNullOrEmpty(playerName) && !bLeaderboardNetworkFailure)
             {
                 SubmitScore(level);
             }

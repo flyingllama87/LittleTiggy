@@ -126,7 +126,7 @@ namespace LittleTiggy
 
             }
 
-            if (bHasEnteredName == false && !LittleTiggy.bLeaderboardNetworkFailure)
+            if (bHasEnteredName == false)
             {
                 if (androidNameTask == null && kbName == "")
                 {
@@ -139,13 +139,13 @@ namespace LittleTiggy
 #endif
 
                 }
-                else if (androidNameTask != null && androidNameTask.IsCompleted && !bLeaderboardNetworkFailure)
+                else if (androidNameTask != null && androidNameTask.IsCompleted)
                 {
                     playerName = androidNameTask.Result;
 
                     bHasEnteredName = true;
                 }
-                else if (kbName != "" && !bLeaderboardNetworkFailure)
+                else if (kbName != "")
                 {
                     playerName = kbName;
 
