@@ -295,7 +295,6 @@ namespace LittleTiggy
                 frameCounter.Update(deltaTime);
                 var fps = string.Format("{0}", frameCounter.CurrentFramesPerSecond.ToString("#"));
                 spriteBatch.DrawString(gameFont, fps, new Vector2(512 - 32, 16), colorLTGreen);
-                enemyPathfinder.Draw(spriteBatch); //draw pathfinding path for debugging
             }
 
             // DEBUG code for drawing wall generation and collision information

@@ -122,7 +122,7 @@ namespace LittleTiggy
         // bool bAddScoreComplete = false;
         bool bGetScoresRequested = false;
         bool bGetScoresComplete = false;
-        public static string LeaderBoardAPIEndpoint = "http://BNEWKS0036.bne.gameloft.org:5000/api";
+        public static string LeaderBoardAPIEndpoint = "http://leaderboard.morganrobertson.net:443/api";
         private BackgroundWorker BackgroundHTTPWorker = new BackgroundWorker();
         List<Tuple<string, int>> leaderBoardScores = new List<Tuple<string, int>>();
 

@@ -3,9 +3,7 @@
 /*
  * TO DO:
  *
- * - FEATURE: Host leaderboard online for access from anywhere
  * - FEATURE: Save and load player name from file?
- * - FEATURE: Get smooth enemy movement going
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
