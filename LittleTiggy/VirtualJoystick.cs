@@ -9,78 +9,138 @@ using Microsoft.Xna.Framework.Input;
 namespace LittleTiggy
 {
 
-    public class VirtualJoystick
+    public class ControlOverlay
     {
 
-        Texture2D virtualJoystickTexture;
-        Boolean bWasTouchPresentLastUpdate = false;
-        public static Vector2 virtualJoystickPosition;
+        Texture2D controlOverlayTexture;
 
-        public float X
+        public ControlOverlay(GraphicsDevice graphicsDevice)
         {
-            get;
-            set;
-        }
-
-        public float Y
-        {
-            get;
-            set;
-        }
-
-        public VirtualJoystick(GraphicsDevice graphicsDevice)
-        {
-            if (virtualJoystickTexture == null)
+            if (controlOverlayTexture == null)
             {
                 using (var stream = TitleContainer.OpenStream("Content/JoystickCircle.png"))
                 {
-                    virtualJoystickTexture = Texture2D.FromStream(graphicsDevice, stream);
+                    controlOverlayTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
             }
+        }
 
-            virtualJoystickPosition.X = LittleTiggy.viewportWidth / 2;
-            virtualJoystickPosition.Y = LittleTiggy.viewportHeight / 2;
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            Rectangle overlayRectangle = new Rectangle(0, 0, 511, 511);
 
+            spriteBatch.Draw(controlOverlayTexture, new Vector2(0, 0), overlayRectangle, Color.White * 0.1f);
+        }
+    }
+
+    public class VirtualThumbstick
+    {
+
+        // the distance in screen pixels that represents a thumbstick value of 1f.
+        private const float maxThumbstickDistance = 80f;
+
+        // the current positions of the physical touches
+        private static Vector2 Position;
+
+        // the IDs of the touches we are tracking for the thumbstick
+        private static int touchId = -1;
+
+        private static Texture2D thumbstickTexture;
+
+        public static Vector2? virtualThumbstickCenter { get; private set; }
+
+        public static Vector2 Thumbstick
+        {
+            get
+            {
+                if (!virtualThumbstickCenter.HasValue)
+                    return Vector2.Zero;
+
+                // calculate the scaled vector from the touch position to the center,
+                // scaled by the maximum thumbstick distance
+                Vector2 p = (Position - virtualThumbstickCenter.Value) / maxThumbstickDistance;
+
+                // if the length is more than 1, normalize the vector
+                if (p.LengthSquared() > 1f)
+                    p.Normalize();
+
+                return p;
+            }
+        }
+
+        public VirtualThumbstick(GraphicsDevice graphicsDevice)
+        {
+            if (thumbstickTexture == null)
+            {
+                using (var stream = TitleContainer.OpenStream("Content/Thumbstick.png"))
+                {
+                    thumbstickTexture = Texture2D.FromStream(graphicsDevice, stream);
+                }
+            }
         }
 
         public void Update()
         {
+            TouchLocation? Touch = null;
+            TouchCollection touches = TouchPanel.GetState();
 
-            TouchCollection touchCollection = TouchPanel.GetState();
-
-            if (touchCollection.Count > 0) // If the player is using a touch screen and has touched the screen.
+            foreach (var touch in touches)
             {
-                // If we detect a new touch, set the touch position as the middle of the virtual joystick.
+                if (touch.Id == touchId)
+                {
+                    // This is a motion of a touch that we're already tracking
+                    Touch = touch;
+                    continue;
+                }
 
-                if (bWasTouchPresentLastUpdate == false)
-                    virtualJoystickPosition = new Vector2(touchCollection[0].Position.X / LittleTiggy.gameScaleFactor, touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor);
+                TouchLocation earliestTouch;
+                if (!touch.TryGetPreviousLocation(out earliestTouch))
+                    earliestTouch = touch;
 
-                bWasTouchPresentLastUpdate = true;
+                if (touchId == -1)
+                {
+                    if (earliestTouch.Position.X < TouchPanel.DisplayWidth / 2)
+                    {
+                        Touch = earliestTouch;
+                        continue;
+                    }
+                }
+            }
 
+            // if we have a touch
+            if (Touch.HasValue)
+            {
+                // if we have no center, this position is our center
+                if (!virtualThumbstickCenter.HasValue)
+                    virtualThumbstickCenter = Touch.Value.Position;
+
+                // save the position of the touch
+                Position = Touch.Value.Position;
+
+                // save the ID of the touch
+                touchId = Touch.Value.Id;
             }
             else
             {
-                bWasTouchPresentLastUpdate = false;
+                // otherwise reset our values to not track any touches
+                // for the thumbstick
+                virtualThumbstickCenter = null;
+                touchId = -1;
             }
-
 
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
-            if (virtualJoystickPosition != null)
+            if (virtualThumbstickCenter.HasValue)
             {
-                Rectangle joystickRectangle = new Rectangle(0, 0, 511, 511);
-                
-                // virtualJoystickPosition.X = (GameConstants.gameWidth / 2) - (virtualJoystickTexture.Width / 2);
-                // virtualJoystickPosition.Y = (GameConstants.gameHeight / 2) - (virtualJoystickTexture.Height / 2);
-
-                // spriteBatch.Draw(virtualJoystickTexture, new Vector2(virtualJoystickPosition.X, virtualJoystickPosition.Y), joystickRectangle, Color.White * 0.1f);
-                spriteBatch.Draw(virtualJoystickTexture, new Vector2(0, 0), joystickRectangle, Color.White * 0.1f);
+                spriteBatch.Draw(
+                    thumbstickTexture,
+                    virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f),
+                    Color.Green);
             }
-
         }
 
     }
+
 }

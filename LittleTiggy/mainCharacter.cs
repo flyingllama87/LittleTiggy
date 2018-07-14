@@ -338,12 +338,20 @@ namespace LittleTiggy
             // desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - Y;
 
             // Acquire the direction the player wants to move based on where they are touching the screen relative to the centre of the game screen
+
+            /*
             desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
             desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
-
+           
             // Normalize the input vector and use the direction to move the character to the nearest grid aligned position.
-
             desiredVelocity.Normalize();
+            */
+
+
+            // Virtual Joystick Test
+            desiredVelocity = VirtualThumbstick.Thumbstick; // LittleTiggy.virtualThumbstick.;
+            desiredVelocity.Normalize();
+
 
             if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
             {

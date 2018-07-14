@@ -16,9 +16,9 @@ namespace LittleTiggy
         List<Enemy> enemies;
         List<PowerUp> powerUps;
         SpriteFont gameFont;
-        VirtualJoystick virtualJoystick;
+        ControlOverlay touchControlOverlay;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
-
+        public static VirtualThumbstick virtualThumbstick;
         Song songBGM;
         public static SoundEffect powerUpSound;
         SoundEffect winGameSound;
@@ -61,7 +61,9 @@ namespace LittleTiggy
         {
             gameBorder = new GameBorder();
             character = new MainCharacter(GraphicsDevice);
-            virtualJoystick = new VirtualJoystick(GraphicsDevice);
+            touchControlOverlay = new ControlOverlay(GraphicsDevice);
+            virtualThumbstick = new VirtualThumbstick(GraphicsDevice);
+            Song songBGM;
             songBGM = Content.Load<Song>("BackgroundMusic");
             MediaPlayer.Play(songBGM);
             MediaPlayer.IsRepeating = true;
@@ -204,8 +206,10 @@ namespace LittleTiggy
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            virtualThumbstick.Update();
+
             character.Update(gameTime, GraphicsDevice, walls);
-            virtualJoystick.Update();
+
             foreach (Enemy enemy in enemies)
             {
                 enemy.Update(gameTime, GraphicsDevice, walls);
@@ -236,16 +240,13 @@ namespace LittleTiggy
             {
                 if (enemy.IsPlayerCollision() && !MainCharacter.isPoweredUp)
                 {
-                    if (level > 1)
+                    if (level > 1 && !playerName.ToUpper().Contains("LOLA"))
                         level--;
                     loseGameSound.Play();
                     LoadLevel(level);
                 }
             }
-
         }
-
-
 
         void inGameDraw(GameTime gameTime)
         {
@@ -262,15 +263,11 @@ namespace LittleTiggy
 
             spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null, renderMatrix);
 
-
-
             // Draw each wall
             for (int i = 0; i < walls.Length; i++)
             {
                 walls[i].Draw(spriteBatch);
             }
-
-
 
             // pathfinder.Draw(spriteBatch); // Used for visualising pathfinding path
             
@@ -295,7 +292,9 @@ namespace LittleTiggy
                 frameCounter.Update(deltaTime);
                 var fps = string.Format("{0}", frameCounter.CurrentFramesPerSecond.ToString("#"));
                 spriteBatch.DrawString(gameFont, fps, new Vector2(512 - 32, 16), colorLTGreen);
+                virtualThumbstick.Draw(spriteBatch);
             }
+
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
@@ -307,7 +306,8 @@ namespace LittleTiggy
 
 
 #if ANDROID // If we are on android, draw a border and virtual joystick
-            virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+            touchControlOverlay.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
+            virtualThumbstick.Draw(spriteBatch);
 
             spriteBatch.End();
 
@@ -318,8 +318,7 @@ namespace LittleTiggy
 #endif
         }
 
-
-    }
+}
 
     class GameBorder
     {
