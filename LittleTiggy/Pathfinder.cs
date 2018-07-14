@@ -113,7 +113,7 @@ namespace LittleTiggy
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            Color tintColor = Color.White;
+            Color tintColor = Color.White * 0.25f;
 
             var DeletedNodesSourceRectangle = DeletedNodesCurrentAnimation.CurrentRectangle;
 

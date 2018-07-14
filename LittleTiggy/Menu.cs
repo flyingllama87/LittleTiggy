@@ -28,7 +28,7 @@ namespace LittleTiggy
         bool bHasEnteredName = false;
         bool bHasTappedButtonLastUpdate = false; // used as button activation (i.e. rectangle intersection) can be detected for multiple update loops but we only need the button to be activated once.
 
-        
+        bool bPlayerRequestedGame = false;
 
         static public string kbInput = "";
         static public string kbName = "";
@@ -103,7 +103,15 @@ namespace LittleTiggy
                 if (rectanglePlayGame.Intersects(touchRectangle))
                 {
                     LittleTiggy.menuSound.Play();
-                    gameState = GameState.inGame;
+
+                    if (!bHasEnteredName)  //Get player to enter their name if they try to play without entering it.
+                    {
+                        gameState = GameState.nameInput;
+                        bPlayerRequestedGame = true;
+                    }
+                    else
+                        gameState = GameState.inGame;
+
                 }
                 if (rectangleChangeName.Intersects(touchRectangle))
                 {
@@ -173,7 +181,12 @@ namespace LittleTiggy
             {
                 if (rectangleGoBack.Intersects(touchRectangle))
                 {
-                    gameState = GameState.menu;
+                    if (bPlayerRequestedGame)
+                        gameState = GameState.inGame;
+                    else
+                    {
+                        gameState = GameState.menu;
+                    }
                     LittleTiggy.menuSound.Play();
                 }
 
@@ -212,10 +225,15 @@ namespace LittleTiggy
 
                 if (androidNameTask != null && androidNameTask.IsCompleted)
                 {
-                    playerName = androidNameTask.Result;
+                    if (androidNameTask.Result != null)
+                    { 
+                        playerName = androidNameTask.Result;
+                        bHasEnteredName = true;
+                        
+                    }
 
-                    bHasEnteredName = true;
                     bHasTappedButtonLastUpdate = false;
+
                 }
 #endif
 
@@ -410,9 +428,22 @@ namespace LittleTiggy
             else
                 spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
 
-            Vector2 stringSize = font.MeasureString("Go Back");
-            Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
-            spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
+            Vector2 stringSize;
+            Vector2 textPosition;
+
+            if (!bPlayerRequestedGame)
+            {
+                stringSize = font.MeasureString("Go Back");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
+                spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
+            }
+            else
+            {
+                stringSize = font.MeasureString("Start Game");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
+                spriteBatch.DrawString(font, "Start Game", textPosition, colorLTRed);
+            }
+
 
             // Draw change name button
             if (menuButtonHover[1] == true)

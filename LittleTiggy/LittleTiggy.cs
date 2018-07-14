@@ -3,15 +3,12 @@
 /*
  * TO DO:
  *
- * - FEATURE: Host leaderboard online for acess from anywhere
- * - FEATURE: Prompt player to input name if they have not done so before beginning game
- * - FEATURE: save and load player name from file?
- * - FEATURE: Add FPS counter
+ * - FEATURE: Host leaderboard online for access from anywhere
+ * - FEATURE: Save and load player name from file?
  * - FEATURE: Get smooth enemy movement going
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
- * - BUGFIX - ANDROID: fix issue if player hits cancel on naem input
  */
 
 using Microsoft.Xna.Framework;

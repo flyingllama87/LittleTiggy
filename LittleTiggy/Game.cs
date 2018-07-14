@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LittleTiggy
 {
@@ -26,6 +27,8 @@ namespace LittleTiggy
 
         Pathfinder pathfinder;
         public static int level { get; set; } = 1;
+
+        private FrameCounter frameCounter = new FrameCounter();
 
 
 #if _DEBUG
@@ -282,7 +285,18 @@ namespace LittleTiggy
 
             character.Draw(spriteBatch);
 
-            
+            spriteBatch.DrawString(gameFont, "Level: " + level, new Vector2(16, 16), colorLTGreen);
+
+
+            // Draw FPS counter if name is debug.
+            if (LittleTiggy.playerName.ToUpper() == "DEBUG")
+            {
+                var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                frameCounter.Update(deltaTime);
+                var fps = string.Format("{0}", frameCounter.CurrentFramesPerSecond.ToString("#"));
+                spriteBatch.DrawString(gameFont, fps, new Vector2(512 - 32, 16), colorLTGreen);
+                enemyPathfinder.Draw(spriteBatch); //draw pathfinding path for debugging
+            }
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
@@ -290,7 +304,8 @@ namespace LittleTiggy
 
             spriteBatch.DrawString(gameFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
-            spriteBatch.DrawString(gameFont, "Level: " + level, new Vector2(16, 16), colorLTGreen);
+
+
 
 #if ANDROID // If we are on android, draw a border and virtual joystick
             virtualJoystick.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
@@ -345,6 +360,43 @@ namespace LittleTiggy
             spriteBatch.Draw(borderTexture, bottomBorder, Color.Red);
         }
     }
-    
+
+    public class FrameCounter // Thank you to https://stackoverflow.com/questions/20676185/xna-monogame-getting-the-frames-per-second
+    {
+        public FrameCounter()
+        {
+        }
+
+        public long TotalFrames { get; private set; }
+        public float TotalSeconds { get; private set; }
+        public float AverageFramesPerSecond { get; private set; }
+        public float CurrentFramesPerSecond { get; private set; }
+
+        public const int MAXIMUM_SAMPLES = 100;
+
+        private Queue<float> _sampleBuffer = new Queue<float>();
+
+        public bool Update(float deltaTime)
+        {
+            CurrentFramesPerSecond = 1.0f / deltaTime;
+
+            _sampleBuffer.Enqueue(CurrentFramesPerSecond);
+
+            if (_sampleBuffer.Count > MAXIMUM_SAMPLES)
+            {
+                _sampleBuffer.Dequeue();
+                AverageFramesPerSecond = _sampleBuffer.Average(i => i);
+            }
+            else
+            {
+                AverageFramesPerSecond = CurrentFramesPerSecond;
+            }
+
+            TotalFrames++;
+            TotalSeconds += deltaTime;
+            return true;
+        }
+    }
+
 
 }

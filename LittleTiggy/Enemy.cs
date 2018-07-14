@@ -9,6 +9,8 @@ using System.Linq;
 namespace LittleTiggy
 {
 
+    enum NodeDirection { Up, Down, Left, Right, Unset}; // Used in path optomisation function
+
     public class Enemy
     {
         private BackgroundWorker BackgroundPathfinderWorker = new BackgroundWorker();
@@ -30,7 +32,7 @@ namespace LittleTiggy
         Pathfinder enemyPathfinder;
 
 #if ANDROID||IOS
-        const float charSpeed = 0.000005F;
+        const float charSpeed = 0.000006F;
 #endif
 #if !ANDROID
         const float charSpeed = 0.00001F;
@@ -42,6 +44,8 @@ namespace LittleTiggy
 
         List<Vector2> pathToFollow;
         DateTime pathfindingTimer = DateTime.Now;
+        double pathfindingLongTimerIntervalSeconds = 2.0; //normally 2.0 // Used when a path to player is already established
+        double pathfindingShortTimerIntervalSeconds = 0.5; //normally 0.5 // Used when a path to player is not establised
 
         public float X
         {
@@ -238,7 +242,7 @@ namespace LittleTiggy
             if (pathfindingTimer.CompareTo(DateTime.Now) < 0 && !BackgroundPathfinderWorker.IsBusy)
             {
                 pathfindingTimer = DateTime.Now;
-                pathfindingTimer = pathfindingTimer.AddSeconds(0.5);
+                pathfindingTimer = pathfindingTimer.AddSeconds(pathfindingShortTimerIntervalSeconds);
 
                 //pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16), walls);
 
@@ -315,7 +319,7 @@ namespace LittleTiggy
                 if (pathfindingTimer.CompareTo(DateTime.Now) < 0 && !BackgroundPathfinderWorker.IsBusy)
                 {
                     pathfindingTimer = DateTime.Now;
-                    pathfindingTimer = pathfindingTimer.AddSeconds(2);
+                    pathfindingTimer = pathfindingTimer.AddSeconds(pathfindingLongTimerIntervalSeconds);
 
                     float randomGridAlignedX;
                     float randomGridAlignedY;
@@ -354,10 +358,86 @@ namespace LittleTiggy
             }
         }
 
+        List<Vector2> OptomisePath(List<Vector2> inPath) 
+        {
+            // If the path finding algo returns a path, optomise it so that any series of nodes in a line are compressed to a single node/destination for the enemy player.
+
+            if (inPath == null || inPath.Count == 0)
+            {
+                return new List<Vector2>();
+            }
+            else
+            {
+                List<Vector2> optomisedPath = new List<Vector2>();
+
+                Vector2 startPosition;
+                Vector2 lastNode = new Vector2(0,0);
+                Vector2 destinationNode = new Vector2(0,0);
+
+                NodeDirection nodeDirection = NodeDirection.Unset;
+                NodeDirection lastNodeDirection = NodeDirection.Unset;
+                // NodeDirection lineDirection;
+
+                startPosition = inPath.First<Vector2>(); // pop off the first element to prime the loop
+                lastNode = inPath.First<Vector2>();
+                optomisedPath.Add(inPath.First<Vector2>());
+                inPath.Remove(inPath.First<Vector2>());
+
+                foreach (Vector2 Node in inPath) // This is processed forwards and builds a List of vectors to be returned along the way, which is exactly what the enemy character expects.
+                {
+                    Vector2 difference = Node - lastNode;
+
+                    if (difference.X == 16)
+                    {
+                        nodeDirection = NodeDirection.Right;
+                    }
+                    else if (difference.X == -16)
+                    {
+                        nodeDirection = NodeDirection.Left;
+                    }
+                    else if (difference.Y == 16)
+                    {
+                        nodeDirection = NodeDirection.Down;
+                    }
+                    else if (difference.Y == -16)
+                    {
+                        nodeDirection = NodeDirection.Up;
+                    }
+                    else
+                    {
+                        Debug.Assert(true);
+                    }
+
+                    
+
+                    if (lastNodeDirection != NodeDirection.Unset && lastNodeDirection != nodeDirection)
+                    {
+                        optomisedPath.Add(startPosition);
+                        startPosition = Node;
+                    }
+                    else
+                    {
+                        startPosition = startPosition + difference;
+                    }
+
+                    lastNodeDirection = nodeDirection;
+                    lastNode = Node;
+
+                }
+
+                optomisedPath.Add(startPosition);
+
+                return optomisedPath;
+            }
+
+        }
+
         public void Draw(SpriteBatch spriteBatch)
         {
-            // pathfinder.Draw(spriteBatch); //draw pathfinding path for debugging
-
+            if (LittleTiggy.playerName.ToUpper() == "DEBUG")
+            {
+                enemyPathfinder.Draw(spriteBatch); //draw pathfinding path for debugging
+            }
             Vector2 topLeftOfSprite = new Vector2(this.X, this.Y);
             Color tintColor = Color.White;
             var sourceRectangle = currentAnimation.CurrentRectangle;
@@ -437,6 +517,9 @@ namespace LittleTiggy
 
                 pathToFollow = (List<Vector2>)eventArgs.Result;
                 enemyPathfinder.PathToDraw = pathToFollow;
+                pathToFollow = OptomisePath(pathToFollow);
+                
+                
 
                 if (pathToFollow.Count != 0)
                 {
