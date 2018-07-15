@@ -37,13 +37,13 @@ namespace LittleTiggy
     {
 
         // the distance in screen pixels that represents a thumbstick value of 1f.
-        private const float maxThumbstickDistance = 80f;
+        private const float maxThumbstickDistance = 60f;
 
         // the current positions of the physical touches
         private static Vector2 Position;
 
         // the IDs of the touches we are tracking for the thumbstick
-        private static int touchId = -1;
+        // private static int touchId = -1;
 
         private static Texture2D thumbstickTexture;
 
@@ -77,55 +77,30 @@ namespace LittleTiggy
                     thumbstickTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }
             }
+
+            
         }
 
         public void Update()
         {
+            virtualThumbstickCenter = new Vector2(((float)LittleTiggy.viewportWidth / 2f), ((float)LittleTiggy.viewportHeight) - 200);
+
             TouchLocation? Touch = null;
             TouchCollection touches = TouchPanel.GetState();
 
             foreach (var touch in touches)
             {
-                if (touch.Id == touchId)
-                {
-                    // This is a motion of a touch that we're already tracking
-                    Touch = touch;
-                    continue;
-                }
-
-                TouchLocation earliestTouch;
-                if (!touch.TryGetPreviousLocation(out earliestTouch))
-                    earliestTouch = touch;
-
-                if (touchId == -1)
-                {
-                    if (earliestTouch.Position.X < TouchPanel.DisplayWidth / 2)
-                    {
-                        Touch = earliestTouch;
-                        continue;
-                    }
-                }
+                Touch = touch;
             }
 
             // if we have a touch
             if (Touch.HasValue)
             {
-                // if we have no center, this position is our center
-                if (!virtualThumbstickCenter.HasValue)
-                    virtualThumbstickCenter = Touch.Value.Position;
-
                 // save the position of the touch
                 Position = Touch.Value.Position;
 
                 // save the ID of the touch
-                touchId = Touch.Value.Id;
-            }
-            else
-            {
-                // otherwise reset our values to not track any touches
-                // for the thumbstick
-                virtualThumbstickCenter = null;
-                touchId = -1;
+                // touchId = Touch.Value.Id;
             }
 
         }
@@ -134,10 +109,7 @@ namespace LittleTiggy
         {
             if (virtualThumbstickCenter.HasValue)
             {
-                spriteBatch.Draw(
-                    thumbstickTexture,
-                    virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f),
-                    Color.Green);
+                spriteBatch.Draw(thumbstickTexture, virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f), Color.Black);
             }
         }
 

@@ -4,6 +4,10 @@
  * TO DO:
  *
  * - FEATURE: Save and load player name from file?
+ * - Go straight into game if forcing player to set a name before playing
+ * - Allow 'back' button on android to go back
+ * - Provide option for either virtual joystick or the quadrant control
+ * - Fix multitasking issues on android
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.

@@ -295,6 +295,7 @@ namespace LittleTiggy
                 virtualThumbstick.Draw(spriteBatch);
             }
 
+            
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
@@ -307,13 +308,15 @@ namespace LittleTiggy
 
 #if ANDROID // If we are on android, draw a border and virtual joystick
             touchControlOverlay.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
-            virtualThumbstick.Draw(spriteBatch);
-
+            
             spriteBatch.End();
 
             spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
-                // Draw game border
-                gameBorder.Draw(spriteBatch);
+
+            // Draw game border
+            gameBorder.Draw(spriteBatch);
+            virtualThumbstick.Draw(spriteBatch);
+
             // Main LT source file ends the spriteBatch
 #endif
         }

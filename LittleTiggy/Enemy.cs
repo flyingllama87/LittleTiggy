@@ -32,7 +32,7 @@ namespace LittleTiggy
         Pathfinder enemyPathfinder;
 
 #if ANDROID||IOS
-        const float charSpeed = 0.000006F;
+        const float charSpeed = 0.000004F;
 #endif
 #if !ANDROID
         const float charSpeed = 0.00001F;

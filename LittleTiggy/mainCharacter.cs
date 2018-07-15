@@ -350,7 +350,11 @@ namespace LittleTiggy
 
             // Virtual Joystick Test
             desiredVelocity = VirtualThumbstick.Thumbstick; // LittleTiggy.virtualThumbstick.;
-            desiredVelocity.Normalize();
+            if (desiredVelocity != new Vector2(0, 0))
+            {
+                desiredVelocity.Normalize();
+            }
+            
 
 
             if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
