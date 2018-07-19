@@ -4,10 +4,12 @@
  * TO DO:
  *
  * - FEATURE: Save and load player name from file?
- * - Go straight into game if forcing player to set a name before playing
  * - Allow 'back' button on android to go back
  * - Provide option for either virtual joystick or the quadrant control
  * - Fix multitasking issues on android
+ * - Provide two different options for enemy speed (difficulty)
+ * - Provide option to disable network requests
+ * - Fix instuctions
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
@@ -15,13 +17,14 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace LittleTiggy
 {
     public enum GameState
     {
         menu,
-        nameInput,
+        optionsMenu,
         leaderBoard,
         instructions,
         inGame
@@ -58,7 +61,6 @@ namespace LittleTiggy
         Color colorLTBlue = new Color(70, 70, 219);
         Color colorLTRed = new Color(219, 70, 70);
         Color colorLTGreen = new Color(70, 200, 70);
-
 
         public LittleTiggy()
         {
@@ -124,13 +126,26 @@ namespace LittleTiggy
         {
             base.Update(gameTime);
 
+
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            {
+                if (gameState != GameState.menu)
+                {
+                    gameState = GameState.menu;
+                }
+                else
+                {
+                    Exit();
+                }
+            }
+
             switch (gameState)
             {
                 case GameState.menu:
                     menuUpdate(gameTime);
                     break;
-                case GameState.nameInput:
-                    changeNameUpdate(gameTime);
+                case GameState.optionsMenu:
+                    optionsMenuUpdate(gameTime);
                     break;
                 case GameState.inGame:
                     inGameUpdate(gameTime);
@@ -156,8 +171,8 @@ namespace LittleTiggy
                 case GameState.menu:
                     menuDraw(gameTime);
                     break;
-                case GameState.nameInput:
-                    changeNameDraw(gameTime);
+                case GameState.optionsMenu:
+                    optionsMenuDraw(gameTime);
                     break;
                 case GameState.inGame:
                     inGameDraw(gameTime);

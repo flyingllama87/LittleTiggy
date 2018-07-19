@@ -9,6 +9,10 @@ using System.Linq;
 
 namespace LittleTiggy
 {
+
+    public enum GameDifficulty { Easy, Medium, Hard };
+    public enum GameTouchControlMethod { Joystick, ScreenTap}
+
     public partial class LittleTiggy : Game
     {
         GameBorder gameBorder;
@@ -29,6 +33,9 @@ namespace LittleTiggy
         public static int level { get; set; } = 1;
 
         private FrameCounter frameCounter = new FrameCounter();
+
+        public static GameDifficulty gameDifficulty = GameDifficulty.Medium;
+        public static GameTouchControlMethod gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
 
 
 #if _DEBUG
@@ -91,7 +98,7 @@ namespace LittleTiggy
         public void LoadLevel(int level)
         {
 
-            if (level > 1 && !string.IsNullOrEmpty(playerName) && !bLeaderboardNetworkFailure)
+            if (level > 1 && !string.IsNullOrEmpty(playerName) && !bDisableNetworkCalls)
             {
                 SubmitScore(level);
             }
@@ -295,7 +302,7 @@ namespace LittleTiggy
                 virtualThumbstick.Draw(spriteBatch);
             }
 
-            
+
 
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
@@ -306,16 +313,18 @@ namespace LittleTiggy
 
 
 
-#if ANDROID // If we are on android, draw a border and virtual joystick
-            touchControlOverlay.Draw(spriteBatch); // Don't draw virtual joystick on desktop version
-            
-            spriteBatch.End();
+#if ANDROID // If we are on android, draw a border and touch controls joystick
+            if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.ScreenTap)
+                touchControlOverlay.Draw(spriteBatch); // Draw the touch control overlay if control scheme is set appropriately
+            else
+                virtualThumbstick.Draw(spriteBatch);
 
-            spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
+            spriteBatch.End(); // End current spriteBatch used for game elements that are scaled to viewport size.
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp); // start a new non-scaled or offset spriteBatch 
 
             // Draw game border
             gameBorder.Draw(spriteBatch);
-            virtualThumbstick.Draw(spriteBatch);
 
             // Main LT source file ends the spriteBatch
 #endif

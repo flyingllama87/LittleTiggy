@@ -28,7 +28,6 @@ namespace LittleTiggy
         public void Draw(SpriteBatch spriteBatch)
         {
             Rectangle overlayRectangle = new Rectangle(0, 0, 511, 511);
-
             spriteBatch.Draw(controlOverlayTexture, new Vector2(0, 0), overlayRectangle, Color.White * 0.1f);
         }
     }
@@ -41,9 +40,6 @@ namespace LittleTiggy
 
         // the current positions of the physical touches
         private static Vector2 Position;
-
-        // the IDs of the touches we are tracking for the thumbstick
-        // private static int touchId = -1;
 
         private static Texture2D thumbstickTexture;
 
@@ -83,7 +79,10 @@ namespace LittleTiggy
 
         public void Update()
         {
-            virtualThumbstickCenter = new Vector2(((float)LittleTiggy.viewportWidth / 2f), ((float)LittleTiggy.viewportHeight) - 200);
+            if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.Joystick)
+                virtualThumbstickCenter = new Vector2(LittleTiggy.viewportWidth / 2f, LittleTiggy.viewportHeight - 200);
+            else
+                virtualThumbstickCenter = new Vector2(LittleTiggy.viewportWidth / 2f, LittleTiggy.viewportHeight / 2f);
 
             TouchLocation? Touch = null;
             TouchCollection touches = TouchPanel.GetState();
@@ -93,24 +92,15 @@ namespace LittleTiggy
                 Touch = touch;
             }
 
-            // if we have a touch
+            // if we have a touch, save the position of the touch
             if (Touch.HasValue)
-            {
-                // save the position of the touch
                 Position = Touch.Value.Position;
-
-                // save the ID of the touch
-                // touchId = Touch.Value.Id;
-            }
 
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (virtualThumbstickCenter.HasValue)
-            {
                 spriteBatch.Draw(thumbstickTexture, virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f), Color.Black);
-            }
         }
 
     }

@@ -219,7 +219,6 @@ namespace LittleTiggy
                 currentAnimation.Update(gameTime);
 
                 desiredDestinationPosition.Y += charSpeed * ticksSinceLastUpdate;
-
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Up))

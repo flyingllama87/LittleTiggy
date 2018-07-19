@@ -22,6 +22,7 @@ namespace LittleTiggy
             SetContentView((View)g.Services.GetService(typeof(View)));
             g.Run();
         }
+
     }
 }
 

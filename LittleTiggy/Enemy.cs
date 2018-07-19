@@ -9,8 +9,6 @@ using System.Linq;
 namespace LittleTiggy
 {
 
-    enum NodeDirection { Up, Down, Left, Right, Unset}; // Used in path optomisation function
-
     public class Enemy
     {
         private BackgroundWorker BackgroundPathfinderWorker = new BackgroundWorker();
@@ -32,10 +30,10 @@ namespace LittleTiggy
         Pathfinder enemyPathfinder;
 
 #if ANDROID||IOS
-        const float charSpeed = 0.000004F;
+        float charSpeed;
 #endif
 #if !ANDROID
-        const float charSpeed = 0.00001F;
+        float charSpeed;
 #endif
         long ticksSinceLastUpdate = 0;
 
@@ -77,6 +75,15 @@ namespace LittleTiggy
 
         public Enemy(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls)
         {
+
+            // Set enemy speed depending on game difficulty
+            if (LittleTiggy.gameDifficulty == GameDifficulty.Easy)
+                this.charSpeed = 0.000004F;
+            else if (LittleTiggy.gameDifficulty == GameDifficulty.Medium)
+                this.charSpeed = 0.000006F;
+            else
+                this.charSpeed = 0.00001F;
+
             this.enemyPathfinder = new Pathfinder(graphicsDevice);
             BackgroundPathfinderWorker_Initialise();
             

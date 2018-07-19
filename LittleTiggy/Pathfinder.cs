@@ -10,6 +10,9 @@ using System.Collections.Generic;
 
 namespace LittleTiggy
 {
+
+    enum NodeDirection { Up, Down, Left, Right, Unset }; // Used in path optomisation function
+
     public class Node : IEquatable<Node>  //device graph node data type used in graph search
     {
         public ushort h_score { get; set; }

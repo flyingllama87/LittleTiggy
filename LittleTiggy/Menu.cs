@@ -11,37 +11,44 @@ using System.Diagnostics;
 
 namespace LittleTiggy
 {
+
     public partial class LittleTiggy : Game
     {
-        Texture2D menuRectangle;
-        Texture2D menuRectangleHover; // Used to change color of menu rectangle on mouse hover.  Unimplemented at the moment.
-        bool[] menuButtonHover = new bool[4];
-        Vector2 mouseXY = new Vector2();
 
-        int menuButtonOffset;
+        // Menu resources
+        Texture2D menuRectangle;
+        Texture2D menuRectangleHover; // Used to change color of menu rectangle on mouse hover.
         public static SoundEffect menuSound;
         private SpriteFont smallFont, font, bigFont, arialFont, bigArialFont;
 
+        // Variables used to assist UI layout
+        bool[] menuButtonHover = new bool[4]; // Used to set/get which button the mouse is hovering over, if any.
+        Vector2 mouseXY;
+        int menuItemSpaceDistance = 25; // Used as the standard spacing between UI elements
+        int menuButtonXOffset; // Used to set the starting X position to draw the menu button rectangle.  Varies depending on viewport width.
+        public static float menuScaleFactor;  // Used to scale menu draw vertically on portrait screens (mobile)
+
         DateTime menuButtonTimer = DateTime.Now; 
         double menuButtonTimeSeconds = 0.3; // Used to disallow activating a button again for the specified length of time.
-
-        bool bHasEnteredName = false;
         bool bHasTappedButtonLastUpdate = false; // used as button activation (i.e. rectangle intersection) can be detected for multiple update loops but we only need the button to be activated once.
 
+        // Game option switches
+        bool bHasEnteredName = false;
         bool bPlayerRequestedGame = false;
 
+        // Player name vars
         static public string kbInput = "";
         static public string kbName = "";
         static public string playerName = "";
         Task<string> androidNameTask = null; // Used for name input on android
-        public static float menuScaleFactor;  // Used to scale menu draw vertically on portrait screens (mobile)
+
 #if !ANDROID
         KbNameHandler kbNameHandler = new KbNameHandler();
 #endif
 
         void InitialiseMenu()
         {
-            menuButtonOffset = (viewportWidth - 600) / 2;
+            menuButtonXOffset = (viewportWidth - 600) / 2;
             menuScaleFactor = (float)GraphicsDevice.Viewport.Height / (float)GameConstants.menuHeight;
         }
 
@@ -84,7 +91,7 @@ namespace LittleTiggy
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
-                touchXY = new Vector2(mouseState.X, mouseState.Y);
+                touchXY = new Vector2(mouseState.X, mouseState.Y); // Mouse clicks are treated as touches.
             }
             else if (touchCollection.Count > 0)
             {
@@ -93,10 +100,13 @@ namespace LittleTiggy
 
             Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 2, 2);
-            Rectangle rectanglePlayGame = new Rectangle(menuButtonOffset, (int)(275 * menuScaleFactor), 600, 150);
-            Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(450 * menuScaleFactor), 600, 150);
-            Rectangle rectangleLeaderBoards = new Rectangle(menuButtonOffset, (int)(625 * menuScaleFactor), 600, 150);
-            Rectangle rectangleInstructions = new Rectangle(menuButtonOffset, (int)(800 * menuScaleFactor), 600, 150);
+
+            // int elementPositionY += menuRectangle.Height + menuItemSpaceDistance * (int)menuScaleFactor;
+
+            Rectangle rectanglePlayGame = new Rectangle(menuButtonXOffset, (int)(275 * menuScaleFactor), 600, 150);
+            Rectangle rectangleChangeName = new Rectangle(menuButtonXOffset, (int)(450 * menuScaleFactor), 600, 150);
+            Rectangle rectangleLeaderBoards = new Rectangle(menuButtonXOffset, (int)(625 * menuScaleFactor), 600, 150);
+            Rectangle rectangleInstructions = new Rectangle(menuButtonXOffset, (int)(800 * menuScaleFactor), 600, 150);
 
             if (touchXY.X != 0 && touchXY.Y != 0)
             {
@@ -106,7 +116,7 @@ namespace LittleTiggy
 
                     if (!bHasEnteredName)  //Get player to enter their name if they try to play without entering it.
                     {
-                        gameState = GameState.nameInput;
+                        gameState = GameState.optionsMenu;
                         bPlayerRequestedGame = true;
                     }
                     else
@@ -116,7 +126,7 @@ namespace LittleTiggy
                 if (rectangleChangeName.Intersects(touchRectangle))
                 {
                     LittleTiggy.menuSound.Play();
-                    gameState = GameState.nameInput;
+                    gameState = GameState.optionsMenu;
                 }
                 if (rectangleLeaderBoards.Intersects(touchRectangle))
                 {
@@ -153,7 +163,7 @@ namespace LittleTiggy
             // message = "Rect position: " + rectanglePlayGame.X + " " + rectanglePlayGame.Y + " Touch Pos: " + touchXY.X + " " + touchXY.Y;
         }
 
-        void changeNameUpdate(GameTime gameTime)
+        void optionsMenuUpdate(GameTime gameTime)
         {
 
             resetButtonHover();
@@ -172,12 +182,29 @@ namespace LittleTiggy
                 touchXY = new Vector2(touchCollection[0].Position.X, touchCollection[0].Position.Y);
             }
 
-            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
+            // Convert position of mouse and touch input to rectangles to be able to use intersection methods.
+            Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 1, 1);
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
-            Rectangle rectangleChangeName = new Rectangle(menuButtonOffset, (int)(185 * menuScaleFactor), 600, 150);
 
-            if (touchXY.X != 0 && touchXY.Y != 0)
+            // Set rectangles used to layout options menu.
+            int elementPositionY = menuItemSpaceDistance; // Used to position the elements of the menu from top to bottom.  Set first element position.
+            Rectangle rectangleGoBack = new Rectangle(menuButtonXOffset, (int)(elementPositionY * menuScaleFactor), 600, 150);
+            elementPositionY += menuRectangle.Height + menuItemSpaceDistance * (int)menuScaleFactor;
+
+            Rectangle rectangleChangeName = new Rectangle(menuButtonXOffset, (int)(elementPositionY * menuScaleFactor), 600, 150);
+            elementPositionY += menuRectangle.Height + menuItemSpaceDistance * (int)menuScaleFactor;
+
+            Vector2 stringSize = font.MeasureString("STRING"); // Used to get the height of a string rendered with this font.  Used here to match layout in draw functions.
+            elementPositionY += (int)stringSize.Y * (int)menuScaleFactor; 
+
+            Rectangle rectangleSetDifficulty = new Rectangle(menuButtonXOffset, (int)(elementPositionY * menuScaleFactor), 600, 150);
+            elementPositionY += menuRectangle.Height + (int)stringSize.Y;
+
+            Rectangle rectangleSetTouchControl = new Rectangle(menuButtonXOffset, (int)(elementPositionY * menuScaleFactor), 600, 150);
+
+            // Logic for UI elements
+
+            if (touchXY.X != 0 && touchXY.Y != 0) // Touch control
             {
                 if (rectangleGoBack.Intersects(touchRectangle))
                 {
@@ -194,15 +221,47 @@ namespace LittleTiggy
                 {
                     menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
                     LittleTiggy.menuSound.Play();
+                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
                     bHasEnteredName = false;
                     androidNameTask = null;
                     kbName = "";
+                    kbInput = "";
+                    
+                }
+
+                if (rectangleSetDifficulty.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
+                {
+                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                    LittleTiggy.menuSound.Play();
                     bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
+                    if (gameDifficulty == GameDifficulty.Hard)
+                        gameDifficulty = GameDifficulty.Easy;
+                    else
+                        gameDifficulty = gameDifficulty + 1;
+
+                }
+
+                if (rectangleSetTouchControl.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
+                {
+                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                    LittleTiggy.menuSound.Play();
+                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
+                    if (gameTouchControlMethod == GameTouchControlMethod.Joystick)
+                        gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
+                    else
+                        gameTouchControlMethod = GameTouchControlMethod.Joystick;
                 }
 
             }
+            else
+            {
+                bHasTappedButtonLastUpdate = false;
+            }
 
-            if (mouseXY.X != 0 && mouseXY.Y != 0)
+            if (mouseXY.X != 0 && mouseXY.Y != 0) // Mouse control
             {
                 if (rectangleGoBack.Intersects(mouseRectangle))
                 {
@@ -211,6 +270,14 @@ namespace LittleTiggy
                 if (rectangleChangeName.Intersects(mouseRectangle))
                 {
                     menuButtonHover[1] = true;
+                }
+                if (rectangleSetDifficulty.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[2] = true;
+                }
+                if (rectangleSetTouchControl.Intersects(mouseRectangle))
+                {
+                    menuButtonHover[3] = true;
                 }
             }
 
@@ -229,12 +296,9 @@ namespace LittleTiggy
                     { 
                         playerName = androidNameTask.Result;
                         bHasEnteredName = true;
-                        
                     }
-
-                    bHasTappedButtonLastUpdate = false;
-
                 }
+
 #endif
 
 #if !ANDROID
@@ -245,14 +309,11 @@ namespace LittleTiggy
                 else
                 {
                     playerName = kbName;
-
                     bHasEnteredName = true;
-                    
                 }
 
                 bHasTappedButtonLastUpdate = false;
 #endif
-
             }
         }
 
@@ -275,7 +336,7 @@ namespace LittleTiggy
             }
 
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(10 * menuScaleFactor), 600, 150);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonXOffset, (int)(10 * menuScaleFactor), 600, 150);
             Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
 
             if (mouseXY.X != 0 && mouseXY.Y != 0)
@@ -300,7 +361,7 @@ namespace LittleTiggy
         {
 
             // Call LeaderBoardAPI GetScores method on new thread via BG worker
-            if (!bGetScoresRequested && !LittleTiggy.bLeaderboardNetworkFailure)
+            if (!bGetScoresRequested && !LittleTiggy.bDisableNetworkCalls)
             {
                 BackgroundHTTPWorker_Initialise(LeaderBoardAPICall.GetScores);
                 LeaderBoardClient LittleTiggyLBClient = new LeaderBoardClient();
@@ -326,7 +387,7 @@ namespace LittleTiggy
 
             Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-            Rectangle rectangleGoBack = new Rectangle(menuButtonOffset, (int)(1 * menuScaleFactor), 600, 150);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonXOffset, (int)(1 * menuScaleFactor), 600, 150);
 
             if (mouseXY.X != 0 && mouseXY.Y != 0)
             {
@@ -367,24 +428,24 @@ namespace LittleTiggy
             // Draw Rectangles for menu items
 
             if (menuButtonHover[0] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 275 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 275 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 275 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 275 * menuScaleFactor), Color.White);
 
             if (menuButtonHover[1] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 450 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 450 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 450 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 450 * menuScaleFactor), Color.White);
 
             if (menuButtonHover[2] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 625 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 625 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 625 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 625 * menuScaleFactor), Color.White);
 
             if (menuButtonHover[3] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 800 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 800 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 800 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 800 * menuScaleFactor), Color.White);
 
             // Draw menu items
 
@@ -392,9 +453,9 @@ namespace LittleTiggy
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 275 * menuScaleFactor);
             spriteBatch.DrawString(font, "Play Game", textPosition, colorLTRed);
 
-            stringSize = font.MeasureString("Change Name");
+            stringSize = font.MeasureString("Options");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 450 * menuScaleFactor);
-            spriteBatch.DrawString(font, "Change Name", textPosition, colorLTRed);
+            spriteBatch.DrawString(font, "Options", textPosition, colorLTRed);
 
             stringSize = font.MeasureString("Leader Board");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 625 * menuScaleFactor);
@@ -418,71 +479,123 @@ namespace LittleTiggy
 
         }
 
-        void changeNameDraw(GameTime gameTime)
+        void optionsMenuDraw(GameTime gameTime)
         {
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
+            
+            Vector2 stringSize; 
+            Vector2 textPosition; // Where to star drawing the text string.
 
-            // Draw back button
+            int elementPositionY = menuItemSpaceDistance; // Where to draw the first menu element.
+
+            // Draw First button & button text.  Either back or start depending on how the player has reached the screen (via menu or if they went to start the game without a name set)
             if (menuButtonHover[0] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
-
-            Vector2 stringSize;
-            Vector2 textPosition;
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
+           
 
             if (!bPlayerRequestedGame)
             {
                 stringSize = font.MeasureString("Go Back");
-                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
                 spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
             }
             else
             {
                 stringSize = font.MeasureString("Start Game");
-                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
                 spriteBatch.DrawString(font, "Start Game", textPosition, colorLTRed);
             }
 
+            elementPositionY += menuRectangle.Height + menuItemSpaceDistance;
 
-            // Draw change name button
+            // Draw Change Name button & button text
             if (menuButtonHover[1] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 185 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 185 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
 
             stringSize = font.MeasureString("Change Name");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 185 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
             spriteBatch.DrawString(font, "Change Name", textPosition, colorLTRed);
 
+            elementPositionY += menuRectangle.Height;
 
-            // Draw player name
+
+
 #if !ANDROID
-            stringSize = font.MeasureString("Player name is ");
-            Vector2 stringSize2 = font.MeasureString(kbInput);
-            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), 600 * menuScaleFactor);
-            spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTRed);
-            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, 600 * menuScaleFactor);
-            spriteBatch.DrawString(font, kbInput, textPosition, colorLTGreen);
+
+            // Draw message prompting user to start typing or display player name!
+
+            if (kbInput == "")
+            {
+                stringSize = font.MeasureString("Please type your name and press Enter!");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
+                spriteBatch.DrawString(font, "Please type your name and press Enter!", textPosition, colorLTGreen);
+            }
+            else // Draw player name
+            {
+                stringSize = font.MeasureString("Player name is ");
+                Vector2 stringSize2 = font.MeasureString(kbInput);
+                textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), elementPositionY * menuScaleFactor);
+                spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTGreen);
+                textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, elementPositionY * menuScaleFactor);
+                spriteBatch.DrawString(font, kbInput, textPosition, colorLTRed);
+            }
 #endif
 
-#if ANDROID
+#if ANDROID // Draw player name
             stringSize = font.MeasureString("Player name is ");
             Vector2 stringSize2 = font.MeasureString(playerName);
-            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), 600 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), elementPositionY * menuScaleFactor);
             spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTRed);
-            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, 600 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, elementPositionY * menuScaleFactor);
             spriteBatch.DrawString(font, playerName, textPosition, colorLTGreen);
 #endif
+            elementPositionY += (int)stringSize.Y; // Add height of last drawn element to y pos tracker 
 
-            // Draw message prompting user to start typing!
+            // Draw difficulty button & button text.
 
-            if (bHasEnteredName == false)
+            if (menuButtonHover[2])
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
+
+            stringSize = font.MeasureString(LittleTiggy.gameDifficulty.ToString());
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
+            spriteBatch.DrawString(font, LittleTiggy.gameDifficulty.ToString(), textPosition, colorLTRed);
+
+            elementPositionY += menuRectangle.Height + menuItemSpaceDistance;
+
+            // Draw touch control header text, button & button text.
+
+            stringSize = font.MeasureString("Touch Control Options:");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
+            spriteBatch.DrawString(font, "Touch Control Options:", textPosition, colorLTGreen);
+
+            elementPositionY += (int)stringSize.Y;
+
+            if (menuButtonHover[3])
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
+            else
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, elementPositionY * menuScaleFactor), Color.White);
+
+            if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.ScreenTap)
             {
-                stringSize = font.MeasureString("Type your name and press Enter!");
-                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 700 * menuScaleFactor);
-                spriteBatch.DrawString(font, "Type your name and press Enter!", textPosition, colorLTGreen);
+                stringSize = font.MeasureString("Screen Tap");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
+                spriteBatch.DrawString(font, "Screen Tap", textPosition, colorLTRed);
             }
+            else
+            {
+                stringSize = font.MeasureString("Virtual Joystick");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
+                spriteBatch.DrawString(font, "Virtual Joystick", textPosition, colorLTRed);
+            }
+
+
+
         }
 
 
@@ -492,18 +605,13 @@ namespace LittleTiggy
 
             // Draw back button
             if (menuButtonHover[0] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
             Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
             spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
-
-            // Draw gamestate string 
-            // stringSize = arialFont.MeasureString(message);
-            // textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 700 * menuScaleFactor);
-            // spriteBatch.DrawString(arialFont, message, textPosition, colorLTRed);
 
             // Draw Leaderboard
 
@@ -517,14 +625,14 @@ namespace LittleTiggy
                 foreach (Tuple<string, int> scoreEntry in leaderBoardScores)
                 {
                     counter++;
-                    stringSize = arialFont.MeasureString(scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString());
+                    stringSize = arialFont.MeasureString(scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString()); // Hackish way to layout this table.
                     textPosition = new Vector2((viewportWidth / 2) - (stringSize.X) + 100, (225 + (counter * 50)) * menuScaleFactor);
                     spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, colorLTGreen);
                 }
 
             }
 
-            if (LittleTiggy.bLeaderboardNetworkFailure)
+            if (LittleTiggy.bDisableNetworkCalls)
             {
                 stringSize = font.MeasureString("Network Error");
                 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 500 * menuScaleFactor);
@@ -538,9 +646,9 @@ namespace LittleTiggy
 
             // Draw back button
             if (menuButtonHover[0] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
             Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
@@ -548,37 +656,52 @@ namespace LittleTiggy
 
 
             // Draw instructions
+
+            int linePositionY = 175;
+
             stringSize = bigArialFont.MeasureString("- Get to the bottom of the map to win the level.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 175 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- Get to the bottom of the map to win the level.", textPosition, colorLTGreen);
 
+            linePositionY += (int)stringSize.Y + 10;
             stringSize = bigArialFont.MeasureString("- Avoid the enemies trying to tag you.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 250 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- Avoid the enemies trying to tag you.", textPosition, colorLTGreen);
 
+            linePositionY += (int)stringSize.Y + 10;
             stringSize = bigArialFont.MeasureString("- If you get the power up,");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 325 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- If you get the power up,", textPosition, colorLTGreen);
 
+            linePositionY += (int)stringSize.Y + 10;
             stringSize = bigArialFont.MeasureString("you can tag the enemies temporarily.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 375 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "you can tag the enemies temporarily.", textPosition, colorLTGreen);
 
+            linePositionY += (int)stringSize.Y + 10;
             stringSize = bigArialFont.MeasureString("- If you get tagged you will go back a level.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 450 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- If you get tagged you will go back a level.", textPosition, colorLTGreen);
 
+            linePositionY += (int)stringSize.Y + 10;
+            stringSize = bigArialFont.MeasureString("- Use the keyboard or mouse on PC.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "- Use the keyboard or mouse on PC.", textPosition, colorLTGreen);
+
+            linePositionY += (int)stringSize.Y + 30;
             stringSize = bigArialFont.MeasureString("Touch controls:");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 525 * menuScaleFactor);
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "Touch controls:", textPosition, colorLTRed);
 
-            stringSize = bigArialFont.MeasureString("- Are relative to centre of screen.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 575 * menuScaleFactor);
-            spriteBatch.DrawString(bigArialFont, "- Are relative to centre of screen.", textPosition, colorLTGreen);
+            linePositionY += (int)stringSize.Y + 10;
+            stringSize = bigArialFont.MeasureString("- Provides a tap based control or virtual joystick.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "- Provides a tap based control or virtual joystick.", textPosition, colorLTGreen);
 
-            stringSize = bigArialFont.MeasureString("- Use of two hands is recommended.");
-            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 625 * menuScaleFactor);
-            spriteBatch.DrawString(bigArialFont, "- Use of two hands is recommended.", textPosition, colorLTGreen);
+            linePositionY += (int)stringSize.Y + 10;
+            stringSize = bigArialFont.MeasureString("- Use of two hands is recommended with tap control.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "- Use of two hands is recommended with tap control.", textPosition, colorLTGreen);
 
         }
 

@@ -155,6 +155,9 @@
     <Content Include="Content\RoundedRectangleDarkGreen.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Thumbstick.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\wingame.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
