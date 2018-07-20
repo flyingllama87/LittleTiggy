@@ -393,7 +393,7 @@ namespace LittleTiggy
 
         public void Draw(SpriteBatch spriteBatch)
         {
-#if ANDROID // Compensate for touch collision detection (grid based) by offsetting the main character by drawing character 3 pixels to the right.  Looks more natural.
+#if ANDROID // Compensate for drawing on android devices (which uses grid based collision system) by offsetting the main character by drawing character 3 pixels to the right.  Looks more natural.
             Vector2 topLeftOfSprite = new Vector2(X+3, Y);
 #endif
 #if !ANDROID
@@ -403,7 +403,6 @@ namespace LittleTiggy
             var sourceRectangle = currentAnimation.CurrentRectangle;
 
             spriteBatch.Draw(characterSheetTexture, topLeftOfSprite, sourceRectangle, tintColor);
-
         }
 
         public static bool IsEnvironmentCollision(EnvironmentBlock[] walls, Vector2 position) // Determine if a particular XY position + character dimensions will collide with the environment.

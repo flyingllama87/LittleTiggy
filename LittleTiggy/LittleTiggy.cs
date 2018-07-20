@@ -3,21 +3,19 @@
 /*
  * TO DO:
  *
- * - FEATURE: Save and load player name from file?
- * - Allow 'back' button on android to go back
- * - Provide option for either virtual joystick or the quadrant control
- * - Fix multitasking issues on android
- * - Provide two different options for enemy speed (difficulty)
- * - Provide option to disable network requests
+ * - FEATURE: Save and load player options from file
+ * - Add easy, medium, hard difficulty on leaderboards.
  * - Fix instuctions
  * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
+ * - STYLE: Go over code to make sure it's neat.
  */
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace LittleTiggy
 {
@@ -32,13 +30,8 @@ namespace LittleTiggy
 
     public static class GameConstants
     {
-#if !ANDROID
         public const int menuHeight = 1024;
-#endif
-#if ANDROID
-        public const int menuHeight = 1024;
-#endif
-        public const int gameWidth = 512;
+        public const int gameWidth = 512; 
         public const int gameHeight = 512;
         public const int tileSize = 16;
         public const int characterHeight = 15;
@@ -51,11 +44,11 @@ namespace LittleTiggy
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        public static float gameScaleFactor;
+        public static float gameScaleFactor; // Used to scale game for difference viewport sizes
         public static int viewportWidth;
         public static int viewportHeight;
 
-        GameState gameState;
+        GameState gameState; // simple state machine 
 
         Color colorLTNeutralGrey = new Color(82, 82, 82);
         Color colorLTBlue = new Color(70, 70, 219);
@@ -73,7 +66,6 @@ namespace LittleTiggy
             graphics.PreferredBackBufferWidth = 1024;  // Set window width
             graphics.PreferredBackBufferHeight = 1024;   // Set window height
 #endif
-
             graphics.ApplyChanges();
 
         }
@@ -122,13 +114,17 @@ namespace LittleTiggy
         }
 
 
-        protected override void Update(GameTime gameTime) // Primary game logic that's updated for every game loop
+        protected override void Update(GameTime gameTime) 
         {
             base.Update(gameTime);
 
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            // Modify state if player wants to go back.
+            if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) && menuButtonTimer.CompareTo(DateTime.Now) < 0)
             {
+                menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                LittleTiggy.menuSound.Play();
+
                 if (gameState != GameState.menu)
                 {
                     gameState = GameState.menu;
@@ -139,6 +135,7 @@ namespace LittleTiggy
                 }
             }
 
+            // call appropriate update method depending on game state.
             switch (gameState)
             {
                 case GameState.menu:
@@ -159,14 +156,14 @@ namespace LittleTiggy
             }
         }
 
-        protected override void Draw(GameTime gameTime)
+        protected override void Draw(GameTime gameTime) 
         {
 
             GraphicsDevice.Clear(colorLTNeutralGrey);  // set BG color
 
             base.Draw(gameTime);
 
-            switch (gameState)
+            switch (gameState)  // call appropriate draw method depending on game state.
             {
                 case GameState.menu:
                     menuDraw(gameTime);
@@ -184,7 +181,8 @@ namespace LittleTiggy
                     leaderBoardDraw(gameTime);
                     break;
             }
-            spriteBatch.End();
+
+            spriteBatch.End(); 
 
         }
     }

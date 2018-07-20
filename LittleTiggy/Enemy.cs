@@ -11,8 +11,7 @@ namespace LittleTiggy
 
     public class Enemy
     {
-        private BackgroundWorker BackgroundPathfinderWorker = new BackgroundWorker();
-
+        // ENEMY GRAPHICS
         static Texture2D characterSheetTexture;
         static Random randomNumber = new Random();
 
@@ -27,24 +26,21 @@ namespace LittleTiggy
         Animation Idle;
         Animation currentAnimation;
 
-        Pathfinder enemyPathfinder;
-
-#if ANDROID||IOS
+        // USED FOR ENEMY SPEED
         float charSpeed;
-#endif
-#if !ANDROID
-        float charSpeed;
-#endif
         long ticksSinceLastUpdate = 0;
 
+        // PATHFINDING OBJECTS AND VALUES
+        private BackgroundWorker BackgroundPathfinderWorker = new BackgroundWorker();
+        Pathfinder enemyPathfinder;
         Vector2 vectorDestinationPosition { get; set; }
         bool isFollowingPath = false;
-
         List<Vector2> pathToFollow;
         DateTime pathfindingTimer = DateTime.Now;
-        double pathfindingLongTimerIntervalSeconds = 2.0; //normally 2.0 // Used when a path to player is already established
-        double pathfindingShortTimerIntervalSeconds = 0.5; //normally 0.5 // Used when a path to player is not establised
+        double pathfindingLongTimerIntervalSeconds = 2.0; //normally 2.0 // Used when a path to player is already established but should be updated as players move :)
+        double pathfindingShortTimerIntervalSeconds = 0.5; //normally 0.5 // Used when a path to player is not establised and a path is needed sooner rather than later
 
+        // ENEMY POSITION
         public float X
         {
             get;
@@ -81,7 +77,7 @@ namespace LittleTiggy
                 this.charSpeed = 0.000004F;
             else if (LittleTiggy.gameDifficulty == GameDifficulty.Medium)
                 this.charSpeed = 0.000006F;
-            else
+            else // Hard
                 this.charSpeed = 0.00001F;
 
             this.enemyPathfinder = new Pathfinder(graphicsDevice);
@@ -251,16 +247,12 @@ namespace LittleTiggy
                 pathfindingTimer = DateTime.Now;
                 pathfindingTimer = pathfindingTimer.AddSeconds(pathfindingShortTimerIntervalSeconds);
 
-                //pathToFollow = pathfinder.Pathfind(new Vector2(this.X - this.X % 16, this.Y - this.Y % 16), new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16), walls);
-
                 enemyPathfinder.from = new Vector2(this.X - this.X % 16, this.Y - this.Y % 16);
                 enemyPathfinder.destination = new Vector2(MainCharacter.X - MainCharacter.X % 16, MainCharacter.Y - MainCharacter.Y % 16);
                 enemyPathfinder.walls = walls;
 
                 BackgroundPathfinderWorker.RunWorkerAsync();
-                // BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
 
-                //pathfinder.PathToDraw = pathToFollow;
             }
 
             if (pathToFollow != null && !(pathToFollow.Count == 0)) // If we have a path to follow, set the next position in the path as our immediate destination

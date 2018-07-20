@@ -28,7 +28,7 @@ namespace LittleTiggy
         public void Draw(SpriteBatch spriteBatch)
         {
             Rectangle overlayRectangle = new Rectangle(0, 0, 511, 511);
-            spriteBatch.Draw(controlOverlayTexture, new Vector2(0, 0), overlayRectangle, Color.White * 0.1f);
+            spriteBatch.Draw(controlOverlayTexture, new Vector2(0, 0), overlayRectangle, Color.White * 0.5f);
         }
     }
 
@@ -74,11 +74,15 @@ namespace LittleTiggy
                 }
             }
 
-            
+            virtualThumbstickCenter = new Vector2(0,0);
+
         }
+
 
         public void Update()
         {
+            // Set joystick centre depending on set game option.  'Tap Control' is really just a virtual joystick in the middle of the screen with a different overlay.
+
             if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.Joystick)
                 virtualThumbstickCenter = new Vector2(LittleTiggy.viewportWidth / 2f, LittleTiggy.viewportHeight - 200);
             else
@@ -100,7 +104,9 @@ namespace LittleTiggy
 
         public void Draw(SpriteBatch spriteBatch)
         {
-                spriteBatch.Draw(thumbstickTexture, virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f), Color.Black);
+            Vector2 pos = virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f);
+
+            spriteBatch.Draw(thumbstickTexture, virtualThumbstickCenter.Value - new Vector2(thumbstickTexture.Width / 2f, thumbstickTexture.Height / 2f), Color.Black);
         }
 
     }

@@ -15,25 +15,34 @@ namespace LittleTiggy
 
     public partial class LittleTiggy : Game
     {
+        // GAME OBJECTS
         GameBorder gameBorder;
         MainCharacter character;
         List<Enemy> enemies;
         List<PowerUp> powerUps;
-        SpriteFont gameFont;
         ControlOverlay touchControlOverlay;
+        Pathfinder pathfinder;
         public static EnvironmentBlock[] walls = new EnvironmentBlock[GameConstants.noWallsToSpawn];
         public static VirtualThumbstick virtualThumbstick;
+        private FrameCounter frameCounter = new FrameCounter(); // Used in debug mode
+
+        // GAME SWITCHES
+        bool bChangedDifficulty = false; // used to reset game if player has changed difficulty to stop leaderboard cheating.
+
+        // GAME RESOURCES
+
+        // Sounds
         Song songBGM;
         public static SoundEffect powerUpSound;
         SoundEffect winGameSound;
         SoundEffect loseGameSound;
         public static SoundEffect killEnemySound;
 
-        Pathfinder pathfinder;
+        // Font
+        SpriteFont gameFont;
+
+        // GAME SETTINGS
         public static int level { get; set; } = 1;
-
-        private FrameCounter frameCounter = new FrameCounter();
-
         public static GameDifficulty gameDifficulty = GameDifficulty.Medium;
         public static GameTouchControlMethod gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
 
@@ -61,6 +70,7 @@ namespace LittleTiggy
             else
                 gameScaleFactor = (float)GraphicsDevice.Viewport.Width / (float)GameConstants.gameWidth;
 
+            // The following can only be loaded when we know the viewport dimensions and game scale factor.
             gameBorder.LoadContent(GraphicsDevice);
         }
 
@@ -70,7 +80,6 @@ namespace LittleTiggy
             character = new MainCharacter(GraphicsDevice);
             touchControlOverlay = new ControlOverlay(GraphicsDevice);
             virtualThumbstick = new VirtualThumbstick(GraphicsDevice);
-            Song songBGM;
             songBGM = Content.Load<Song>("BackgroundMusic");
             MediaPlayer.Play(songBGM);
             MediaPlayer.IsRepeating = true;
@@ -205,14 +214,17 @@ namespace LittleTiggy
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 
             } while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || MainCharacter.IsEnvironmentCollision(walls, new Vector2(1, 1)));
-            // while (pathfinder.IsRoutable(new Vector2(0, 0), new Vector2(496, 496), walls) == false || pathfinder.IsRoutable(new Vector2(enemy.X, enemy.Y), new Vector2(MainCharacter.X, MainCharacter.Y), walls) == false);
         }
 
         void inGameUpdate(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
+            if (bChangedDifficulty) // reset game if player changes difficulty
+            {
+                bChangedDifficulty = false;
+                level = 1;
+                LoadLevel(level);
+            }
+                
             virtualThumbstick.Update();
 
             character.Update(gameTime, GraphicsDevice, walls);
@@ -247,7 +259,7 @@ namespace LittleTiggy
             {
                 if (enemy.IsPlayerCollision() && !MainCharacter.isPoweredUp)
                 {
-                    if (level > 1 && !playerName.ToUpper().Contains("LOLA"))
+                    if (level > 1 && !(LittleTiggy.gameDifficulty == GameDifficulty.Easy))
                         level--;
                     loseGameSound.Play();
                     LoadLevel(level);
@@ -299,7 +311,7 @@ namespace LittleTiggy
                 frameCounter.Update(deltaTime);
                 var fps = string.Format("{0}", frameCounter.CurrentFramesPerSecond.ToString("#"));
                 spriteBatch.DrawString(gameFont, fps, new Vector2(512 - 32, 16), colorLTGreen);
-                virtualThumbstick.Draw(spriteBatch);
+                // virtualThumbstick.Draw(spriteBatch);
             }
 
 
@@ -316,8 +328,7 @@ namespace LittleTiggy
 #if ANDROID // If we are on android, draw a border and touch controls joystick
             if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.ScreenTap)
                 touchControlOverlay.Draw(spriteBatch); // Draw the touch control overlay if control scheme is set appropriately
-            else
-                virtualThumbstick.Draw(spriteBatch);
+
 
             spriteBatch.End(); // End current spriteBatch used for game elements that are scaled to viewport size.
 
@@ -326,11 +337,25 @@ namespace LittleTiggy
             // Draw game border
             gameBorder.Draw(spriteBatch);
 
+            if (LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.Joystick)
+                virtualThumbstick.Draw(spriteBatch);
+
             // Main LT source file ends the spriteBatch
 #endif
+
+            // TEMP
+#if !ANDROID
+            if (LittleTiggy.playerName.ToUpper() == "DEBUG" && LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.Joystick)
+            {
+                spriteBatch.End(); // End current spriteBatch used for game elements that are scaled to viewport size.
+                spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp); // start a new non-scaled or offset spriteBatch 
+                virtualThumbstick.Draw(spriteBatch);
+            }
+#endif 
+
         }
 
-}
+    }
 
     class GameBorder
     {

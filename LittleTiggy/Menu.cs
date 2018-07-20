@@ -33,8 +33,9 @@ namespace LittleTiggy
         bool bHasTappedButtonLastUpdate = false; // used as button activation (i.e. rectangle intersection) can be detected for multiple update loops but we only need the button to be activated once.
 
         // Game option switches
-        bool bHasEnteredName = false;
+        public static bool bHasEnteredName = false;
         bool bPlayerRequestedGame = false;
+        bool bFlashPlayerNamePrompt = false;
 
         // Player name vars
         static public string kbInput = "";
@@ -42,7 +43,7 @@ namespace LittleTiggy
         static public string playerName = "";
         Task<string> androidNameTask = null; // Used for name input on android
 
-#if !ANDROID
+#if !ANDROID // Class for keyboard input on desktop platforms.
         KbNameHandler kbNameHandler = new KbNameHandler();
 #endif
 
@@ -72,6 +73,8 @@ namespace LittleTiggy
             }
 
             menuSound = Content.Load<SoundEffect>("killenemy");
+
+            GameOptionsFile.LoadOptions();
         }
 
         void resetButtonHover()
@@ -204,83 +207,6 @@ namespace LittleTiggy
 
             // Logic for UI elements
 
-            if (touchXY.X != 0 && touchXY.Y != 0) // Touch control
-            {
-                if (rectangleGoBack.Intersects(touchRectangle))
-                {
-                    if (bPlayerRequestedGame)
-                        gameState = GameState.inGame;
-                    else
-                    {
-                        gameState = GameState.menu;
-                    }
-                    LittleTiggy.menuSound.Play();
-                }
-
-                if (rectangleChangeName.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
-                {
-                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
-                    LittleTiggy.menuSound.Play();
-                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
-
-                    bHasEnteredName = false;
-                    androidNameTask = null;
-                    kbName = "";
-                    kbInput = "";
-                    
-                }
-
-                if (rectangleSetDifficulty.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
-                {
-                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
-                    LittleTiggy.menuSound.Play();
-                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
-
-                    if (gameDifficulty == GameDifficulty.Hard)
-                        gameDifficulty = GameDifficulty.Easy;
-                    else
-                        gameDifficulty = gameDifficulty + 1;
-
-                }
-
-                if (rectangleSetTouchControl.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
-                {
-                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
-                    LittleTiggy.menuSound.Play();
-                    bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
-
-                    if (gameTouchControlMethod == GameTouchControlMethod.Joystick)
-                        gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
-                    else
-                        gameTouchControlMethod = GameTouchControlMethod.Joystick;
-                }
-
-            }
-            else
-            {
-                bHasTappedButtonLastUpdate = false;
-            }
-
-            if (mouseXY.X != 0 && mouseXY.Y != 0) // Mouse control
-            {
-                if (rectangleGoBack.Intersects(mouseRectangle))
-                {
-                    menuButtonHover[0] = true;
-                }
-                if (rectangleChangeName.Intersects(mouseRectangle))
-                {
-                    menuButtonHover[1] = true;
-                }
-                if (rectangleSetDifficulty.Intersects(mouseRectangle))
-                {
-                    menuButtonHover[2] = true;
-                }
-                if (rectangleSetTouchControl.Intersects(mouseRectangle))
-                {
-                    menuButtonHover[3] = true;
-                }
-            }
-
             if (bHasEnteredName == false)
             {
 
@@ -302,6 +228,12 @@ namespace LittleTiggy
 #endif
 
 #if !ANDROID
+                if (touchXY.X > 0 || touchXY.Y > 0) // If the user is clicking or tapping anywhere if they are supposed to be typing their name, flash text to prompt user to type name.
+                {
+                    bFlashPlayerNamePrompt = true;
+                    menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds); // Flash text for this long.
+                }
+
                 if (kbName == "")
                 {
                     kbNameHandler.Update();
@@ -315,6 +247,98 @@ namespace LittleTiggy
                 bHasTappedButtonLastUpdate = false;
 #endif
             }
+            else // Don't let them click/tap anything if they haven't entered their name
+            {
+                if (touchXY.X != 0 && touchXY.Y != 0) // Touch control
+                {
+                    if (rectangleGoBack.Intersects(touchRectangle))
+                    {
+                        try
+                        {
+                            GameOptionsFile.SaveOptions();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine("Unable to save, Error: " + ex.Message);
+                        }
+
+                        if (bPlayerRequestedGame)
+                            gameState = GameState.inGame;
+                        else
+                        {
+                            gameState = GameState.menu;
+                        }
+                        LittleTiggy.menuSound.Play();
+                    }
+
+                    if (rectangleChangeName.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
+                    {
+                        menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                        LittleTiggy.menuSound.Play();
+                        bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
+                        bHasEnteredName = false;
+                        androidNameTask = null;
+                        kbName = "";
+                        kbInput = "";
+
+                    }
+
+                    if (rectangleSetDifficulty.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
+                    {
+                        menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                        LittleTiggy.menuSound.Play();
+                        bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
+                        if (gameDifficulty == GameDifficulty.Hard)
+                            gameDifficulty = GameDifficulty.Easy;
+                        else
+                            gameDifficulty = gameDifficulty + 1;
+
+                        bChangedDifficulty = true; // Used to reset the game if the difficulty has been changed to stop leaderboard cheating.
+
+                    }
+
+                    if (rectangleSetTouchControl.Intersects(touchRectangle) && !bHasTappedButtonLastUpdate && menuButtonTimer.CompareTo(DateTime.Now) < 0)
+                    {
+                        menuButtonTimer = DateTime.Now.AddSeconds(menuButtonTimeSeconds);
+                        LittleTiggy.menuSound.Play();
+                        bHasTappedButtonLastUpdate = true; // Used as sometimes a touch is held for multiple updates but we only want the button to be activated once.
+
+                        if (gameTouchControlMethod == GameTouchControlMethod.Joystick)
+                            gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
+                        else
+                            gameTouchControlMethod = GameTouchControlMethod.Joystick;
+                    }
+
+                }
+                else
+                {
+                    bHasTappedButtonLastUpdate = false;
+                }
+
+
+                if (mouseXY.X != 0 && mouseXY.Y != 0) // Mouse control
+                {
+                    if (rectangleGoBack.Intersects(mouseRectangle))
+                    {
+                        menuButtonHover[0] = true;
+                    }
+                    if (rectangleChangeName.Intersects(mouseRectangle))
+                    {
+                        menuButtonHover[1] = true;
+                    }
+                    if (rectangleSetDifficulty.Intersects(mouseRectangle))
+                    {
+                        menuButtonHover[2] = true;
+                    }
+                    if (rectangleSetTouchControl.Intersects(mouseRectangle))
+                    {
+                        menuButtonHover[3] = true;
+                    }
+                }
+            }
+
         }
 
 
@@ -532,7 +556,10 @@ namespace LittleTiggy
             {
                 stringSize = font.MeasureString("Please type your name and press Enter!");
                 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY * menuScaleFactor);
-                spriteBatch.DrawString(font, "Please type your name and press Enter!", textPosition, colorLTGreen);
+                if (bFlashPlayerNamePrompt)  // draw this in red if the flash flag is set.  Used so this text 'pops' on screen to draw attention to player.
+                    spriteBatch.DrawString(font, "Please type your name and press Enter!", textPosition, colorLTRed);
+                else
+                    spriteBatch.DrawString(font, "Please type your name and press Enter!", textPosition, colorLTGreen); 
             }
             else // Draw player name
             {
@@ -541,17 +568,29 @@ namespace LittleTiggy
                 textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), elementPositionY * menuScaleFactor);
                 spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTGreen);
                 textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, elementPositionY * menuScaleFactor);
-                spriteBatch.DrawString(font, kbInput, textPosition, colorLTRed);
+
+                if (playerName.ToUpper() != "LOLA") // Easter egg for my daughter :)
+                    spriteBatch.DrawString(font, kbInput, textPosition, colorLTRed);
+                else
+                    spriteBatch.DrawString(font, kbInput, textPosition, Color.DeepPink);
             }
+
+
+            if (menuButtonTimer.CompareTo(DateTime.Now) < 0) // If the timer has elapsed, allow the above text to draw normally
+                bFlashPlayerNamePrompt = false;
 #endif
 
 #if ANDROID // Draw player name
             stringSize = font.MeasureString("Player name is ");
             Vector2 stringSize2 = font.MeasureString(playerName);
             textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2), elementPositionY * menuScaleFactor);
-            spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTRed);
+            spriteBatch.DrawString(font, "Player name is ", textPosition, colorLTGreen);
             textPosition = new Vector2((viewportWidth / 2) - ((stringSize.X + stringSize2.X) / 2) + stringSize.X, elementPositionY * menuScaleFactor);
-            spriteBatch.DrawString(font, playerName, textPosition, colorLTGreen);
+
+            if (playerName.ToUpper() != "LOLA") // Easter egg for my daughter :)
+                spriteBatch.DrawString(font, playerName, textPosition, colorLTRed);
+            else
+                spriteBatch.DrawString(font, playerName, textPosition, Color.DeepPink);
 #endif
             elementPositionY += (int)stringSize.Y; // Add height of last drawn element to y pos tracker 
 
@@ -594,8 +633,6 @@ namespace LittleTiggy
                 spriteBatch.DrawString(font, "Virtual Joystick", textPosition, colorLTRed);
             }
 
-
-
         }
 
 
@@ -627,7 +664,10 @@ namespace LittleTiggy
                     counter++;
                     stringSize = arialFont.MeasureString(scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString()); // Hackish way to layout this table.
                     textPosition = new Vector2((viewportWidth / 2) - (stringSize.X) + 100, (225 + (counter * 50)) * menuScaleFactor);
-                    spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, colorLTGreen);
+                    if (scoreEntry.Item1.ToUpper() != "LOLA") // Easter egg for my daughter :)
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, colorLTGreen);
+                    else
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, Color.DeepPink);
                 }
 
             }

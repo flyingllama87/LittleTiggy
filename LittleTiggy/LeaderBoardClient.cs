@@ -99,7 +99,7 @@ namespace LittleTiggy
         {
             try
             {
-                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 3000))
+                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 5000))
                 {
 
                     Debug.WriteLine("API Endpoint:" + LittleTiggy.LeaderBoardAPIEndpoint);

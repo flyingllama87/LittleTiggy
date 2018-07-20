@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 
 // This source file is for the implementation of the A* pathfinding / graph search algorithm.  Two classes are defined.  The first is a data type for nodes on the graph and the second is the actual implementation of the search built using the former data type.  Drawing functions for debugging exist too.
 
@@ -93,27 +93,6 @@ namespace LittleTiggy
         }
 
 
-        public void Update(GraphicsDevice graphicsDevice, EnvironmentBlock[] walls, Enemy enemy)
-        {
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Z) && !OldKeyboardState.IsKeyDown(Keys.Z))
-            {
-                Vector2 source = new Vector2(enemy.X - (enemy.X % 16), enemy.Y - (enemy.Y % 16));
-
-                Vector2 destination = new Vector2(MainCharacter.X - (MainCharacter.X % 16), MainCharacter.Y - (MainCharacter.Y % 16));
-
-                // Path = new Stack<Vector2>();
-
-                // DeletedNodes = new List<Vector2>();
-
-                Path = Pathfind(source, destination, walls);
-
-            }
-
-            OldKeyboardState = Keyboard.GetState();
-
-        }
-
         public void Draw(SpriteBatch spriteBatch)
         {
             Color tintColor = Color.White * 0.25f;
@@ -158,9 +137,9 @@ namespace LittleTiggy
 
         // Main A* pathfinding algorithm implementation
 
-        public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  
+        public List<Vector2> Pathfind(Vector2 from, Vector2 destination, EnvironmentBlock[] walls)  // Used in IsRoutable to ensure generated levels are valid
         {
-
+            
             if (from == destination)
             {
                 return new List<Vector2>(); // Return empty vector list if asked to path find between two equal locations.
@@ -172,6 +151,14 @@ namespace LittleTiggy
             List<Node> open = new List<Node>();                 //list of nodes
             List<Node> closed = new List<Node>();
             open.Add(startNode);                                //Add starting point
+
+            //TEMP
+            if (open.Count > 1024)
+            {
+                Debug.Write("TEMP");
+            }
+
+            Debug.WriteIf(open.Count > 1024, "Too many nodes allocated in pathfinding algorithm.  something went wrong"); 
 
             while (open.Count > 0)
             {
@@ -217,7 +204,7 @@ namespace LittleTiggy
             return emptyVectorList;
         }
 
-        public List<Vector2> Pathfind()
+        public List<Vector2> Pathfind() // Used for enemy background workers
         {
 
             if (from == destination)
@@ -231,6 +218,14 @@ namespace LittleTiggy
             List<Node> open = new List<Node>();                 //list of nodes
             List<Node> closed = new List<Node>();
             open.Add(startNode);                                //Add starting point
+
+            Debug.WriteIf(open.Count > 1024, "Too many nodes allocated in pathfinding algorithm.  something went wrong");
+
+            //TEMP
+            if (open.Count > 1024)
+            {
+                Debug.Write("TEMP");
+            }
 
             while (open.Count > 0)
             {

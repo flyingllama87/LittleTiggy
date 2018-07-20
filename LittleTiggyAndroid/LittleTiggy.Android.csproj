@@ -85,6 +85,9 @@
     <Compile Include="..\LittleTiggy\Game.cs">
       <Link>Game.cs</Link>
     </Compile>
+    <Compile Include="..\LittleTiggy\GameOptionsFile.cs">
+      <Link>GameOptionsFile.cs</Link>
+    </Compile>
     <Compile Include="..\LittleTiggy\LeaderBoardClient.cs">
       <Link>LeaderBoardClient.cs</Link>
     </Compile>
