@@ -4,14 +4,14 @@ LittleTiggy is a small, arcade-like multi-platform game I created as a learning 
 
 ### DOWNLOADS:
 
-Windows:
-http://morganrobertson.net/Littletiggy.zip
+Windows (2.5MB):
+http://morganrobertson.net/LittleTiggy.zip
 
-Android:
-http://morganrobertson.net/Littletiggy.apk
+Android (13.9MB):
+http://morganrobertson.net/LittleTiggy.apk
 
-All desktop platforms:
-http://morganrobertson.net/LittletiggyFull.7z
+All desktop platforms (5MB) - Requires mono:
+http://morganrobertson.net/LittleTiggyFull.7z
 
 ### BACKGROUND & FEATURES:
 
