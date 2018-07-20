@@ -1,13 +1,5 @@
 ﻿// #define _DEBUG
 
-/*
- * TO DO:
- *
- * - STYLE: Remove unneeded directives
- * - STYLE: Run stylecop over build for code consistency.
- * - STYLE: Go over code to make sure it's neat.
- */
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

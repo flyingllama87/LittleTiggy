@@ -332,30 +332,15 @@ namespace LittleTiggy
         {
             Vector2 desiredVelocity = new Vector2();
 
-            // Acquire the direction the player wants to move based on where they are touching the screen relative to player's position
-            // desiredVelocity.X = (touchCollection[0].Position.X / LittleTiggy.gameScaleFactor) - X;
-            // desiredVelocity.Y = (touchCollection[0].Position.Y / LittleTiggy.gameScaleFactor) - Y;
+            // Acquire the direction the player wants to move virtual thumbstick.  The same class is used for tap control or joystick mode.  They are the same thing except different screen positions.
+            desiredVelocity = VirtualThumbstick.Thumbstick;
 
-            // Acquire the direction the player wants to move based on where they are touching the screen relative to the centre of the game screen
-
-            /*
-            desiredVelocity.X = touchCollection[0].Position.X - (LittleTiggy.viewportWidth / 2);
-            desiredVelocity.Y = touchCollection[0].Position.Y - (LittleTiggy.viewportHeight / 2);
-           
-            // Normalize the input vector and use the direction to move the character to the nearest grid aligned position.
-            desiredVelocity.Normalize();
-            */
-
-
-            // Virtual Joystick Test
-            desiredVelocity = VirtualThumbstick.Thumbstick; // LittleTiggy.virtualThumbstick.;
             if (desiredVelocity != new Vector2(0, 0))
             {
                 desiredVelocity.Normalize();
             }
             
-
-
+            // Logic for grid based movement on touch controls to make it easier
             if (Math.Abs(desiredVelocity.X) > Math.Abs(desiredVelocity.Y) && desiredVelocity.X > 0)
             {
                 desiredDestinationTilePosition = new Vector2(GridAlignedX + 16, GridAlignedY);

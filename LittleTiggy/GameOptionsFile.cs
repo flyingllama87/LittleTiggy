@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.IO;
 using System.Diagnostics;
 
@@ -10,7 +6,7 @@ namespace LittleTiggy
 {
     public static class GameOptionsFile
     {
-        private static string optionsFilename = "options.json";
+        private static string optionsFilename = "gameOptions.txt";
 
         public static void LoadOptions()
         {
@@ -50,15 +46,6 @@ namespace LittleTiggy
                 Debug.WriteLine("Wrote to File!");
             }
 
-
-
-            /*file = file.OpenFile(optionsFilename, FileMode.CreateNew);
-
-
-            using (StreamWriter sw = new StreamWriter(fs))
-            {
-                
-            }*/
         }
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Linq;
@@ -162,8 +161,6 @@ namespace LittleTiggy
                     menuButtonHover[3] = true;
                 }
             }
-
-            // message = "Rect position: " + rectanglePlayGame.X + " " + rectanglePlayGame.Y + " Touch Pos: " + touchXY.X + " " + touchXY.Y;
         }
 
         void optionsMenuUpdate(GameTime gameTime)
@@ -395,7 +392,6 @@ namespace LittleTiggy
             }
 
 
-
             resetButtonHover();
             MouseState mouseState = Mouse.GetState();
             mouseXY = new Vector2(mouseState.X, mouseState.Y);
@@ -492,18 +488,6 @@ namespace LittleTiggy
             stringSize = font.MeasureString("Instructions");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 800 * menuScaleFactor);
             spriteBatch.DrawString(font, "Instructions", textPosition, colorLTRed);
-
-            // Draw debug stuff
-
-            // stringSize = arialFont.MeasureString("Viewport size: " + viewportWidth + " " + viewportHeight + ".  Scale Factor: " + menuScaleFactor);
-            // textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), viewportHeight - (stringSize.Y));
-            // spriteBatch.DrawString(arialFont, "Viewport size: " + viewportWidth + " " + viewportHeight + ".  Scale Factor: " + menuScaleFactor, textPosition, colorLTGreen);
-
-            // Draw gamestate & touch pos  
-
-            // stringSize = arialFont.MeasureString(message);
-            // textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 750 * menuScaleFactor);
-            // spriteBatch.DrawString(arialFont, message, textPosition, colorLTRed);
 
         }
 

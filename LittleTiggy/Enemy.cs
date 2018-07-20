@@ -408,7 +408,7 @@ namespace LittleTiggy
                     }
 
                     
-
+                    // If we've changed direction, store the position in the optomised path.
                     if (lastNodeDirection != NodeDirection.Unset && lastNodeDirection != nodeDirection)
                     {
                         optomisedPath.Add(startPosition);
@@ -423,7 +423,7 @@ namespace LittleTiggy
                     lastNode = Node;
 
                 }
-
+                // Add the final position
                 optomisedPath.Add(startPosition);
 
                 return optomisedPath;
@@ -532,8 +532,6 @@ namespace LittleTiggy
                 }
             }
 
-            // BackgroundPathfinderWorker.DoWork -= new DoWorkEventHandler(BackgroundPathfinderWorker_DoWork);
-            // BackgroundPathfinderWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(BackgroundPathfinderWorker_Complete);
         }
         
 

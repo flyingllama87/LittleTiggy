@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Input;
 
 
 
@@ -50,7 +48,6 @@ namespace LittleTiggy
 
             // Place this object in a random, grid aligned location on the map & ensure it's not colliding with the environment / a wall.
 
-            
             do 
             {
                 this.X = (float)randomNumber.Next(0, GameConstants.gameWidth);

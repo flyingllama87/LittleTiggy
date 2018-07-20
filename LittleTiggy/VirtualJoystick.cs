@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
-using Microsoft.Xna.Framework.Input;
 
 
 
@@ -18,7 +17,7 @@ namespace LittleTiggy
         {
             if (controlOverlayTexture == null)
             {
-                using (var stream = TitleContainer.OpenStream("Content/JoystickCircle.png"))
+                using (var stream = TitleContainer.OpenStream("Content/TapOverlay.png"))
                 {
                     controlOverlayTexture = Texture2D.FromStream(graphicsDevice, stream);
                 }

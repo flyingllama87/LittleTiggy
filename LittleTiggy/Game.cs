@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Audio;
 using System;
@@ -41,9 +40,9 @@ namespace LittleTiggy
         // Font
         SpriteFont gameFont;
 
-        // GAME SETTINGS
+        // GAME SETTINGS - set defaults
         public static int level { get; set; } = 1;
-        public static GameDifficulty gameDifficulty = GameDifficulty.Medium;
+        public static GameDifficulty gameDifficulty = GameDifficulty.Easy;
         public static GameTouchControlMethod gameTouchControlMethod = GameTouchControlMethod.ScreenTap;
 
 

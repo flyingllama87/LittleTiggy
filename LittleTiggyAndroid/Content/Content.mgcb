@@ -164,7 +164,7 @@
 /processorParam:Quality=Best
 /build:killenemy.wav
 
-#begin JoystickCircle.png
+#begin TapOverlay.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -174,5 +174,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:JoystickCircle.png
+/build:TapOverlay.png
 
