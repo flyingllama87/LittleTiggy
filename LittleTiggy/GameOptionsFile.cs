@@ -17,15 +17,23 @@ namespace LittleTiggy
 
             if (File.Exists(optionsFilename))
             {
-                using (StreamReader file = new StreamReader(optionsFilename))
+                try
                 {
-                    LittleTiggy.playerName = Convert.ToString(file.ReadLine());
-                    LittleTiggy.gameDifficulty = (GameDifficulty)Convert.ToInt32(file.ReadLine());
-                    LittleTiggy.gameTouchControlMethod = (GameTouchControlMethod)Convert.ToInt32(file.ReadLine());
+                    using (StreamReader file = new StreamReader(optionsFilename))
+                    {
+                        LittleTiggy.playerName = Convert.ToString(file.ReadLine());
+                        LittleTiggy.gameDifficulty = (GameDifficulty)Convert.ToInt32(file.ReadLine());
+                        LittleTiggy.gameTouchControlMethod = (GameTouchControlMethod)Convert.ToInt32(file.ReadLine());
+                    }
+                    LittleTiggy.bHasEnteredName = true;
+                    LittleTiggy.kbInput = LittleTiggy.playerName;
+                    Debug.WriteLine("Opened file!");
                 }
-                LittleTiggy.bHasEnteredName = true;
-                LittleTiggy.kbInput = LittleTiggy.playerName;
-                Debug.WriteLine("Opened file!");
+                catch
+                {
+                    Debug.WriteLine("Can't load options file, removing it.");
+                    File.Delete(optionsFilename);
+                }
             }
             
         }

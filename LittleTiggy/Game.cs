@@ -193,6 +193,12 @@ namespace LittleTiggy
 
                 // spawn other elements on map now that walls have been created
 
+
+                /*foreach (Enemy enemy in enemies)
+                {
+                    enemy.
+                } */
+
                 enemies = new List<Enemy>();
                 for (int noOfEnemiesToSpawn = 0; noOfEnemiesToSpawn < level; noOfEnemiesToSpawn++)
                 {
@@ -207,10 +213,7 @@ namespace LittleTiggy
                     powerUps.Add(powerUp);
                 }
 
-                // powerUp = new PowerUp(this.GraphicsDevice, walls);
                 pathfinder = new Pathfinder(this.GraphicsDevice);
-
-
 
                 // Loop until player can get to bottom of map & the enemy is in a position to get to the player.
 

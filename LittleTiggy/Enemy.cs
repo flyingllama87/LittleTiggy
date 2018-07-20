@@ -382,8 +382,9 @@ namespace LittleTiggy
                 optomisedPath.Add(inPath.First<Vector2>());
                 inPath.Remove(inPath.First<Vector2>());
 
-                foreach (Vector2 Node in inPath) // This is processed forwards and builds a List of vectors to be returned along the way, which is exactly what the enemy character expects.
+                for (int i = 0; i < inPath.Count; i++) // This is processed forwards and builds a List of vectors to be returned along the way, which is exactly what the enemy character expects.
                 {
+                    Vector2 Node = inPath[i];
                     Vector2 difference = Node - lastNode;
 
                     if (difference.X == 16)
@@ -517,8 +518,6 @@ namespace LittleTiggy
                 pathToFollow = (List<Vector2>)eventArgs.Result;
                 enemyPathfinder.PathToDraw = pathToFollow;
                 pathToFollow = OptomisePath(pathToFollow);
-                
-                
 
                 if (pathToFollow.Count != 0)
                 {
