@@ -152,12 +152,6 @@ namespace LittleTiggy
             List<Node> closed = new List<Node>();
             open.Add(startNode);                                //Add starting point
 
-            //TEMP
-            if (open.Count > 1024)
-            {
-                Debug.Write("TEMP");
-            }
-
             Debug.WriteIf(open.Count > 1024, "Too many nodes allocated in pathfinding algorithm.  something went wrong"); 
 
             while (open.Count > 0)
@@ -220,12 +214,6 @@ namespace LittleTiggy
             open.Add(startNode);                                //Add starting point
 
             Debug.WriteIf(open.Count > 1024, "Too many nodes allocated in pathfinding algorithm.  something went wrong");
-
-            //TEMP
-            if (open.Count > 1024)
-            {
-                Debug.Write("TEMP");
-            }
 
             while (open.Count > 0)
             {
