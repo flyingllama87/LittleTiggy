@@ -13,8 +13,8 @@ namespace LittleTiggy
     public partial class LittleTiggy : Game
     {
 
-        //  public static string LeaderBoardAPIEndpoint = "http://morganrobertson.net/LTLeaderBoard/api";
-        public static string LeaderBoardAPIEndpoint = "http://127.0.0.1:5000/api";
+        public static string LeaderBoardAPIEndpoint = "http://morganrobertson.net/LTLeaderBoard/api";
+        // public static string LeaderBoardAPIEndpoint = "http://127.0.0.1:5000/api"; // Local flask test instance
         public static bool bDisableNetworkCalls = false;
         bool bGetScoresRequested = false;
         bool bGetScoresComplete = false;
