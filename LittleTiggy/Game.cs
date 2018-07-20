@@ -193,12 +193,6 @@ namespace LittleTiggy
 
                 // spawn other elements on map now that walls have been created
 
-
-                /*foreach (Enemy enemy in enemies)
-                {
-                    enemy.
-                } */
-
                 enemies = new List<Enemy>();
                 for (int noOfEnemiesToSpawn = 0; noOfEnemiesToSpawn < level; noOfEnemiesToSpawn++)
                 {
@@ -320,14 +314,12 @@ namespace LittleTiggy
             }
 
 
-
             // DEBUG code for drawing wall generation and collision information
 #if _DEBUG
             spriteBatch.DrawString(gameFont, "Number of Random walls is " + numberOfRandomWalls + ".  Number of Placed Walls is " + numberOfPlacedWalls, new Vector2(20, 20), Color.Black);
 
             spriteBatch.DrawString(gameFont, "Collision Left: " + collidingLeft + "\nCollision Right: " + collidingRight + "\nCollision Top: " + collidingTop + "\nCollision Bottom: " + collidingBottom, new Vector2(20, 50), Color.Black);
 #endif
-
 
 
 #if ANDROID // If we are on android, draw a border and touch controls joystick
@@ -348,8 +340,8 @@ namespace LittleTiggy
             // Main LT source file ends the spriteBatch
 #endif
 
-            // TEMP
-#if !ANDROID
+            
+#if !ANDROID // Debug on PC if name is 'debug'
             if (LittleTiggy.playerName.ToUpper() == "DEBUG" && LittleTiggy.gameTouchControlMethod == GameTouchControlMethod.Joystick)
             {
                 spriteBatch.End(); // End current spriteBatch used for game elements that are scaled to viewport size.
@@ -362,7 +354,7 @@ namespace LittleTiggy
 
     }
 
-    class GameBorder
+    class GameBorder // Used to set up and draw the game's border on mobile devices.
     {
         Texture2D borderTexture;
         int borderStartY;
