@@ -54,21 +54,21 @@ namespace LittleTiggy
 
         public List<Vector2> PathToDraw = new List<Vector2>();
         List<Vector2> Path = new List<Vector2>();
-        List<Vector2> DeletedNodes = new List<Vector2>();
+        List<Vector2> DeletedNodes = new List<Vector2>(); // TO DO: Remove deleted nodes visualisation
 
 
         //The following exist for visualisation of path finding if debug is enabled
         static Texture2D environmentSheetTexture;
         Animation PathIdle;
         Animation PathCurrentAnimation;
-        Animation DeletedNodesIdle;
-        Animation DeletedNodesCurrentAnimation;
-
-        KeyboardState OldKeyboardState;
+        Animation DeletedNodesIdle; // TO DO: Remove deleted nodes visualisation
+        Animation DeletedNodesCurrentAnimation; // TO DO: Remove deleted nodes visualisation
 
         public Vector2 from;
         public Vector2 destination;
         public EnvironmentBlock[] walls;
+
+        int maxNodeCount; // This is used to calculate the maximum number of nodes the pathfinding algorithm should evaluate given it's environment.  If it exceeds this number, it has failed and needs to exit.
 
         public Pathfinder(GraphicsDevice graphicsDevice)
         {
@@ -89,6 +89,8 @@ namespace LittleTiggy
             DeletedNodesIdle.AddFrame(new Rectangle(16, 0, 16, 16), TimeSpan.FromSeconds(.25));
 
             DeletedNodesCurrentAnimation = DeletedNodesIdle;
+
+            maxNodeCount = ((GameConstants.gameWidth / GameConstants.tileSize) * (GameConstants.gameHeight / GameConstants.tileSize));
 
         }
 
@@ -152,7 +154,6 @@ namespace LittleTiggy
             List<Node> closed = new List<Node>();
             open.Add(startNode);                                //Add starting point
 
-            Debug.WriteIf(open.Count > 1024, "Too many nodes allocated in pathfinding algorithm.  something went wrong"); 
 
             while (open.Count > 0)
             {
@@ -175,6 +176,15 @@ namespace LittleTiggy
                 {
                     DeletedNodes.Add(neighbour.position);
                 }*/
+
+                Debug.WriteIf(open.Count > maxNodeCount, "Too many nodes allocated in pathfinding algorithm.  something went wrong");
+                Debug.WriteIf(closed.Count > maxNodeCount, "Too many nodes allocated in pathfinding algorithm.  something went wrong");
+
+                if (open.Count == 1 && closed.Count > maxNodeCount) //Something has gone wrong with the pathfinding algo and it needs to return as opposed to looping infinitely
+                {
+                    List<Vector2> emergencyEmptyVectorList = new List<Vector2>(); 
+                    return emergencyEmptyVectorList;
+                }
 
                 foreach (Node neighbour in neighbours)
                 {

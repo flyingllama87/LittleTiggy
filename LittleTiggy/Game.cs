@@ -100,6 +100,7 @@ namespace LittleTiggy
             LittleTiggyLBClient.APICall = LeaderBoardAPICall.AddScore;
             LittleTiggyLBClient.name = playerName;
             LittleTiggyLBClient.score = level;
+            LittleTiggyLBClient.difficulty = gameDifficulty.ToString();
 
             BackgroundHTTPWorker.RunWorkerAsync(LittleTiggyLBClient);
         }
@@ -110,6 +111,7 @@ namespace LittleTiggy
             if (level > 1 && !string.IsNullOrEmpty(playerName) && !bDisableNetworkCalls)
             {
                 SubmitScore(level);
+                bGetScoresRequested = false; // Allow the player to get the latest leaderboard scores if they've won a level
             }
 
             // main character start position
@@ -218,6 +220,7 @@ namespace LittleTiggy
 
         void inGameUpdate(GameTime gameTime)
         {
+
             if (bChangedDifficulty) // reset game if player changes difficulty
             {
                 bChangedDifficulty = false;

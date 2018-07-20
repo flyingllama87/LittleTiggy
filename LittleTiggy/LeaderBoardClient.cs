@@ -13,13 +13,14 @@ namespace LittleTiggy
     public partial class LittleTiggy : Game
     {
 
-        public static string LeaderBoardAPIEndpoint = "http://morganrobertson.net/LTLeaderBoard/api";
+        //  public static string LeaderBoardAPIEndpoint = "http://morganrobertson.net/LTLeaderBoard/api";
+        public static string LeaderBoardAPIEndpoint = "http://127.0.0.1:5000/api";
         public static bool bDisableNetworkCalls = false;
         bool bGetScoresRequested = false;
         bool bGetScoresComplete = false;
         
         private BackgroundWorker BackgroundHTTPWorker = new BackgroundWorker();
-        List<Tuple<string, int>> leaderBoardScores = new List<Tuple<string, int>>();
+        List<Tuple<string, int, string>> leaderBoardScores = new List<Tuple<string, int, string>>();
 
         private void BackgroundHTTPWorker_Initialise(LeaderBoardAPICall APICall)
         {
@@ -53,7 +54,6 @@ namespace LittleTiggy
         {
             if (eventArgs.Result != null && (bool)eventArgs.Result)
             {
-                // bAddScoreComplete = true;
                 Debug.WriteLine("AddScore BG worker completed");
             }
             BackgroundHTTPWorker.DoWork -= new DoWorkEventHandler(BackgroundHTTPWorker_DoWork);
@@ -69,7 +69,7 @@ namespace LittleTiggy
             BackgroundHTTPWorker.DoWork -= new DoWorkEventHandler(BackgroundHTTPWorker_DoWork);
             BackgroundHTTPWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(BackgroundHTTPWorker_GetScoresComplete);
 
-            leaderBoardScores = (List<Tuple<string, int>>)eventArgs.Result;
+            leaderBoardScores = (List<Tuple<string, int, string>>)eventArgs.Result;
 
         }
     }
@@ -85,6 +85,7 @@ namespace LittleTiggy
         public LeaderBoardAPICall APICall;
         public string name;
         public int score;
+        public string difficulty;
 
         public LeaderBoardClient()
         {
@@ -105,7 +106,7 @@ namespace LittleTiggy
                     Debug.WriteLine("API Endpoint:" + LittleTiggy.LeaderBoardAPIEndpoint);
                     Debug.WriteLine("Player name to send: " + this.name);
 
-                    JArray parameters = JArray.Parse(@"['" + this.name + @"', '" + this.score + "']");
+                    JArray parameters = JArray.Parse(@"['" + this.name + @"', '" + this.score + @"', '" + this.difficulty + "']");
 
                     Request request = rpcClient.NewRequest("app.AddScore", parameters);
 
@@ -134,12 +135,12 @@ namespace LittleTiggy
             }
         }
 
-        public List<Tuple<string, int>> GetScores() // getScores API call
+        public List<Tuple<string, int, string>> GetScores() // getScores API call
         {
             try
             {
 
-                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 3000))
+                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 5000))
                 {
 
                     Debug.WriteLine("API Endpoint:" + LittleTiggy.LeaderBoardAPIEndpoint);
@@ -150,13 +151,13 @@ namespace LittleTiggy
 
                     if (response.Result != null)
                     {
-                        List<Tuple<string, int>> TBScores = new List<Tuple<string, int>>();
+                        List<Tuple<string, int, string>> TBScores = new List<Tuple<string, int, string>>();
                         JToken result = response.Result;
                         Debug.Write(result.ToString());
                         JArray jArray = JsonConvert.DeserializeObject<JArray>(response.Result.ToString());
                         foreach (JObject jObject in jArray)
                         {
-                            Tuple<string, int> score = new Tuple<string, int>(jObject["name"].ToString(), (int)jObject["score"]);
+                            Tuple<string, int, string> score = new Tuple<string, int, string>(jObject["name"].ToString(), (int)jObject["score"], jObject["difficulty"].ToString());
                             Debug.Write(score.ToString());
 
                             TBScores.Add(score);
@@ -168,8 +169,8 @@ namespace LittleTiggy
                     else
                     {
                         Debug.WriteLine("Error in response! Error code: {0}", response.Error.Code);
-                        Tuple<string, int>[] emptyTupleArray = new Tuple<string, int>[0];
-                        List<Tuple<string, int>> emptyTupleList = new List<Tuple<string, int>>();
+                        Tuple<string, int, string>[] emptyTupleArray = new Tuple<string, int, string>[0];
+                        List<Tuple<string, int, string>> emptyTupleList = new List<Tuple<string, int, string>>();
                         return emptyTupleList;
                     }
 
@@ -180,7 +181,7 @@ namespace LittleTiggy
                 LittleTiggy.bDisableNetworkCalls = true;
                 Debug.WriteLine("Unable to connect to API endpoint");
                 Debug.WriteLine(ex.ToString());
-                List<Tuple<string, int>> emptyTupleList = new List<Tuple<string, int>>();
+                List<Tuple<string, int, string>> emptyTupleList = new List<Tuple<string, int, string>>();
                 return emptyTupleList;
             }
         }

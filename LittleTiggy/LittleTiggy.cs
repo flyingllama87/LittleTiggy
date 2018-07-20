@@ -3,10 +3,6 @@
 /*
  * TO DO:
  *
- * - FEATURE: Save and load player options from file
- * - Add easy, medium, hard difficulty on leaderboards.
- * - Fix instuctions
- * 
  * - STYLE: Remove unneeded directives
  * - STYLE: Run stylecop over build for code consistency.
  * - STYLE: Go over code to make sure it's neat.

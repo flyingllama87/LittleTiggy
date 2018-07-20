@@ -394,11 +394,15 @@ namespace LittleTiggy
                 bGetScoresRequested = true;
             }
 
+
+
             resetButtonHover();
             MouseState mouseState = Mouse.GetState();
             mouseXY = new Vector2(mouseState.X, mouseState.Y);
             TouchCollection touchCollection = TouchPanel.GetState();
             Vector2 touchXY = new Vector2(0, 0);
+
+            float elementPositionY = (float)menuItemSpaceDistance * menuScaleFactor;
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
@@ -411,7 +415,7 @@ namespace LittleTiggy
 
             Rectangle mouseRectangle = new Rectangle((int)mouseXY.X, (int)mouseXY.Y, 2, 2);
             Rectangle touchRectangle = new Rectangle((int)touchXY.X, (int)touchXY.Y, 1, 1);
-            Rectangle rectangleGoBack = new Rectangle(menuButtonXOffset, (int)(1 * menuScaleFactor), 600, 150);
+            Rectangle rectangleGoBack = new Rectangle(menuButtonXOffset, (int)(elementPositionY), 600, 150);
 
             if (mouseXY.X != 0 && mouseXY.Y != 0)
             {
@@ -640,34 +644,57 @@ namespace LittleTiggy
         {
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
 
+            float elementPositionY = (float)menuItemSpaceDistance * menuScaleFactor;
+
             // Draw back button
             if (menuButtonHover[0] == true)
-                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangleHover, new Vector2(menuButtonXOffset, elementPositionY), Color.White);
             else
-                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, 10 * menuScaleFactor), Color.White);
+                spriteBatch.Draw(menuRectangle, new Vector2(menuButtonXOffset, elementPositionY), Color.White);
 
             Vector2 stringSize = font.MeasureString("Go Back");
-            Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 10 * menuScaleFactor);
+            Vector2 textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY);
             spriteBatch.DrawString(font, "Go Back", textPosition, colorLTRed);
 
             // Draw Leaderboard
 
             if (bGetScoresComplete == true)
             {
-                stringSize = font.MeasureString("Name   Score");
-                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), 150 * menuScaleFactor);
-                spriteBatch.DrawString(font, "Name   Score", textPosition, colorLTRed);
+                elementPositionY += (float)menuRectangle.Height + (((float)menuItemSpaceDistance) * (float)menuScaleFactor);
+
+                stringSize = font.MeasureString("Name   Level   Difficulty");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), elementPositionY);
+                spriteBatch.DrawString(font, "Name   Level   Difficulty", textPosition, colorLTRed);
+
+                // Get the X position of the start, middle and end of the header to layout scores.  Add offsets for formatting due to large font used by heading.
+                float scorePositionNameX = textPosition.X + 50; ;
+                float scorePositionScoreX = textPosition.X + (stringSize.X / 2) - 40;
+                float scorePositionDifficultyX = textPosition.X + (stringSize.X - 25);
+
+                elementPositionY += stringSize.Y;
 
                 int counter = 0;
-                foreach (Tuple<string, int> scoreEntry in leaderBoardScores)
+                foreach (Tuple<string, int, string> scoreEntry in leaderBoardScores)
                 {
                     counter++;
-                    stringSize = arialFont.MeasureString(scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString()); // Hackish way to layout this table.
-                    textPosition = new Vector2((viewportWidth / 2) - (stringSize.X) + 100, (225 + (counter * 50)) * menuScaleFactor);
+
+                    Vector2 stringSizeDifficulty = arialFont.MeasureString(scoreEntry.Item3);
+
                     if (scoreEntry.Item1.ToUpper() != "LOLA") // Easter egg for my daughter :)
-                        spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, colorLTGreen);
+                    {
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item1, new Vector2(scorePositionNameX, elementPositionY), colorLTGreen);
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item2.ToString(), new Vector2(scorePositionScoreX, elementPositionY), colorLTGreen);
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item3, new Vector2(scorePositionDifficultyX - stringSizeDifficulty.X, elementPositionY), colorLTGreen);
+                    }
                     else
-                        spriteBatch.DrawString(arialFont, scoreEntry.Item1 + "          " + scoreEntry.Item2.ToString(), textPosition, Color.DeepPink);
+                    {
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item1, new Vector2(scorePositionNameX, elementPositionY), Color.DeepPink);
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item2.ToString(), new Vector2(scorePositionScoreX, elementPositionY), Color.DeepPink);
+                        spriteBatch.DrawString(arialFont, scoreEntry.Item3, new Vector2(scorePositionDifficultyX - stringSizeDifficulty.X, elementPositionY), Color.DeepPink);
+                    }
+                        
+                    elementPositionY += arialFont.MeasureString(scoreEntry.Item1).Y + (float)menuItemSpaceDistance * (int)menuScaleFactor;
+
                 }
 
             }
@@ -713,7 +740,7 @@ namespace LittleTiggy
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "- If you get the power up,", textPosition, colorLTGreen);
 
-            linePositionY += (int)stringSize.Y + 10;
+            linePositionY += (int)stringSize.Y - 10;
             stringSize = bigArialFont.MeasureString("you can tag the enemies temporarily.");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
             spriteBatch.DrawString(bigArialFont, "you can tag the enemies temporarily.", textPosition, colorLTGreen);
@@ -739,9 +766,14 @@ namespace LittleTiggy
             spriteBatch.DrawString(bigArialFont, "- Provides a tap based control or virtual joystick.", textPosition, colorLTGreen);
 
             linePositionY += (int)stringSize.Y + 10;
-            stringSize = bigArialFont.MeasureString("- Use of two hands is recommended with tap control.");
+            stringSize = bigArialFont.MeasureString("- Use of two hands is recommended with");
             textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
-            spriteBatch.DrawString(bigArialFont, "- Use of two hands is recommended with tap control.", textPosition, colorLTGreen);
+            spriteBatch.DrawString(bigArialFont, "- Use of two hands is recommended with", textPosition, colorLTGreen);
+
+            linePositionY += (int)stringSize.Y - 10;
+            stringSize = bigArialFont.MeasureString("tap control.");
+            textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), linePositionY * menuScaleFactor);
+            spriteBatch.DrawString(bigArialFont, "tap control.", textPosition, colorLTGreen);
 
         }
 
