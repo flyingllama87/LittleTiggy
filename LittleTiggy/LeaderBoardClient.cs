@@ -18,7 +18,8 @@ namespace LittleTiggy
         public static bool bDisableNetworkCalls = false;
         bool bGetScoresRequested = false;
         bool bGetScoresComplete = false;
-        
+        public static int apiTimeOut = 7500; // in milliseconds
+
         private BackgroundWorker BackgroundHTTPWorker = new BackgroundWorker();
         List<Tuple<string, int, string>> leaderBoardScores = new List<Tuple<string, int, string>>();
 
@@ -100,7 +101,7 @@ namespace LittleTiggy
         {
             try
             {
-                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 5000))
+                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, LittleTiggy.apiTimeOut))
                 {
 
                     Debug.WriteLine("API Endpoint:" + LittleTiggy.LeaderBoardAPIEndpoint);
@@ -140,7 +141,7 @@ namespace LittleTiggy
             try
             {
 
-                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, 5000))
+                using (Client rpcClient = new Client(LittleTiggy.LeaderBoardAPIEndpoint, LittleTiggy.apiTimeOut))
                 {
 
                     Debug.WriteLine("API Endpoint:" + LittleTiggy.LeaderBoardAPIEndpoint);

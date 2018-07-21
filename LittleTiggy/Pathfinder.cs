@@ -121,16 +121,18 @@ namespace LittleTiggy
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 } 
 
-                foreach (Vector2 topLeftOfPathSquare in Path)
+                for (int i = 0; i < Path.Count; i++)
                 {
+                    Vector2 topLeftOfPathSquare = Path[i];
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
             }
 
             if (PathToDraw != null)
             {
-                foreach (Vector2 topLeftOfPathSquare in PathToDraw)
+                for (int i = 0; i < PathToDraw.Count; i++)
                 {
+                    Vector2 topLeftOfPathSquare = PathToDraw[i];
                     spriteBatch.Draw(environmentSheetTexture, topLeftOfPathSquare, sourceRectangle, tintColor);
                 }
             } 
@@ -375,8 +377,6 @@ namespace LittleTiggy
             Node tempNode = new Node(new Vector2(0,0), 999, 999);
 
             bool foundStartPosition = false;
-            DateTime timer = DateTime.Now;
-            timer = timer.AddSeconds(0.1);
 
             vectorList.Add(lastNode.position);
 
@@ -413,12 +413,6 @@ namespace LittleTiggy
                 }
 
                 nodes = cleanNodeList;
-
-                if (timer.CompareTo(DateTime.Now) < 0)
-                {
-                    foundStartPosition = true;
-                    break;
-                }
 
             } while (!foundStartPosition);
             return vectorList;

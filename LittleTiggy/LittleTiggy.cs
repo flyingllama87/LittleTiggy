@@ -25,6 +25,7 @@ namespace LittleTiggy
         public const int characterHeight = 15;
         public const int characterWidth = 10;
         public const int noWallsToSpawn = 300;
+        public const int powerUpTimeSeconds = 5;
     }
 
     public partial class LittleTiggy : Game

@@ -527,7 +527,7 @@ namespace LittleTiggy
                 }
                 else
                 {
-                    Debug.WriteLine("Pathfinding count is 0! Pathfinding from ", enemyPathfinder.from.ToString(), "To: ", enemyPathfinder.destination.ToString());
+                    Debug.WriteLine("Pathfinding count is 0! Pathfinding from " + enemyPathfinder.from.ToString() +  "To: " + enemyPathfinder.destination.ToString());
                 }
             }
 

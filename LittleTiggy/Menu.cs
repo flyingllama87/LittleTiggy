@@ -31,6 +31,9 @@ namespace LittleTiggy
         double menuButtonTimeSeconds = 0.3; // Used to disallow activating a button again for the specified length of time.
         bool bHasTappedButtonLastUpdate = false; // used as button activation (i.e. rectangle intersection) can be detected for multiple update loops but we only need the button to be activated once.
 
+        DateTime leaderboardTimeoutTimer = DateTime.Now;
+        double leaderboardTimeoutSeconds = LittleTiggy.apiTimeOut / 1000; // Used to countdown timeout of connection to leaderboard.
+
         // Game option switches
         public static bool bHasEnteredName = false;
         bool bPlayerRequestedGame = false;
@@ -642,7 +645,7 @@ namespace LittleTiggy
 
             // Draw Leaderboard
 
-            if (bGetScoresComplete == true)
+            if (bGetScoresComplete == true) // Draw table of scores if the call has completed.
             {
                 elementPositionY += (float)menuRectangle.Height + (((float)menuItemSpaceDistance) * (float)menuScaleFactor);
 
@@ -680,7 +683,22 @@ namespace LittleTiggy
                     elementPositionY += arialFont.MeasureString(scoreEntry.Item1).Y + (float)menuItemSpaceDistance * (int)menuScaleFactor;
 
                 }
+            }
+            else if (leaderboardTimeoutTimer.CompareTo(DateTime.Now) < 0 && !LittleTiggy.bDisableNetworkCalls) // Set a timer for leaderboard timeout if we haven't already done so and we haven't disabled network calls.
+            {
+                leaderboardTimeoutTimer = DateTime.Now.AddSeconds(leaderboardTimeoutSeconds);
+            }
+            else if (leaderboardTimeoutTimer.CompareTo(DateTime.Now) > 0 && !LittleTiggy.bDisableNetworkCalls) // Display timer that counts down until Leaderboard server times out
+            {
+                TimeSpan timeLeftBeforeTimeout = leaderboardTimeoutTimer.Subtract(DateTime.Now);
 
+                stringSize = bigArialFont.MeasureString("Connecting...");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), (viewportHeight / 2) - (stringSize.Y / 2) - (100f * menuScaleFactor));
+                spriteBatch.DrawString(bigArialFont, "Connecting...", textPosition, colorLTGreen);
+
+                stringSize = bigArialFont.MeasureString(timeLeftBeforeTimeout.Seconds.ToString() +  "." + timeLeftBeforeTimeout.Milliseconds.ToString().Substring(0,1) + " before timeout.");
+                textPosition = new Vector2((viewportWidth / 2) - (stringSize.X / 2), (viewportHeight / 2) - (stringSize.Y / 2));
+                spriteBatch.DrawString(bigArialFont, timeLeftBeforeTimeout.Seconds.ToString() + "." + timeLeftBeforeTimeout.Milliseconds.ToString().Substring(0, 1) + " before timeout.", textPosition, colorLTGreen);
             }
 
             if (LittleTiggy.bDisableNetworkCalls)
@@ -793,6 +811,7 @@ namespace LittleTiggy
         {
             if (key.Equals(Keys.Enter))
             {
+                LittleTiggy.menuSound.Play();
                 LittleTiggy.kbName = LittleTiggy.kbInput;
             }
             else if (key.Equals(Keys.Back) && LittleTiggy.kbInput.Length > 0)

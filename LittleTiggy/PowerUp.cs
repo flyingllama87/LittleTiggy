@@ -15,10 +15,6 @@ namespace LittleTiggy
         Animation Idle;
         Animation currentAnimation;
 
-        const float charSpeed = 0.00001F;
-        long ticksSinceLastUpdate = 0;
-
-
         public float X
         {
             get;
@@ -62,20 +58,16 @@ namespace LittleTiggy
 
         public void Update(GameTime gameTime, GraphicsDevice graphicsDevice)
         {
-            ticksSinceLastUpdate = gameTime.ElapsedGameTime.Ticks;
 
             if (IsPlayerCollision())
             {
                 MainCharacter.isPoweredUp = true;
                 LittleTiggy.powerUpSound.Play();
                 MainCharacter.changeSkin();
-                MainCharacter.powerUpTimer = DateTime.Now.AddSeconds(5.0);
+                MainCharacter.powerUpTimer = DateTime.Now.AddSeconds(GameConstants.powerUpTimeSeconds);
                 this.X = -16;
                 this.Y = -16;
             }
-
-
-
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -93,7 +85,7 @@ namespace LittleTiggy
             for (int i = 0; i < walls.Length; i++)
             {
                 Rectangle wall = new Rectangle((int)walls[i].X + 1, (int)walls[i].Y + 1, 14, 14);
-                Rectangle character = new Rectangle((int)this.X, (int)this.Y, 10, 15);
+                Rectangle character = new Rectangle((int)this.X, (int)this.Y, GameConstants.characterWidth, GameConstants.characterHeight);
 
                 if (character.Intersects(wall))
                 {

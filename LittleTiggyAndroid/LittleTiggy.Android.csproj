@@ -23,6 +23,10 @@
     <MonoGamePlatform>Android</MonoGamePlatform>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
+    <AndroidKeyStore>false</AndroidKeyStore>
+    <AndroidSigningKeyStore>C:\Users\MJ12\AppData\Local\Xamarin\Mono for Android\Keystore\Morgan Robertson\Morgan Robertson.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>Swimartel64</AndroidSigningStorePass>
+    <AndroidSigningKeyAlias />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
