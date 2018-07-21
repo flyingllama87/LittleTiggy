@@ -10,8 +10,8 @@ http://morganrobertson.net/LittleTiggy.zip
 Android (13.9MB):
 http://morganrobertson.net/LittleTiggy.apk
 
-All desktop platforms (5MB) - Requires mono:
-http://morganrobertson.net/LittleTiggyFull.7z
+All desktop platforms (6MB) - Requires mono:
+http://morganrobertson.net/LittleTiggyAllDesktop.zip
 
 ### BACKGROUND & FEATURES:
 
